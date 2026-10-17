@@ -27,7 +27,7 @@ Abra o endereço exibido pelo Vite no navegador.
 
 ```text
 apps/web  → interface React
-apps/api  → API Spring Boot, adicionada na próxima etapa
+apps/api  → API Python (FastAPI + SQLite)
 docs      → requisitos e decisões do projeto
 ```
 
@@ -38,3 +38,29 @@ docs      → requisitos e decisões do projeto
 - Toda mudança chega à `main` por Pull Request.
 - Um colega revisa antes do merge.
 
+
+## Rodar o projeto (dois terminais)
+
+```bash
+# Terminal 1 - API Python (http://127.0.0.1:8000, documentação em /docs)
+cd apps/api
+python -m venv .venv
+.venv\Scripts\activate        # Windows (Linux/macOS: source .venv/bin/activate)
+pip install -r requirements.txt
+uvicorn main:app --reload
+
+# Terminal 2 - interface
+cd apps/web
+npm install
+npm run dev
+```
+
+O banco `apps/api/banco.db` é criado sozinho, já com dados de exemplo. Testes da API: `pip install httpx pytest` e `pytest` dentro de `apps/api`.
+
+## Painel do backend
+
+Depois de entrar, abra **Perfil → Painel do backend**:
+
+- **Dados**: cria, edita, conclui e exclui provas, trabalhos e avisos (grava via API no SQLite).
+- **Botões**: o que cada botão faz e qual rota da API ele chama (`src/backend/botoes.ts`).
+- **Esquema SQL**: tabelas do banco e a evolução prevista (`apps/api/schema.sql`).
