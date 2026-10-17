@@ -1,4 +1,4 @@
-# Projeto de Extensão — Pulso Escolar
+# Projeto de Extensão
 
 Protótipo de um web app que organiza provas, trabalhos e avisos e aproxima alunos, professores e direção.
 

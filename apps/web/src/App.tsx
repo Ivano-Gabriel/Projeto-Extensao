@@ -49,7 +49,7 @@ function Login({ onEntrar }: { onEntrar: () => void }) {
         <div className="brand-mark" aria-hidden="true">
           P
         </div>
-        <p className="eyebrow">Pulso Escolar</p>
+        <p className="eyebrow">Projeto de Extensão</p>
         <h1 id="login-title">Sua escola, no seu ritmo.</h1>
         <p className="login-copy">
           Veja provas, entregas e avisos sem precisar procurar em cinco lugares.
