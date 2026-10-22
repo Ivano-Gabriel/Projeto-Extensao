@@ -631,3 +631,216 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* --- Boletim: colar no FINAL do styles.css --- */
+.subtela-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.subtela-header h2 { font-size: 1.6rem; color: #111827; }
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: var(--purple-light);
+  color: var(--primary-purple);
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.tabela-scroll { overflow-x: auto; }
+
+.boletim-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+  font-size: 0.95rem;
+}
+
+.boletim-table th {
+  text-align: center;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding: 10px 8px;
+  border-bottom: 2px solid #eef0f4;
+}
+
+.boletim-table td {
+  text-align: center;
+  padding: 14px 8px;
+  border-bottom: 1px solid #f1f2f6;
+}
+
+.boletim-table th:first-child,
+.boletim-table td.disciplina-nome { text-align: left; font-weight: 600; }
+
+.situacao-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.situacao-badge.ok { background: var(--green-light); color: #15803d; }
+.situacao-badge.alerta { background: var(--yellow-light); color: #a16207; }
+.situacao-badge.risco { background: #fee2e2; color: #b91c1c; }
+.situacao-badge.neutro { background: #f3f4f6; color: var(--text-muted); }
+
+.boletim-legenda { margin-top: 16px; font-size: 0.8rem; color: var(--text-muted); }
+
+/* --- Preferências --- */
+.pref-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #f1f2f6;
+}
+.pref-row:last-of-type { border-bottom: none; }
+.pref-row p { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+.pref-column { flex-direction: column; align-items: flex-start; }
+
+.switch {
+  flex-shrink: 0;
+  width: 48px;
+  height: 28px;
+  border: none;
+  border-radius: 999px;
+  background: #d1d5db;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.switch.on { background: var(--primary-purple); }
+.switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+.switch.on .switch-knob { transform: translateX(20px); }
+
+.segmented {
+  display: flex;
+  background: #f3f4f6;
+  border-radius: 14px;
+  padding: 4px;
+  gap: 4px;
+}
+.segmented button {
+  border: none;
+  background: transparent;
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.segmented button.active {
+  background: #fff;
+  color: var(--primary-purple);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.reset-button { margin-top: 12px; }
+
+/* Quando "Reduzir animações" está ligado */
+.reduzir-animacoes *,
+.reduzir-animacoes *::before,
+.reduzir-animacoes *::after {
+  animation: none !important;
+  transition: none !important;
+}
+/* --- Central de Ajuda --- */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 0 14px;
+  margin-bottom: 16px;
+  color: var(--text-muted);
+}
+.search-box input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 14px 0;
+  outline: none;
+  font-size: 0.95rem;
+}
+
+.faq-list { display: flex; flex-direction: column; gap: 10px; }
+.faq-item { background: #f9fafb; border-radius: 14px; overflow: hidden; }
+.faq-item button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  text-align: left;
+  color: #374151;
+  cursor: pointer;
+}
+.faq-item svg { transition: transform 0.2s; flex-shrink: 0; }
+.faq-item.open svg { transform: rotate(180deg); }
+.faq-item p {
+  padding: 0 16px 16px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.contact-form { display: flex; flex-direction: column; }
+.contact-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 14px 0 6px;
+}
+.contact-form select,
+.contact-form textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #f9fafb;
+  font-size: 0.95rem;
+  outline: none;
+  resize: vertical;
+}
+.contact-form select:focus,
+.contact-form textarea:focus { border-color: var(--primary-purple); background: #fff; }
+.form-error { color: #b91c1c; font-size: 0.85rem; margin-top: 8px; }
+.login-error {
+  margin: 4px 0 0;
+  color: #b3261e;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.primary-button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
