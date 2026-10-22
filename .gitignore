@@ -8,8 +8,3 @@ dist/
 *.log
 *.tsbuildinfo
 
-
-# API Python
-.venv/
-__pycache__/
-*.db
