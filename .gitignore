@@ -8,3 +8,7 @@ dist/
 *.log
 *.tsbuildinfo
 
+Backend/target/
+Backend/dados/
+*.h2.db
+*.mv.db
