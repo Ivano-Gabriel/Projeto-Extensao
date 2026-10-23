@@ -99,4 +99,49 @@ class SegurancaIntegracaoTest {
                 .andExpect(header().exists("X-Content-Type-Options"))
                 .andExpect(header().exists("X-Frame-Options"));
     }
+
+    @Test
+    void csrfPublicoNaoExpõeSenhaOuSessao() throws Exception {
+        mvc.perform(get("/api/csrf"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isNotEmpty());
+    }
+
+    @Test
+    void loginCriaSessaoJDBCQuePermiteMeELogoutEncerraSessao() throws Exception {
+        var resposta = mvc.perform(post("/api/login").with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"aluno.teste@escola.edu.br\",\"senha\":\"TesteSeguro123!\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse();
+
+        var sessao = java.util.Arrays.stream(resposta.getCookies())
+                .filter(cookie -> cookie.getName().equals("EXTENSAO_SESSION"))
+                .findFirst().orElseThrow();
+
+        mvc.perform(get("/api/me").cookie(sessao))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("aluno.teste@escola.edu.br"));
+
+        mvc.perform(post("/api/logout").cookie(sessao).with(csrf()))
+                .andExpect(status().isNoContent());
+
+        mvc.perform(get("/api/me").cookie(sessao))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void soDirecaoPodeCriarUsuario() throws Exception {
+        String body = "{\"nome\":\"Docente\",\"email\":\"docente@escola.edu.br\",\"senha\":\"SenhaForte12345!\",\"papel\":\"PROFESSOR\"}";
+        mvc.perform(post("/api/gestao/usuarios").with(user("aluno.teste@escola.edu.br").roles("ALUNO"))
+                .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isForbidden());
+
+        mvc.perform(post("/api/gestao/usuarios").with(user("direcao@escola.edu.br").roles("DIRECAO"))
+                .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.papel").value("PROFESSOR"))
+                .andExpect(jsonPath("$.senha").doesNotExist())
+                .andExpect(jsonPath("$.senhaHash").doesNotExist());
+    }
 }
