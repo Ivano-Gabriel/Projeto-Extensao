@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { Ajuda, Boletim, MenuPerfil, PreferenciasPagina, type SubpaginaPerfil } from './student/PaginasPerfil'
+import { carregarPreferencias, salvarPreferencias, type Preferencias } from './preferences/preferencias'
 import {
   ArrowRight,
   Bell,
@@ -398,7 +400,7 @@ function Avisos() {
   )
 }
 
-function Perfil({ onSair }: { onSair: () => void }) {
+function Perfil({ onSair, onAbrir }: { onSair: () => void; onAbrir: (pagina: SubpaginaPerfil) => void }) {
   return (
     <div className="pagina">
       <section className="perfil-cartao">
@@ -424,6 +426,7 @@ function Perfil({ onSair }: { onSair: () => void }) {
         </dl>
       </section>
 
+      <MenuPerfil onAbrir={onAbrir} />
       <button className="botao-sair" type="button" onClick={onSair}>
         <LogOut size={19} /> Sair da demonstração
       </button>
@@ -433,6 +436,19 @@ function Perfil({ onSair }: { onSair: () => void }) {
 
 function Painel({ onSair }: { onSair: () => void }) {
   const [aba, setAba] = useState<Aba>('inicio')
+  const [subpagina, setSubpagina] = useState<SubpaginaPerfil | null>(null)
+  const [preferencias, setPreferencias] = useState<Preferencias>(() => carregarPreferencias(typeof window === 'undefined' ? null : window.localStorage))
+
+  useEffect(() => {
+    salvarPreferencias(window.localStorage, preferencias)
+    document.documentElement.classList.toggle('texto-maior', preferencias.tamanhoTexto === 'grande')
+    document.documentElement.classList.toggle('reduzir-animacoes', preferencias.reduzirAnimacoes)
+  }, [preferencias])
+
+  function navegar(destino: Aba) {
+    setAba(destino)
+    setSubpagina(null)
+  }
 
   useEffect(() => {
     const nomes: Record<Aba, string> = {
@@ -441,20 +457,23 @@ function Painel({ onSair }: { onSair: () => void }) {
       avisos: 'Avisos',
       perfil: 'Perfil',
     }
-    document.title = `${nomes[aba]} — Projeto de Extensão`
+    document.title = `${subpagina === 'boletim' ? 'Meu boletim' : subpagina === 'preferencias' ? 'Preferências' : subpagina === 'ajuda' ? 'Central de ajuda' : nomes[aba]} — Projeto de Extensão`
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [aba])
+  }, [aba, subpagina])
 
   return (
     <div className="app-layout">
-      <Navegacao aba={aba} onNavegar={setAba} />
+      <Navegacao aba={aba} onNavegar={navegar} />
       <div className="conteudo-layout">
-        <Cabecalho aba={aba} onAbrirAvisos={() => setAba('avisos')} />
+        <Cabecalho aba={aba} onAbrirAvisos={() => navegar('avisos')} />
         <main className="conteudo-principal">
-          {aba === 'inicio' && <Inicio onNavegar={setAba} />}
-          {aba === 'agenda' && <Agenda />}
-          {aba === 'avisos' && <Avisos />}
-          {aba === 'perfil' && <Perfil onSair={onSair} />}
+          {subpagina === 'boletim' && <Boletim onVoltar={() => setSubpagina(null)} />}
+          {subpagina === 'preferencias' && <PreferenciasPagina preferencias={preferencias} onAlterar={setPreferencias} onVoltar={() => setSubpagina(null)} />}
+          {subpagina === 'ajuda' && <Ajuda onVoltar={() => setSubpagina(null)} />}
+          {!subpagina && aba === 'inicio' && <Inicio onNavegar={navegar} />}
+          {!subpagina && aba === 'agenda' && <Agenda />}
+          {!subpagina && aba === 'avisos' && <Avisos />}
+          {!subpagina && aba === 'perfil' && <Perfil onSair={onSair} onAbrir={setSubpagina} />}
         </main>
       </div>
     </div>
