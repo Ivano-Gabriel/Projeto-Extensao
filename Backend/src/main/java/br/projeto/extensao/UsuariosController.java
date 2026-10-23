@@ -41,12 +41,15 @@ public class UsuariosController {
 
     @GetMapping("/alunos/{id}")
     public ResponseEntity<UsuarioPublico> consultarAluno(@PathVariable Long id, Authentication autenticacao) {
-        Usuario usuario = usuarios.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         boolean direcao = autenticacao.getAuthorities().stream()
             .anyMatch(role -> role.getAuthority().equals("ROLE_DIRECAO"));
-        if (!direcao && !usuario.getEmail().equals(autenticacao.getName())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        // Primeiro autoriza o acesso, antes da busca por ID, para nao revelar a existencia de outras contas.
+        if (!direcao) {
+            Usuario proprio = usuarios.findByEmail(autenticacao.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
+            if (!proprio.getId().equals(id)) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
+        Usuario usuario = usuarios.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         if (usuario.getPapel() != Papel.ALUNO) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(UsuarioPublico.de(usuario));
     }
