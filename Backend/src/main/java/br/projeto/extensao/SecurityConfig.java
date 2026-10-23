@@ -21,6 +21,8 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
 
 @Configuration
 public class SecurityConfig {
@@ -47,6 +49,17 @@ public class SecurityConfig {
         CookieCsrfTokenRepository repo = CookieCsrfTokenRepository.withHttpOnlyFalse();
         repo.setCookieCustomizer(cookie -> cookie.sameSite("Lax").secure(seguro).path("/"));
         return repo;
+    }
+
+    @Bean
+    CookieSerializer cookieSerializer(@Value("${app.security.secure-cookies:true}") boolean seguro) {
+        DefaultCookieSerializer cookie = new DefaultCookieSerializer();
+        cookie.setCookieName("EXTENSAO_SESSION");
+        cookie.setUseHttpOnlyCookie(true);
+        cookie.setUseSecureCookie(seguro);
+        cookie.setSameSite("Lax");
+        cookie.setCookiePath("/");
+        return cookie;
     }
 
     @Bean
