@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowLeft, ArrowRight, BookOpen, BookOpenCheck, Brain, Check, CheckCircle2,
-  ChevronRight, CircleHelp, Clock3, FileText, GraduationCap, Home, Info,
+  ChevronRight, Clock3, Home, Info,
   Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X,
 } from 'lucide-react'
 import { materiais, materias, type Material, type Materia } from './dados/materiais'
@@ -129,7 +129,7 @@ function Inicio({ estado, abrirMaterial, escolherMateria, irMateriais, irRevisao
       </section>
 
       <section className="secao" aria-labelledby="materias-titulo">
-        <div className="secao-titulo"><div><span>SEU PONTO DE PARTIDA</span><h2 id="materias-titulo">O que vms estudar hoje?</h2></div></div>
+        <div className="secao-titulo"><div><span>SEU PONTO DE PARTIDA</span><h2 id="materias-titulo">O que vamos estudar hoje?</h2></div></div>
         <div className="grade-materias">
           {materiasDisponiveis.map((materia, indice) => (
             <button key={materia} className={`escolha-materia materia-bg-${cores[materia]}`}
@@ -287,7 +287,7 @@ function QuizPagina({ estado, indice, setIndice, responder, irMateriais, reinici
   const acertou = resposta?.opcao === questao.correta
   return (
     <div className="pagina">
-      <CabecalhoSecao etiqueta="HORA DE PRATICAR" titulo="Vamos testar oq ficou?"
+      <CabecalhoSecao etiqueta="HORA DE PRATICAR" titulo="Vamos testar o que ficou?"
         descricao="Responda com calma e veja a explicação antes de ir pra próxima pergunta" />
       <div className="revisao-layout">
         <section className="quiz" aria-labelledby="pergunta-atual">
