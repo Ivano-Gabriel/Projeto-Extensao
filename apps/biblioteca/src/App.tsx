@@ -15,6 +15,14 @@ import {
 type Tela = 'inicio' | 'acervo' | 'meus' | 'sobre'
 type CategoriaFiltro = 'Todas' | Categoria
 
+function obterArmazenamento(): Storage | null {
+  try {
+    return typeof window !== 'undefined' ? window.localStorage : null
+  } catch {
+    return null
+  }
+}
+
 const navegacao = [
   { id: 'inicio', nome: 'Início', Icone: Home },
   { id: 'acervo', nome: 'Acervo', Icone: LibraryBig },
@@ -364,13 +372,13 @@ export default function App() {
   const [categoria, setCategoria] = useState<CategoriaFiltro>('Todas')
   const [soDisponiveis, setSoDisponiveis] = useState(false)
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>(() =>
-    carregarEmprestimos(typeof window === 'undefined' ? null : window.localStorage, livros))
+    carregarEmprestimos(obterArmazenamento(), livros))
   const [aviso, setAviso] = useState('')
   const [pendente, setPendente] = useState<string | null>(null)
   const selecionado = detalhe ? livros.find((livro) => livro.id === detalhe) : undefined
 
   useEffect(() => {
-    salvarEmprestimos(window.localStorage, emprestimos)
+    salvarEmprestimos(obterArmazenamento(), emprestimos)
   }, [emprestimos])
 
   useEffect(() => {
@@ -404,8 +412,8 @@ export default function App() {
         <div className="navegacao-marca"><Marca /><p>Um cantinho pra descobrir histórias e aprender mais</p></div>
         <div className="navegacao-itens">
           {navegacao.map(({ id, nome, Icone }) => (
-            <button key={id} type="button" className={tela === id && !detalhe ? 'ativo' : ''}
-              aria-current={tela === id && !detalhe ? 'page' : undefined} onClick={() => navegar(id)}>
+            <button key={id} type="button" className={tela === id ? 'ativo' : ''}
+              aria-current={tela === id ? 'page' : undefined} onClick={() => navegar(id)}>
               <Icone size={21} strokeWidth={2} aria-hidden="true" />
               <span>{nome}</span>
               {id === 'meus' && emprestimos.length > 0 && <b aria-label={`${emprestimos.length} livros`}>{emprestimos.length}</b>}
