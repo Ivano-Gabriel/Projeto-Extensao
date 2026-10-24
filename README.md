@@ -1,40 +1,51 @@
 # Projeto de Extensão
 
-Protótipo de um web app que organiza provas, trabalhos e avisos e aproxima alunos, professores e direção.
+Tres propostas para os alunos conhecerem e escolherem qual ideia a equipe vai desenvolver com mais profundidade. Cada prototipo tem seu proprio frontend, com dados de demonstracao.
 
-## Primeira fatia
+## Prototipos
 
-Este primeiro incremento contém somente uma experiência demonstrativa do aluno:
+| Proposta | Pasta | O que demonstra |
+| --- | --- | --- |
+| 1. Calendario de provas, trabalhos e avisos | `apps/web` | Agenda, comunicados, boletim demonstrativo e area do aluno |
+| 2. Biblioteca escolar | `apps/biblioteca` | Catalogo, busca, filtros, emprestimo e devolucao simulados |
+| 3. Ferramenta de estudos | `apps/estudos` (planejado) | Materias, materiais e revisoes |
 
-1. Login sem autenticação real.
-2. Resumo do dia.
-3. Radar da semana.
-4. Agenda e avisos fictícios.
+O `Backend/` contem a API Java com login e permissoes. Ela foi criada para a proposta 1 e **ainda nao esta ligada aos prototipos do frontend**. Nao existe banco ou conta real na biblioteca.
 
-O objetivo é validar navegação, linguagem e identidade visual antes de conectar banco de dados e API.
+## Como rodar localmente
 
-## Executar o protótipo
+Precisa de Node.js compativel com o Vite 8.
 
-```bash
+**Proposta 1 — Calendario:**
+
+```powershell
 cd apps/web
-npm install
-npm run dev
+npm.cmd ci
+npm.cmd test
+npm.cmd run dev
 ```
 
-Abra o endereço exibido pelo Vite no navegador.
+**Proposta 2 — Biblioteca:**
 
-## Organização planejada
-
-```text
-apps/web  → interface React
-apps/api  → API Spring Boot, adicionada na próxima etapa
-docs      → requisitos e decisões do projeto
+```powershell
+cd apps/biblioteca
+npm.cmd ci
+npm.cmd test
+npm.cmd run dev
 ```
 
-## Fluxo da equipe
+Execute um app por vez, ou passe `-- --port 5174` ao iniciar o segundo app.
 
-- A branch `main` deve permanecer funcional.
-- Cada tarefa usa uma branch curta: `feature/nome-da-tarefa`.
-- Toda mudança chega à `main` por Pull Request.
-- Um colega revisa antes do merge.
+O Vite mostrara a URL local. Para gerar versao de producao, execute `npm.cmd run build` dentro da pasta de cada frontend.
 
+## Identidade visual
+
+O arquivo [DESIGN.md](./DESIGN.md) define as cores e a linguagem visual da familia de prototipos. A proposta do calendario tambem segue o [UX-CONTRACT.md](./UX-CONTRACT.md); cada app novo mantem o foco mobile e controles acessiveis.
+
+## Combinados da equipe
+
+- `main` sempre revisada e funcional
+- Cada prototipo ou mudanca usa uma branch e seu proprio PR
+- Sem merge automatico: a equipe revisa e aprova
+- Nao usar dados pessoais ou estoque real nas demonstracoes
+- A escolha dos alunos vem antes de ligar API, banco ou deploy definitivo
