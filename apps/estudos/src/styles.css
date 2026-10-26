@@ -365,3 +365,39 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--blue); outl
   .linha-download { flex-wrap: wrap; }
   .linha-download-texto { flex-basis: calc(100% - 60px); }
 }
+
+.calendario-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start; margin-bottom: 28px; }
+.calendario-lateral { display: grid; gap: 16px; }
+.calendario-cartao { background: #fff; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 16px; padding: 18px; }
+.calendario-topo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.calendario-topo h2 { margin: 0; font-size: 1.1rem; }
+.calendario-nav { display: flex; gap: 6px; }
+.calendario-nav button { width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(0, 0, 0, 0.12); background: transparent; cursor: pointer; display: grid; place-items: center; }
+.calendario-grade { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.dia-semana { text-align: center; font-size: 0.75rem; opacity: 0.6; padding: 4px 0; }
+.dia { aspect-ratio: 1; border-radius: 10px; border: 1px solid transparent; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font: inherit; }
+.dia:hover { background: rgba(0, 0, 0, 0.05); }
+.dia.hoje { border-color: rgba(0, 0, 0, 0.35); font-weight: 600; }
+.dia.selecionado { background: #1f2937; color: #fff; }
+.pontos { display: flex; gap: 3px; height: 6px; }
+.ponto-prova { width: 6px; height: 6px; border-radius: 50%; background: #888; }
+.ponto-azul { background: #3b82f6; }
+.ponto-coral { background: #f97362; }
+.ponto-verde { background: #22a06b; }
+.ponto-amarelo { background: #e5a50a; }
+.dia.selecionado .ponto-prova { box-shadow: 0 0 0 1px #fff; }
+.titulo-dia { margin: 0 0 12px; font-size: 1rem; text-transform: capitalize; }
+.sem-provas { margin: 0; opacity: 0.7; font-size: 0.9rem; }
+.form-prova { display: grid; gap: 10px; }
+.form-prova label { display: grid; gap: 4px; font-size: 0.85rem; }
+.form-prova input, .form-prova select { padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(0, 0, 0, 0.15); font: inherit; background: #fff; }
+.erro-campo { color: #b42318; font-size: 0.85rem; margin: 0; }
+.lista-provas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.linha-prova { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 12px; background: #fff; }
+.linha-prova-texto { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.linha-prova-texto small { opacity: 0.7; }
+.botao-icone { border: 0; background: transparent; cursor: pointer; padding: 6px; border-radius: 8px; display: grid; place-items: center; }
+.botao-icone:hover { background: rgba(0, 0, 0, 0.06); }
+.prazo { font-size: 0.75rem; padding: 3px 8px; border-radius: 999px; background: rgba(0, 0, 0, 0.06); white-space: nowrap; }
+.prazo.urgente { background: #fee4e2; color: #b42318; }
+@media (max-width: 800px) { .calendario-layout { grid-template-columns: 1fr; } }

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  ArrowLeft, ArrowRight, BookOpen, BookOpenCheck, Brain, Check, CheckCircle2,
-  ChevronRight, Clock3, Download, Home, Info,
-  Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X,
+  ArrowLeft, ArrowRight, BookOpen, BookOpenCheck, Brain, CalendarDays, Check, CheckCircle2,
+  ChevronLeft, ChevronRight, Clock3, Download, Home, Info,
+  Lightbulb, ListChecks, Plus, RotateCcw, Search, Sparkles, Target, Trash2, X,
 } from 'lucide-react'
 import { materiais, materias, type Material, type Materia } from './dados/materiais'
 import { questoes, type Questao } from './dados/questoes'
@@ -10,13 +10,17 @@ import { alternarRevisado, buscarMateriais, resumoEstudos } from './logica/estud
 import { responderQuestao, resumirRespostas } from './logica/revisao'
 import { carregarEstado, salvarEstado, type EstadoEstudos } from './logica/persistencia'
 import { gerarPdf, nomeSeguro } from './logica/pdf'
+import {
+  carregarProvas, salvarProvas, chaveData, dataDeChave, diasAte, textoPrazo, celulasDoMes, type Prova,
+} from './logica/provas'
 
-type Tela = 'inicio' | 'materiais' | 'revisao' | 'progresso' | 'downloads'
+type Tela = 'inicio' | 'materiais' | 'revisao' | 'progresso' | 'downloads' | 'calendario'
 type FiltroMateria = 'Todas' | Materia
 const menu = [
   { id: 'inicio', nome: 'Início', Icone: Home },
   { id: 'materiais', nome: 'Materiais', Icone: BookOpen },
   { id: 'revisao', nome: 'Revisão', Icone: Brain },
+  { id: 'calendario', nome: 'Provas', Icone: CalendarDays },
   { id: 'progresso', nome: 'Progresso', Icone: Target },
   { id: 'downloads', nome: 'Downloads', Icone: Download },
 ] as const
@@ -461,6 +465,157 @@ function DownloadsPagina({ abrirMaterial }: { abrirMaterial: (material: Material
   )
 }
 
+
+const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+const letrasSemana = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
+
+function CalendarioPagina({ provas, onAdicionar, onRemover, estudar }: {
+  provas: Prova[]
+  onAdicionar: (prova: Prova) => void
+  onRemover: (id: string) => void
+  estudar: (materia: Materia) => void
+}) {
+  const hoje = new Date()
+  const chaveHoje = chaveData(hoje)
+  const [mes, setMes] = useState(() => new Date(hoje.getFullYear(), hoje.getMonth(), 1))
+  const [dia, setDia] = useState(chaveHoje)
+  const [materiaForm, setMateriaForm] = useState<Materia>('Matemática')
+  const [titulo, setTitulo] = useState('')
+  const [data, setData] = useState(chaveHoje)
+  const [erro, setErro] = useState('')
+
+  const celulas = useMemo(() => celulasDoMes(mes.getFullYear(), mes.getMonth()), [mes])
+  const porDia = useMemo(() => {
+    const mapa = new Map<string, Prova[]>()
+    provas.forEach((p) => mapa.set(p.data, [...(mapa.get(p.data) ?? []), p]))
+    return mapa
+  }, [provas])
+  const proximas = useMemo(
+    () => provas.filter((p) => diasAte(p.data) >= 0).sort((a, b) => a.data.localeCompare(b.data)),
+    [provas],
+  )
+  const doDia = porDia.get(dia) ?? []
+
+  const mudarMes = (delta: number) =>
+    setMes((atual) => new Date(atual.getFullYear(), atual.getMonth() + delta, 1))
+
+  function adicionar(e: React.FormEvent) {
+    e.preventDefault()
+    if (!titulo.trim()) { setErro('Escreva o assunto da prova'); return }
+    if (!data) { setErro('Escolha a data da prova'); return }
+    onAdicionar({ id: `${Date.now()}`, materia: materiaForm, titulo: titulo.trim(), data })
+    const alvo = dataDeChave(data)
+    setMes(new Date(alvo.getFullYear(), alvo.getMonth(), 1))
+    setDia(data)
+    setTitulo('')
+    setErro('')
+  }
+
+  return (
+    <div className="pagina">
+      <CabecalhoSecao etiqueta="ORGANIZE SUAS DATAS" titulo="Calendário de provas"
+        descricao="Cadastre as provas, veja quantos dias faltam e vá direto estudar a matéria" />
+
+      <div className="calendario-layout">
+        <section className="calendario-cartao" aria-label="Calendário do mês">
+          <div className="calendario-topo">
+            <h2>{nomesMeses[mes.getMonth()]} de {mes.getFullYear()}</h2>
+            <div className="calendario-nav">
+              <button type="button" onClick={() => mudarMes(-1)} aria-label="Mês anterior"><ChevronLeft size={18} /></button>
+              <button type="button" onClick={() => mudarMes(1)} aria-label="Próximo mês"><ChevronRight size={18} /></button>
+            </div>
+          </div>
+          <div className="calendario-grade">
+            {letrasSemana.map((letra, i) => <span key={i} className="dia-semana" aria-hidden="true">{letra}</span>)}
+            {celulas.map((chave, i) => {
+              if (!chave) return <span key={`vazio-${i}`} className="dia-vazio" aria-hidden="true" />
+              const lista = porDia.get(chave) ?? []
+              const numero = Number(chave.slice(8))
+              return (
+                <button key={chave} type="button"
+                  className={`dia ${chave === chaveHoje ? 'hoje' : ''} ${chave === dia ? 'selecionado' : ''}`}
+                  aria-pressed={chave === dia}
+                  aria-label={`${numero} de ${nomesMeses[mes.getMonth()]}${lista.length ? `, ${lista.length} prova${lista.length > 1 ? 's' : ''}` : ''}`}
+                  onClick={() => setDia(chave)}>
+                  <span>{numero}</span>
+                  <span className="pontos" aria-hidden="true">
+                    {lista.slice(0, 3).map((p) => <i key={p.id} className={`ponto-prova ponto-${cores[p.materia]}`} />)}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+
+        <aside className="calendario-lateral">
+          <section className="calendario-cartao" aria-labelledby="dia-titulo">
+            <h2 id="dia-titulo" className="titulo-dia">
+              {dataDeChave(dia).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </h2>
+            {doDia.length ? (
+              <ul className="lista-provas">
+                {doDia.map((p) => (
+                  <li className="linha-prova" key={p.id}>
+                    <span className={`icone-materia materia-${cores[p.materia]}`} aria-hidden="true"><BookOpen size={18} /></span>
+                    <div className="linha-prova-texto"><strong>{p.titulo}</strong><small>{p.materia}</small></div>
+                    <button type="button" className="botao-link" onClick={() => estudar(p.materia)}>Estudar</button>
+                    <button type="button" className="botao-icone" onClick={() => onRemover(p.id)}
+                      aria-label={`Remover prova ${p.titulo}`}><Trash2 size={17} /></button>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="sem-provas">Nenhuma prova neste dia.</p>}
+          </section>
+
+          <form className="calendario-cartao form-prova" onSubmit={adicionar} noValidate>
+            <h2 className="titulo-dia">Nova prova</h2>
+            <label>Matéria
+              <select value={materiaForm} onChange={(e) => setMateriaForm(e.target.value as Materia)}>
+                {materiasDisponiveis.map((m) => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </label>
+            <label>Assunto da prova
+              <input type="text" value={titulo} placeholder="Ex.: Funções do 1º grau"
+                onChange={(e) => { setTitulo(e.target.value); setErro('') }} />
+            </label>
+            <label>Data
+              <input type="date" value={data} onChange={(e) => { setData(e.target.value); setErro('') }} />
+            </label>
+            {erro && <p className="erro-campo" role="alert">{erro}</p>}
+            <button type="submit" className="botao-principal"><Plus size={18} /> Adicionar ao calendário</button>
+          </form>
+        </aside>
+      </div>
+
+      <section className="secao" aria-labelledby="proximas-titulo">
+        <div className="secao-titulo"><div><span>NÃO ESQUEÇA</span><h2 id="proximas-titulo">Próximas provas</h2></div></div>
+        {proximas.length ? (
+          <ul className="lista-provas">
+            {proximas.map((p) => {
+              const dias = diasAte(p.data)
+              return (
+                <li className="linha-prova" key={p.id}>
+                  <span className={`icone-materia materia-${cores[p.materia]}`} aria-hidden="true"><BookOpen size={18} /></span>
+                  <div className="linha-prova-texto">
+                    <strong>{p.titulo}</strong>
+                    <small>{p.materia} · {dataDeChave(p.data).toLocaleDateString('pt-BR')}</small>
+                  </div>
+                  <span className={`prazo ${dias <= 2 ? 'urgente' : ''}`}>{textoPrazo(dias)}</span>
+                  <button type="button" className="botao-link" onClick={() => estudar(p.materia)}>Estudar</button>
+                </li>
+              )
+            })}
+          </ul>
+        ) : (
+          <div className="estado-vazio"><CalendarDays size={33} /><h2>Nenhuma prova marcada</h2>
+            <p>Escolha uma data no calendário e adicione a primeira prova</p></div>
+        )}
+      </section>
+    </div>
+  )
+}
+
 export default function App() {
   const [tela, setTela] = useState<Tela>('inicio')
   const [materialAberto, setMaterialAberto] = useState<string | null>(null)
@@ -469,6 +624,7 @@ export default function App() {
   const [indiceQuiz, setIndiceQuiz] = useState(0)
   const [estado, setEstado] = useState<EstadoEstudos>(() => carregarEstado(armazenamento(), materiais, questoes))
   const [aviso, setAviso] = useState('')
+  const [provas, setProvas] = useState<Prova[]>(() => carregarProvas(armazenamento()))
   const materialAtual = materialAberto ? materiais.find((item) => item.id === materialAberto) : undefined
 
   useEffect(() => { salvarEstado(armazenamento(), estado) }, [estado])
@@ -477,6 +633,8 @@ export default function App() {
     document.title = `${materialAtual?.titulo ?? menu.find((item) => item.id === tela)?.nome ?? 'Estudos'} — Projeto de Extensão`
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [tela, materialAtual, indiceQuiz])
+
+  useEffect(() => { salvarProvas(armazenamento(), provas) }, [provas])
 
   function navegar(destino: Tela) {
     setTela(destino)
@@ -488,6 +646,15 @@ export default function App() {
       setIndiceQuiz(proxima === -1 ? questoes.length : proxima)
     }
   }
+  const adicionarProva = (prova: Prova) => {
+  setProvas((atual) => [...atual, prova])
+  setAviso('Prova adicionada ao calendário')
+}
+const removerProva = (id: string) => {
+  setProvas((atual) => atual.filter((p) => p.id !== id))
+  setAviso('Prova removida')
+}
+
   const abrirMaterial = (item: Material) => { setTela('materiais'); setMaterialAberto(item.id); setAviso('') }
   const escolherMateria = (opcao: FiltroMateria) => { setMateria(opcao); setBusca(''); navegar('materiais') }
   const alternar = (id: string) => {
@@ -535,7 +702,9 @@ export default function App() {
               {tela === 'progresso' && <Progresso estado={estado} irMateriais={() => navegar('materiais')}
                 irRevisao={() => navegar('revisao')}
                 limparProgresso={() => {setEstado({ revisados: [], respostas: [] }); setAviso('Demonstração reiniciada')}} />}
-              {tela === 'downloads' && <DownloadsPagina abrirMaterial={abrirMaterial} />}  
+              {tela === 'downloads' && <DownloadsPagina abrirMaterial={abrirMaterial} />}
+              {tela === 'calendario' && <CalendarioPagina provas={provas}
+               onAdicionar={adicionarProva} onRemover={removerProva} estudar={escolherMateria} />}  
             </>
           )}
         </main>
