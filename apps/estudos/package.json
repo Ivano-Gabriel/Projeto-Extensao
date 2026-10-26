@@ -10,6 +10,7 @@
     "test": "node --experimental-strip-types --test tests/*.test.mjs"
   },
   "dependencies": {
+    "jspdf": "^4.2.1",
     "lucide-react": "^1.39.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"

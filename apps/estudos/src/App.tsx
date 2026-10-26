@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowLeft, ArrowRight, BookOpen, BookOpenCheck, Brain, Check, CheckCircle2,
-  ChevronRight, Clock3, Home, Info,
+  ChevronRight, Clock3, Download, Home, Info,
   Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X,
 } from 'lucide-react'
 import { materiais, materias, type Material, type Materia } from './dados/materiais'
@@ -9,14 +9,16 @@ import { questoes, type Questao } from './dados/questoes'
 import { alternarRevisado, buscarMateriais, resumoEstudos } from './logica/estudos'
 import { responderQuestao, resumirRespostas } from './logica/revisao'
 import { carregarEstado, salvarEstado, type EstadoEstudos } from './logica/persistencia'
+import { gerarPdf, nomeSeguro } from './logica/pdf'
 
-type Tela = 'inicio' | 'materiais' | 'revisao' | 'progresso'
+type Tela = 'inicio' | 'materiais' | 'revisao' | 'progresso' | 'downloads'
 type FiltroMateria = 'Todas' | Materia
 const menu = [
   { id: 'inicio', nome: 'Início', Icone: Home },
   { id: 'materiais', nome: 'Materiais', Icone: BookOpen },
   { id: 'revisao', nome: 'Revisão', Icone: Brain },
   { id: 'progresso', nome: 'Progresso', Icone: Target },
+  { id: 'downloads', nome: 'Downloads', Icone: Download },
 ] as const
 const cores: Record<Materia, string> = {
   'Matemática': 'azul',
@@ -33,9 +35,9 @@ function armazenamento(): Storage | null {
 
 function Marca() {
   return (
-    <div className="marca" aria-label="Projeto de Extensão, ferramenta de estudos">
+    <div className="marca" aria-label="Gerenciador de estudos, ferramenta de estudos">
       <span className="marca-simbolo" aria-hidden="true"><BookOpenCheck size={23} /></span>
-      <span><strong>Projeto de Extensão</strong><small>Ferramenta de estudos</small></span>
+      <span><strong>Estude Melhor</strong><small>Ferramenta de estudos</small></span>
     </div>
   )
 }
@@ -395,6 +397,70 @@ function Progresso({ estado, irMateriais, irRevisao, limparProgresso }: {
   )
 }
 
+function DownloadsPagina({ abrirMaterial }: { abrirMaterial: (material: Material) => void }) {
+  const [erro, setErro] = useState('')
+
+  function baixar(lista: Material[], titulo: string, arquivo: string) {
+    try {
+      setErro('')
+      gerarPdf(lista, titulo, arquivo)
+    } catch {
+      setErro('Não foi possível gerar o PDF. Tente novamente.')
+    }
+  }
+
+  return (
+    <div className="pagina">
+      <CabecalhoSecao etiqueta="LEVE PRA ESTUDAR OFFLINE" titulo="Baixar PDFs"
+        descricao="Baixe os resumos em PDF por assunto, por matéria ou todos de uma vez" />
+
+      {erro && <div className="demo-nota" role="alert"><Info size={19} /><span>{erro}</span></div>}
+
+      <section className="secao" aria-labelledby="pdf-tudo">
+        <div className="secao-titulo">
+          <div><span>PACOTE COMPLETO</span><h2 id="pdf-tudo">Todos os materiais</h2></div>
+        </div>
+        <button type="button" className="botao-principal"
+          onClick={() => baixar(materiais, 'Estude Melhor - Todos os materiais', 'estude-melhor-todos-os-materiais')}>
+          <Download size={18} /> Baixar tudo em um PDF ({materiais.length} materiais)
+        </button>
+      </section>
+
+      {materiasDisponiveis.map((nomeMateria) => {
+        const lista = materiais.filter((item) => item.materia === nomeMateria)
+        return (
+          <section className="secao" key={nomeMateria} aria-labelledby={`pdf-${nomeSeguro(nomeMateria)}`}>
+            <div className="secao-titulo">
+              <div><span>MATÉRIA</span><h2 id={`pdf-${nomeSeguro(nomeMateria)}`}>{nomeMateria}</h2></div>
+              <button type="button" className="botao-secundario"
+                onClick={() => baixar(lista, `Estude Melhor - ${nomeMateria}`, `estude-melhor-${nomeSeguro(nomeMateria)}`)}>
+                <Download size={17} /> PDF da matéria
+              </button>
+            </div>
+            <ul className="lista-download">
+              {lista.map((material) => (
+                <li className="linha-download" key={material.id}>
+                  <span className={`icone-materia materia-${cores[nomeMateria]}`} aria-hidden="true"><BookOpen size={20} /></span>
+                  <div className="linha-download-texto">
+                    <strong>{material.titulo}</strong>
+                    <small>{material.etiqueta} · {material.minutos} min de leitura</small>
+                  </div>
+                  <button type="button" className="botao-link" onClick={() => abrirMaterial(material)}>Ler</button>
+                  <button type="button" className="botao-secundario"
+                    onClick={() => baixar([material], `Estude Melhor - ${material.materia}`, `${nomeSeguro(material.materia)}-${nomeSeguro(material.titulo)}`)}
+                    aria-label={`Baixar PDF de ${material.titulo}`}>
+                    <Download size={17} /> PDF
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function App() {
   const [tela, setTela] = useState<Tela>('inicio')
   const [materialAberto, setMaterialAberto] = useState<string | null>(null)
@@ -469,6 +535,7 @@ export default function App() {
               {tela === 'progresso' && <Progresso estado={estado} irMateriais={() => navegar('materiais')}
                 irRevisao={() => navegar('revisao')}
                 limparProgresso={() => {setEstado({ revisados: [], respostas: [] }); setAviso('Demonstração reiniciada')}} />}
+              {tela === 'downloads' && <DownloadsPagina abrirMaterial={abrirMaterial} />}  
             </>
           )}
         </main>
