@@ -1,5 +1,7 @@
 # Projeto de Extensão
 
+> **Resultado da consulta aos estudantes:** a proposta 3 (Ferramenta de Estudos) foi escolhida. A evolução fica em `feature/estudos-voz-dos-alunos` até revisão e merge da equipe.
+
 Tres propostas para os alunos conhecerem e escolherem qual ideia a equipe vai desenvolver com mais profundidade. Cada prototipo tem seu proprio frontend, com dados de demonstracao.
 
 ## Prototipos
