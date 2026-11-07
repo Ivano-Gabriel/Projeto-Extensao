@@ -41,6 +41,9 @@ self.addEventListener('fetch',(evento)=>{
   const destino = new URL(pedido.url)
   if (pedido.method !== 'GET' || destino.origin !== self.location.origin ||
     !destino.href.startsWith(self.registration.scope)) return
+  // Nao cachear API, autenticacao, requisicoes externas ou recursos personalizados.
+  const recursoEstatico = /\.(?:js|css|svg|png|webp|ico|woff2?)$/i.test(destino.pathname)
+  if (pedido.mode !== 'navigate' && !recursoEstatico) return
   if (pedido.mode === 'navigate') {
     evento.respondWith(fetch(pedido).then(async resposta=>{
       if (resposta.ok) (await caches.open(CACHE)).put(pedido,resposta.clone())
