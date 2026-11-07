@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
+import type { Dispatch, SetStateAction, ReactNode } from 'react'
 import {
   ArrowRight, BookOpen, CalendarCheck, Check, CheckCheck, ClipboardCheck,
   Clock3, Download, Flame, Heart, Info, MessageSquareText, Newspaper,
@@ -7,8 +7,8 @@ import {
 } from 'lucide-react'
 import { disciplinas, gerarFrequenciaDemo, notasDemo, publicacoes } from './dados'
 import { faltasAteMeta, filtroPeriodo, formatarDataLocal, mediaNotas,
-  proximoDiaLetivo, resumirFrequencia, type Periodo } from './regras'
-import { diasConsecutivosEstudados, type EstadoEscola, type MensagemFeedback } from './estado'
+  proximoDiaLetivo, resumirFrequencia, diasConsecutivosEstudados, type Periodo } from './regras'
+import { type EstadoEscola, type MensagemFeedback } from './estado'
 
 type AbaEscola = 'frequencia' | 'notas' | 'feed' | 'feedback'
 type Props = {
@@ -25,7 +25,7 @@ const dataBonita = (iso: string) => {
   return new Date(ano, mes - 1, dia).toLocaleDateString('pt-BR', {weekday:'long',day:'2-digit',month:'long'})
 }
 
-function RotuloDemo({children}:{children:React.ReactNode}) {
+function RotuloDemo({children}:{children:ReactNode}) {
   return <span className="escola-demo"><Info size={14} aria-hidden="true" /> {children}</span>
 }
 
