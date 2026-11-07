@@ -10,7 +10,7 @@ test('nao quebra com dados locais ilegíveis', () => {
 test('filtra entradas invalidas, feedback exagerado e valores desconhecidos', () => {
   const dado = {tema:'escuro', diasEstudo:['2026-11-06','nao', '2026-11-06'],
     previsao:{data:'2026-11-09',valor:'invadido'},
-    lidos:['post-1','teste'], feedback:[{id:'1',categoria:'Sugestão',texto:'ok',data:'2026-11-07'}]}
+    lidos:['post-1','teste'], feedback:[{id:'1',categoria:'Sugestão',texto:'boa',data:'2026-11-07'}]}
   const estado = carregarEscola({getItem:()=>JSON.stringify(dado)})
   assert.equal(estado.tema, 'escuro')
   assert.deepEqual(estado.diasEstudo, ['2026-11-06'])
