@@ -9,6 +9,7 @@ import { disciplinas, gerarFrequenciaDemo, notasDemo, publicacoes } from './dado
 import { faltasAteMeta, filtroPeriodo, formatarDataLocal, mediaNotas,
   proximoDiaLetivo, resumirFrequencia, diasConsecutivosEstudados, type Periodo } from './regras'
 import { type EstadoEscola, type MensagemFeedback } from './estado'
+import { baixarAplicativo } from './offline'
 
 type AbaEscola = 'frequencia' | 'notas' | 'feed' | 'feedback'
 type Props = {
@@ -256,7 +257,6 @@ export default function Escola({estado,atualizar,abrirMaterial}:Props) {
       return
     }
     try {
-      const {baixarAplicativo} = await import('./offline')
       await baixarAplicativo()
       setOfflineStatus('Conteúdos do app guardados no dispositivo. Abra novamente offline para testar.')
     } catch {
