@@ -40,7 +40,10 @@ export const publicacoes: Publicacao[] = [
 export function gerarFrequenciaDemo(hoje = new Date()): Aula[] {
   const aulas: Aula[] = []
   const inicio = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())
-  for (let atraso = 100; atraso >= 0; atraso--) {
+  // O painel anual cobre o ano letivo demonstrativo do inicio do ano ate hoje.
+  const primeiroDia = new Date(inicio.getFullYear(), 0, 1)
+  const diasNoAno = Math.round((inicio.getTime() - primeiroDia.getTime()) / 86400000)
+  for (let atraso = diasNoAno; atraso >= 0; atraso--) {
     const dia = new Date(inicio)
     dia.setDate(inicio.getDate() - atraso)
     if ([0,6].includes(dia.getDay())) continue
