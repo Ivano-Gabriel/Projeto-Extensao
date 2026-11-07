@@ -2,20 +2,24 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowLeft, ArrowRight, BookOpen, BookOpenCheck, Brain, Check, CheckCircle2,
   ChevronRight, Clock3, Home, Info,
-  Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X,
+  Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X, School, Flame, Moon, Sun,
 } from 'lucide-react'
 import { materiais, materias, type Material, type Materia } from './dados/materiais'
 import { questoes, type Questao } from './dados/questoes'
 import { alternarRevisado, buscarMateriais, resumoEstudos } from './logica/estudos'
 import { responderQuestao, resumirRespostas } from './logica/revisao'
 import { carregarEstado, salvarEstado, type EstadoEstudos } from './logica/persistencia'
+import Escola from './escola/Escola'
+import { carregarEscola, salvarEscola } from './escola/estado'
+import { diasConsecutivosEstudados, formatarDataLocal } from './escola/regras'
 
-type Tela = 'inicio' | 'materiais' | 'revisao' | 'progresso'
+type Tela = 'inicio' | 'materiais' | 'revisao' | 'escola' | 'progresso'
 type FiltroMateria = 'Todas' | Materia
 const menu = [
   { id: 'inicio', nome: 'Início', Icone: Home },
   { id: 'materiais', nome: 'Materiais', Icone: BookOpen },
   { id: 'revisao', nome: 'Revisão', Icone: Brain },
+  { id: 'escola', nome: 'Escola', Icone: School },
   { id: 'progresso', nome: 'Progresso', Icone: Target },
 ] as const
 const cores: Record<Materia, string> = {
@@ -80,13 +84,15 @@ function CartaoMaterial({ material, revisado, onAbrir }: {
   )
 }
 
-function Inicio({ estado, abrirMaterial, escolherMateria, irMateriais, irRevisao, irProgresso }: {
+function Inicio({ estado, sequencia, abrirMaterial, escolherMateria, irMateriais, irRevisao, irProgresso, irEscola }: {
+  sequencia: number
   estado: EstadoEstudos
   abrirMaterial: (material: Material) => void
   escolherMateria: (materia: FiltroMateria) => void
   irMateriais: () => void
   irRevisao: () => void
   irProgresso: () => void
+  irEscola: () => void
 }) {
   const resumo = resumoEstudos(materiais, estado.revisados, estado.respostas)
   const desempenho = resumirRespostas(questoes, estado.respostas)
@@ -117,6 +123,15 @@ function Inicio({ estado, abrirMaterial, escolherMateria, irMateriais, irRevisao
         <span><strong>Protótipo demonstrativo.</strong> Os resumos e as questões são exemplos, não materiais oficiais da escola</span>
       </div>
 
+      <section className="escola-chamada-inicio" aria-label="Novidades propostas pelos alunos">
+        <div className="escola-chamada-icon"><School size={25}/></div>
+        <div><span className="sobretitulo">VOCÊS PEDIRAM, A GENTE OUVIU</span>
+          <h2>Agora tem um espaço pra vida escolar ✳</h2>
+          <p>Frequência, notas, recados dos professores e uma área pra dar ideias. Tudo demonstrativo.</p>
+          <span className="escola-streak"><Flame size={17}/> {sequencia} {sequencia === 1 ? 'dia seguido estudando' : 'dias seguidos estudando'}</span>
+        </div>
+        <button type="button" className="botao-principal" onClick={irEscola}>Conhecer a escola <ArrowRight size={18}/></button>
+      </section>
       <section className="inicio-resumo" aria-label="Seu progresso neste navegador">
         <div className="resumo-destaque">
           <span className="resumo-topo"><ListChecks size={19} /> SEUS ESTUDOS</span>
@@ -402,10 +417,22 @@ export default function App() {
   const [materia, setMateria] = useState<FiltroMateria>('Todas')
   const [indiceQuiz, setIndiceQuiz] = useState(0)
   const [estado, setEstado] = useState<EstadoEstudos>(() => carregarEstado(armazenamento(), materiais, questoes))
+  const [escola, setEscola] = useState(() => carregarEscola(armazenamento()))
   const [aviso, setAviso] = useState('')
   const materialAtual = materialAberto ? materiais.find((item) => item.id === materialAberto) : undefined
 
   useEffect(() => { salvarEstado(armazenamento(), estado) }, [estado])
+  useEffect(() => { salvarEscola(armazenamento(), escola) }, [escola])
+  useEffect(() => {
+    document.documentElement.dataset.tema = escola.tema
+    return () => { delete document.documentElement.dataset.tema }
+  }, [escola.tema])
+
+  const registrarEstudo = () => {
+    const hoje = formatarDataLocal(new Date())
+    setEscola((atual) => atual.diasEstudo.includes(hoje) ? atual :
+      {...atual, diasEstudo: [...atual.diasEstudo.slice(-199), hoje]})
+  }
 
   useEffect(() => {
     document.title = `${materialAtual?.titulo ?? menu.find((item) => item.id === tela)?.nome ?? 'Estudos'} — Projeto de Extensão`
@@ -423,14 +450,23 @@ export default function App() {
     }
   }
   const abrirMaterial = (item: Material) => { setTela('materiais'); setMaterialAberto(item.id); setAviso('') }
+  const abrirPorId = (id: string) => {
+    const material = materiais.find((item) => item.id === id)
+    if (material) abrirMaterial(material)
+  }
   const escolherMateria = (opcao: FiltroMateria) => { setMateria(opcao); setBusca(''); navegar('materiais') }
   const alternar = (id: string) => {
     const novo = alternarRevisado(estado.revisados, id, materiais)
+    if (!estado.revisados.includes(id) && novo.includes(id)) registrarEstudo()
     setEstado((atual) => ({ ...atual, revisados: novo }))
     setAviso(novo.includes(id) ? 'Material marcado como revisado!' : 'Marcação removida')
   }
-  const responder = (questao: Questao, opcao: number) =>
+  const responder = (questao: Questao, opcao: number) => {
+    if (estado.respostas.some((r) => r.questaoId === questao.id)
+      || !Number.isInteger(opcao) || opcao < 0 || opcao >= questao.opcoes.length) return
+    registrarEstudo()
     setEstado((atual) => ({ ...atual, respostas: responderQuestao(atual.respostas, questao, opcao) }))
+  }
   const reiniciarQuiz = () => { setEstado((atual) => ({ ...atual, respostas: [] })); setIndiceQuiz(0); setAviso('Quiz reiniciado! Bora tentar novamente') }
 
   return (
@@ -451,7 +487,14 @@ export default function App() {
       <div className="layout-corpo">
         <header className="cabecalho-app">
           <div><span>PROJETO DE EXTENSÃO</span><strong>Ferramenta de estudos</strong></div>
-          <span className="demo-tag"><span className="demo-ponto"/> DEMONSTRAÇÃO</span>
+          <div className="escola-header-controles">
+            <button type="button" className="escola-tema" aria-label={escola.tema === 'escuro' ? 'Ativar modo claro' : 'Ativar modo noturno'}
+              aria-pressed={escola.tema === 'escuro'}
+              onClick={() => setEscola((atual) => ({...atual,tema:atual.tema === 'claro' ? 'escuro':'claro'}))}>
+              {escola.tema === 'escuro' ? <Sun size={20}/> : <Moon size={20}/>}
+            </button>
+            <span className="demo-tag"><span className="demo-ponto"/> DEMONSTRAÇÃO</span>
+          </div>
         </header>
         <main className="conteudo-principal">
           {materialAtual ? (
@@ -459,13 +502,15 @@ export default function App() {
               onVoltar={() => setMaterialAberto(null)} onAlternar={alternar} irRevisao={() => navegar('revisao')} />
           ) : (
             <>
-              {tela === 'inicio' && <Inicio estado={estado} abrirMaterial={abrirMaterial}
+              {tela === 'inicio' && <Inicio estado={estado} sequencia={diasConsecutivosEstudados(escola.diasEstudo)}
+                irEscola={() => navegar('escola')} abrirMaterial={abrirMaterial}
                 escolherMateria={escolherMateria} irMateriais={() => navegar('materiais')}
                 irRevisao={() => navegar('revisao')} irProgresso={() => navegar('progresso')}/>}
               {tela === 'materiais' && <MateriaisPagina estado={estado} busca={busca} setBusca={setBusca}
                 materia={materia} setMateria={setMateria} abrirMaterial={abrirMaterial}/>}
               {tela === 'revisao' && <QuizPagina estado={estado} indice={indiceQuiz} setIndice={setIndiceQuiz}
                 responder={responder} irMateriais={() => navegar('materiais')} reiniciar={reiniciarQuiz}/>}
+              {tela === 'escola' && <Escola estado={escola} atualizar={setEscola} abrirMaterial={abrirPorId}/>}
               {tela === 'progresso' && <Progresso estado={estado} irMateriais={() => navegar('materiais')}
                 irRevisao={() => navegar('revisao')}
                 limparProgresso={() => {setEstado({ revisados: [], respostas: [] }); setAviso('Demonstração reiniciada')}} />}
