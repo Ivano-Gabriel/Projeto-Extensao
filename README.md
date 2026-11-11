@@ -1,62 +1,47 @@
-# Projeto de Extensão
+# Projeto de Extensão — Plataforma Escolar 🎓
 
-> **Resultado da consulta aos estudantes:** a proposta 3 (Ferramenta de Estudos) foi escolhida. A evolução fica em `feature/estudos-voz-dos-alunos` até revisão e merge da equipe.
+Projeto acadêmico desenvolvido em equipe para explorar soluções digitais que auxiliem o cotidiano de **alunos, professores e direção escolar**. Os protótipos foram apresentados aos estudantes para ouvir suas preferências.
 
-Tres propostas para os alunos conhecerem e escolherem qual ideia a equipe vai desenvolver com mais profundidade. Cada prototipo tem seu proprio frontend, com dados de demonstracao.
+## Propostas desenvolvidas
 
-## Prototipos
-
-| Proposta | Pasta | O que demonstra |
+| Protótipo | Pasta | Objetivo |
 | --- | --- | --- |
-| 1. Calendario de provas, trabalhos e avisos | `apps/web` | Agenda, comunicados, boletim demonstrativo e area do aluno |
-| 2. Biblioteca escolar | `apps/biblioteca` | Catalogo, busca, filtros, emprestimo e devolucao simulados |
-| 3. Ferramenta de estudos | `apps/estudos` | Materias, materiais e revisoes |
+| **Agenda escolar** | `apps/web/` | Provas, trabalhos, avisos e área do aluno. |
+| **Biblioteca** | `apps/biblioteca/` | Busca, catálogo e empréstimos simulados. |
+| **Ferramenta de estudos** | `apps/estudos/` | Materiais, revisões, questões e acompanhamento de estudos. |
 
-O `Backend/` contem a API Java com login e permissoes. Ela foi criada para a proposta 1 e **ainda nao esta ligada aos prototipos do frontend**. Biblioteca e Estudos usam dados ficticios e salvamento local no navegador.
+✅ **A ferramenta de estudos foi a proposta escolhida pelos alunos.**
 
-## Como rodar localmente
+## Tecnologias
 
-Precisa de Node.js compativel com o Vite 8.
+- **Frontend:** React, TypeScript e Vite.
+- **Backend:** Java 21, Spring Boot e Spring Security.
+- **Persistência:** PostgreSQL para a API; dados demonstrativos e armazenamento local nos protótipos.
+- **Organização:** GitHub, branches, pull requests e testes automatizados.
 
-**Proposta 1 — Calendario:**
+## Executar um protótipo
 
-```powershell
-cd apps/web
-npm.cmd ci
-npm.cmd test
-npm.cmd run dev
-```
+**Pré-requisito:** Node.js compatível com Vite 8.
 
-**Proposta 2 — Biblioteca:**
-
-```powershell
-cd apps/biblioteca
-npm.cmd ci
-npm.cmd test
-npm.cmd run dev
-```
-
-**Proposta 3 — Estudos:**
-
-```powershell
+```bash
 cd apps/estudos
-npm.cmd ci
-npm.cmd test
-npm.cmd run dev
+npm ci
+npm run dev
 ```
 
-Execute um app por vez, ou passe `-- --port 5174` ao iniciar o segundo app. Cada app tem seu proprio `package.json` e `package-lock.json`. Os tres ficam juntos na `main` apos os merges aprovados.
+Para abrir os outros protótipos, substitua `apps/estudos` por `apps/web` ou `apps/biblioteca` e execute os mesmos comandos.
 
-O Vite mostrara a URL local. Para gerar versao de producao, execute `npm.cmd run build` dentro da pasta de cada frontend.
+```bash
+npm test
+npm run build
+```
 
-## Identidade visual
+O backend tem instruções específicas em [`Backend/README.md`](./Backend/README.md).
 
-O arquivo [DESIGN.md](./DESIGN.md) define as cores e a linguagem visual da familia de prototipos. A proposta do calendario tambem segue o [UX-CONTRACT.md](./UX-CONTRACT.md); cada app novo mantem o foco mobile e controles acessiveis.
+## Estado atual
 
-## Combinados da equipe
+O backend possui uma base de autenticação e permissões, mas **a integração com os protótipos ainda está em desenvolvimento**. Notas, frequência e demais dados exibidos nas demonstrações **não são registros escolares oficiais**.
 
-- `main` sempre revisada e funcional
-- Cada prototipo ou mudanca usa uma branch e seu proprio PR
-- Sem merge automatico: a equipe revisa e aprova
-- Nao usar dados pessoais ou estoque real nas demonstracoes
-- A escolha dos alunos vem antes de ligar API, banco ou deploy definitivo
+**Trabalho em equipe:** mudanças de código são organizadas em branches e pull requests para revisão. Não utilizar dados pessoais reais nas demonstrações.
+
+**Objetivo:** construir a solução com participação dos estudantes, priorizando usabilidade, acessibilidade e aprendizado prático.
