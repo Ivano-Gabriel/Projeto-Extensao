@@ -10,6 +10,10 @@ import { faltasAteMeta, filtroPeriodo, formatarDataLocal, mediaNotas,
   proximoDiaLetivo, resumirFrequencia, diasConsecutivosEstudados, type Periodo } from './regras'
 import { type EstadoEscola, type MensagemFeedback } from './estado'
 import { baixarAplicativo } from './offline'
+import MuralDemo from './MuralDemo'
+import { adicionarPostDemo, removerPostDemo, type NovoPostDemo } from './mural'
+import type { Publicacao } from './dados'
+import type { Materia } from '../dados/materiais'
 
 type AbaEscola = 'frequencia' | 'notas' | 'feed' | 'feedback'
 type Props = {
@@ -161,36 +165,99 @@ function Notas() {
 }
 
 function Feed({estado,atualizar,abrirMaterial}:Props) {
+  const [materia,setMateria] = useState<'Todas'|Materia>('Todas')
+  const [somenteNaoLidos,setSomenteNaoLidos] = useState(false)
+  const [simulador,setSimulador] = useState(false)
+  const [confirmarExclusao,setConfirmarExclusao] = useState<string|null>(null)
+  const todos: Array<Publicacao & {local:boolean}> = [
+    ...estado.postsDemo.map((post)=>({
+      id:post.id,nome:'Prof. Demonstração',iniciais:'PD',disciplina:post.materia,
+      quando:'SALVO NESTE NAVEGADOR',titulo:post.titulo,texto:post.texto,
+      materialId:post.materialId,local:true,
+    })),
+    ...publicacoes.map((post)=>({...post,local:false})),
+  ]
+  const naoLidos=todos.filter(p=>!estado.lidos.includes(p.id)).length
+  const visiveis=todos.filter((post)=>
+    (materia==='Todas'||post.disciplina===materia)&&(!somenteNaoLidos||!estado.lidos.includes(post.id)))
+  const criarLocal=(novo:NovoPostDemo)=>{
+    const id=`demo-${crypto.randomUUID()}`
+    const prox=adicionarPostDemo(estado.postsDemo,novo,id)
+    atualizar((atual)=>({...atual,postsDemo:prox}))
+  }
+  const excluirLocal=(id:string)=>{
+    atualizar((atual)=>({
+      ...atual,
+      postsDemo:removerPostDemo(atual.postsDemo,id),
+      lidos:atual.lidos.filter((x)=>x!==id),
+      curtidos:atual.curtidos.filter((x)=>x!==id),
+    }))
+    setConfirmarExclusao(null)
+  }
   return <div className="escola-secao">
     <div className="escola-heading">
       <div><span className="sobretitulo">MURAL DE CONTEÚDOS</span><h2>O que os professores postaram?</h2>
-        <p>Um feed escolar organizado por matéria, inspirado no jeito simples de acompanhar as novidades</p></div>
+        <p>Um feed de exemplo pra acompanhar conteúdos e avisos por matéria. Nenhuma publicação é oficial.</p></div>
       <RotuloDemo>publicações fictícias</RotuloDemo>
     </div>
+    <div className="mural-demo-controle">
+      <div><strong>Área de demonstração do professor</strong>
+        <p>Mostre na apresentação como seria publicar conteúdo. Este botão não libera acesso de professor real.</p></div>
+      <button type="button" aria-expanded={simulador} onClick={()=>setSimulador((valor)=>!valor)}>
+        {simulador?'Fechar simulador':'Simular publicação'} <ArrowRight size={16}/>
+      </button>
+    </div>
+    {simulador && <MuralDemo criar={criarLocal} quantidade={estado.postsDemo.length}/>}
+    <div className="mural-filtros" aria-label="Filtros do feed">
+      <div><label htmlFor="mural-filtrar">Matéria</label>
+        <select id="mural-filtrar" value={materia} onChange={(e)=>setMateria(e.target.value as 'Todas'|Materia)}>
+          <option value="Todas">Todas as matérias</option>
+          {disciplinas.map((nome)=><option key={nome}>{nome}</option>)}</select></div>
+      <button type="button" className={somenteNaoLidos?'ativo':''} aria-pressed={somenteNaoLidos}
+        onClick={()=>setSomenteNaoLidos((valor)=>!valor)}>
+        <CheckCheck size={18}/> Só não lidos ({naoLidos})
+      </button>
+    </div>
+    <p className="mural-contagem" role="status">
+      {visiveis.length} {visiveis.length===1?'post encontrado':'posts encontrados'} · {naoLidos} não lidos
+    </p>
     <div className="escola-feed">
-      {publicacoes.map((post) => {
-        const curtiu = estado.curtidos.includes(post.id)
-        const leu = estado.lidos.includes(post.id)
+      {visiveis.length===0 && <div className="mural-vazio"><Newspaper size={28}/>
+        <h3>Nenhuma publicação neste filtro</h3>
+        <p>Experimente mudar a matéria ou mostrar os recados lidos também.</p></div>}
+      {visiveis.map((post)=>{
+        const curtiu=estado.curtidos.includes(post.id)
+        const leu=estado.lidos.includes(post.id)
         return <article className="escola-post" key={post.id}>
           <header className="escola-post-cabecalho">
             <span className="escola-avatar">{post.iniciais}</span>
-            <div><strong>{post.nome} <span>· perfil demonstrativo</span></strong><small>{post.disciplina} · {post.quando}</small></div>
-            {post.fixado && <span className="escola-fixado">FIXADO</span>}
+            <div><strong>{post.nome} <span>· perfil demonstrativo</span></strong>
+              <small>{post.disciplina} · {post.quando}</small></div>
+            {post.local ? <span className="mural-local-tag">LOCAL</span>
+              : post.fixado && <span className="escola-fixado">FIXADO</span>}
           </header>
           <div className="escola-post-conteudo"><h3>{post.titulo}</h3><p>{post.texto}</p></div>
           <div className="escola-post-acoes">
-            <button type="button" aria-pressed={curtiu} className={curtiu ? 'ativo':''} onClick={() =>
-              atualizar((anterior) => ({...anterior,curtidos:curtiu ?
-                anterior.curtidos.filter((id)=>id!==post.id) : [...anterior.curtidos,post.id]}))}>
-              <Heart size={18} fill={curtiu ? 'currentColor':'none'}/> {curtiu ? 'Gostei' : 'Curtir'}
+            <button type="button" aria-pressed={curtiu} className={curtiu?'ativo':''}
+              onClick={()=>atualizar((anterior)=>({...anterior,curtidos:curtiu?
+                anterior.curtidos.filter((id)=>id!==post.id):[...anterior.curtidos,post.id]}))}>
+              <Heart size={18} fill={curtiu?'currentColor':'none'}/> {curtiu?'Gostei':'Curtir'}
             </button>
-            <button type="button" aria-pressed={leu} onClick={() => atualizar((atual) =>
-              ({...atual,lidos:leu ? atual.lidos.filter((id)=>id!==post.id) : [...atual.lidos,post.id]}))}>
-              <CheckCheck size={18}/> {leu ? 'Lido' : 'Marcar lido'}
+            <button type="button" aria-pressed={leu} onClick={()=>atualizar((atual)=>({
+              ...atual,lidos:leu?atual.lidos.filter((id)=>id!==post.id):[...atual.lidos,post.id]}))}>
+              <CheckCheck size={18}/> {leu?'Lido':'Marcar lido'}
             </button>
-            {post.materialId && <button className="escola-abrir" type="button" onClick={() => abrirMaterial(post.materialId!)}>
+            {post.materialId && <button type="button" className="escola-abrir"
+              onClick={()=>abrirMaterial(post.materialId!)}>
               Ver material <ArrowRight size={17}/></button>}
+            {post.local && <button type="button" onClick={()=>setConfirmarExclusao(confirmarExclusao===post.id?null:post.id)}
+              aria-label={`Excluir postagem de demonstração: ${post.titulo}`}>Excluir demo</button>}
           </div>
+          {confirmarExclusao===post.id && <div className="mural-excluir-confirmar">
+            <span>Excluir essa publicação só deste navegador?</span>
+            <button type="button" onClick={()=>excluirLocal(post.id)}>Excluir</button>
+            <button type="button" onClick={()=>setConfirmarExclusao(null)}>Cancelar</button>
+          </div>}
         </article>
       })}
     </div>

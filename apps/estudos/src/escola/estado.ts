@@ -1,4 +1,5 @@
 import { publicacoes } from './dados.ts'
+import { validarPostsDemo, type PostDemo } from './mural.ts'
 
 export type Tema = 'claro' | 'escuro'
 export type Previsao = { data: string; valor: 'vou' | 'talvez' | 'nao' }
@@ -10,10 +11,11 @@ export type EstadoEscola = {
   lidos: string[]
   curtidos: string[]
   feedback: MensagemFeedback[]
+  postsDemo: PostDemo[]
 }
 export const CHAVE_ESCOLA = 'extensao:estudos:escola-demo:v1'
 export function estadoInicialEscola(): EstadoEscola {
-  return {tema:'claro',diasEstudo:[],previsao:null,lidos:[],curtidos:[],feedback:[]}
+  return {tema:'claro',diasEstudo:[],previsao:null,lidos:[],curtidos:[],feedback:[],postsDemo:[]}
 }
 type Leitura = {getItem:(key:string)=>string|null}
 type Escrita = {setItem:(key:string,valor:string)=>void}
@@ -32,7 +34,9 @@ export function carregarEscola(store?: Leitura | null): EstadoEscola {
     const bruto = dados as Record<string,unknown>
     const lista = (valor:unknown, validar:(v:unknown)=>v is string) =>
       Array.isArray(valor) ? [...new Set(valor.slice(0,400).filter(validar))] : []
-    const postValido = (id:unknown):id is string => typeof id === 'string' && idsPosts.has(id)
+    const postsDemo = validarPostsDemo(bruto.postsDemo)
+    const idsPermitidos = new Set([...idsPosts,...postsDemo.map((post)=>post.id)])
+    const postValido = (id:unknown):id is string => typeof id === 'string' && idsPermitidos.has(id)
     const previsaoBruta = bruto.previsao
     let previsao: Previsao | null = null
     if (previsaoBruta && typeof previsaoBruta === 'object') {
@@ -59,6 +63,7 @@ export function carregarEscola(store?: Leitura | null): EstadoEscola {
       lidos:lista(bruto.lidos,postValido),
       curtidos:lista(bruto.curtidos,postValido),
       feedback,
+      postsDemo,
     }
   } catch { return novo }
 }
