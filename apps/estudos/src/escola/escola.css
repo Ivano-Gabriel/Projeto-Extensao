@@ -229,3 +229,52 @@ html[data-tema="escuro"] .escola-demo { color:#f4d784; }
 @media(prefers-reduced-motion:reduce) {
   .escola-progresso > span { transition:none; }
 }
+
+/* Simulador de publicação: não oferece autorização docente real. */
+.mural-demo-controle { display:flex; flex-wrap:wrap; gap:.7rem; align-items:center; justify-content:space-between;
+  padding:1.1rem; border:1px solid var(--line); border-radius:1rem; background:var(--blue-soft); }
+.mural-demo-controle > div { flex:1 1 230px; }
+.mural-demo-controle strong { font:850 1.03rem var(--font-display); }
+.mural-demo-controle p { margin:.3rem 0 0; font-size:.78rem; line-height:1.6; color:var(--muted); }
+.mural-demo-controle button { display:inline-flex; align-items:center; gap:.35rem; min-height:3rem; border:1px solid var(--line-strong);
+  background:var(--sheet); color:var(--blue-dark); border-radius:.7rem; font-size:.79rem; font-weight:900; padding:.6rem .8rem; }
+.mural-simulador { display:grid; gap:.85rem; padding:1.2rem; background:var(--sheet); border:1px solid var(--line); border-radius:1rem; }
+.mural-simulador-cabecalho { display:flex; align-items:center; gap:.7rem; }
+.mural-simulador-icone { display:grid; place-items:center; width:2.7rem; height:2.7rem; background:var(--mint-soft); color:#17694d; border-radius:.75rem; flex:0 0 2.7rem; }
+.mural-simulador-cabecalho h3 { font:850 1.15rem var(--font-display); margin:.2rem 0 0; }
+.mural-alerta { display:flex; align-items:start; gap:.5rem; padding:.8rem; color:var(--muted);
+  font-size:.8rem; line-height:1.65; border:1px solid var(--line); background:var(--paper); border-radius:.8rem; }
+.mural-alerta svg { flex:0 0 auto; margin-top:.1rem; }
+.mural-form { display:grid; gap:.65rem; }
+.mural-form label, .mural-filtros label { font-size:.78rem; font-weight:900; }
+.mural-form input, .mural-form textarea, .mural-form select, .mural-filtros select {
+  width:100%; min-height:3rem; padding:.7rem .85rem; border:1px solid var(--line-strong);
+  border-radius:.7rem; color:var(--ink); background:var(--sheet); font:inherit; font-size:.83rem; }
+.mural-form textarea { min-height:7rem; resize:vertical; line-height:1.6; }
+.mural-form-campos { display:grid; gap:.65rem; grid-template-columns:repeat(2,minmax(0,1fr)); }
+.mural-form-campos > div { display:grid; gap:.5rem; min-width:0; }
+.mural-form-acoes { display:flex; gap:.5rem; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+.mural-form-acoes small { display:inline-flex; align-items:center; gap:.3rem; color:var(--muted); font-size:.75rem; }
+.mural-erro, .mural-sucesso { padding:.8rem; margin:0; border-radius:.7rem; font-size:.82rem; line-height:1.5; }
+.mural-erro { color:#9c312b; background:#fff0ed; }
+.mural-sucesso { display:flex; align-items:center; gap:.4rem; background:var(--mint-soft); color:#126b4b; }
+.mural-filtros { display:flex; justify-content:space-between; align-items:end; flex-wrap:wrap; gap:.75rem; }
+.mural-filtros > div { display:grid; flex:1 1 170px; gap:.4rem; max-width:300px; }
+.mural-filtros > button { display:inline-flex; justify-content:center; align-items:center; gap:.45rem; min-height:3rem; border:1px solid var(--line);
+  padding:.6rem .75rem; font-size:.8rem; font-weight:900; background:var(--sheet); border-radius:.7rem; }
+.mural-filtros > button.ativo { color:white; background:var(--blue); border-color:var(--blue); }
+.mural-contagem { color:var(--muted); font-size:.75rem; margin:0; }
+.mural-local-tag { margin-left:auto; color:#175a45; background:var(--mint-soft); padding:.25rem .4rem; border-radius:.4rem; font-size:.59rem; font-weight:900; }
+.mural-vazio { display:grid; justify-items:center; gap:.5rem; padding:2rem 1rem; text-align:center; background:var(--sheet); border:1px dashed var(--line-strong); border-radius:1rem; }
+.mural-vazio h3 { font:850 1.05rem var(--font-display); margin:0; }
+.mural-vazio p { color:var(--muted); margin:0; font-size:.8rem; line-height:1.6; }
+.mural-excluir-confirmar { display:flex; flex-wrap:wrap; align-items:center; gap:.6rem; padding:.75rem; background:var(--yellow-soft); }
+.mural-excluir-confirmar span { flex:1 1 180px; font-size:.77rem; font-weight:850; }
+.mural-excluir-confirmar button { min-height:2.8rem; border:1px solid var(--line); background:var(--sheet); color:var(--ink); border-radius:.55rem; padding:.5rem .7rem; font-size:.76rem; font-weight:800; }
+.mural-excluir-confirmar button:first-of-type { border-color:#ba5f51; color:#a93627; }
+.mural-form :focus-visible, .mural-filtros :focus-visible { outline:3px solid var(--blue); outline-offset:2px; }
+html[data-tema="escuro"] .mural-demo-controle { background:var(--blue-soft); }
+html[data-tema="escuro"] .mural-simulador, html[data-tema="escuro"] .mural-vazio { background:var(--sheet); }
+html[data-tema="escuro"] .mural-alerta { background:var(--paper); }
+html[data-tema="escuro"] .mural-local-tag { color:#a5e8cd; }
+@media(max-width:390px) { .mural-form-campos { grid-template-columns:1fr; } }
