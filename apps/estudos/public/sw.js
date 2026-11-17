@@ -1,4 +1,3 @@
-/* Acesso offline somente ao prototipo de Estudos. Nenhuma chamada de API, dado privado ou origem externa. */
 const PREFIX = 'extensao-estudos-'
 const CACHE = PREFIX + 'v1'
 
@@ -41,7 +40,6 @@ self.addEventListener('fetch',(evento)=>{
   const destino = new URL(pedido.url)
   if (pedido.method !== 'GET' || destino.origin !== self.location.origin ||
     !destino.href.startsWith(self.registration.scope)) return
-  // Nao cachear API, autenticacao, requisicoes externas ou recursos personalizados.
   const recursoEstatico = /\.(?:js|css|svg|png|webp|ico|woff2?)$/i.test(destino.pathname)
   if (pedido.mode !== 'navigate' && !recursoEstatico) return
   if (pedido.mode === 'navigate') {

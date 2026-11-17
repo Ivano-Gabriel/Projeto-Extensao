@@ -46,7 +46,6 @@ public class SecurityConfig {
 
     @Bean
     CsrfTokenRepository csrfTokenRepository(@Value("${app.security.secure-cookies:true}") boolean seguro) {
-        // O front recebe o token pelo endpoint /api/csrf; nao precisa ler o cookie via JavaScript.
         CookieCsrfTokenRepository repo = new CookieCsrfTokenRepository();
         repo.setCookieCustomizer(cookie -> cookie.sameSite("Lax").secure(seguro).path("/"));
         return repo;

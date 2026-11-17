@@ -10,7 +10,6 @@ export type Publicacao = {
 
 export const disciplinas: Materia[] = ['Matemática', 'Português', 'Física', 'História']
 
-// Valores demonstrativos, sem qualquer vinculo com escola ou estudante real.
 export const notasDemo: Nota[] = [
   {materia:'Matemática',bimestres:[7.5,8.2,6.8,null]},
   {materia:'Português',bimestres:[8.5,9.0,8.0,null]},
@@ -40,7 +39,6 @@ export const publicacoes: Publicacao[] = [
 export function gerarFrequenciaDemo(hoje = new Date()): Aula[] {
   const aulas: Aula[] = []
   const inicio = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())
-  // O painel anual cobre o ano letivo demonstrativo do inicio do ano ate hoje.
   const primeiroDia = new Date(inicio.getFullYear(), 0, 1)
   const diasNoAno = Math.round((inicio.getTime() - primeiroDia.getTime()) / 86400000)
   for (let atraso = diasNoAno; atraso >= 0; atraso--) {

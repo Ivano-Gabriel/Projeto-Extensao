@@ -43,7 +43,6 @@ public class UsuariosController {
     public ResponseEntity<UsuarioPublico> consultarAluno(@PathVariable Long id, Authentication autenticacao) {
         boolean direcao = autenticacao.getAuthorities().stream()
             .anyMatch(role -> role.getAuthority().equals("ROLE_DIRECAO"));
-        // Primeiro autoriza o acesso, antes da busca por ID, para nao revelar a existencia de outras contas.
         if (!direcao) {
             Usuario proprio = usuarios.findByEmail(autenticacao.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
@@ -54,8 +53,6 @@ public class UsuariosController {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(UsuarioPublico.de(usuario));
     }
 
-    // Professor nao tem acesso automatico aos dados de todos os alunos.
-    // Vinculos com turmas e materias serao implementados em etapa separada.
     @GetMapping("/professor/area")
     public ResponseEntity<java.util.Map<String, String>> professor() {
         return ResponseEntity.ok(java.util.Map.of("area", "PROFESSOR"));

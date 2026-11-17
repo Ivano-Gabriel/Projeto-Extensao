@@ -1,4 +1,3 @@
-/* Proposta 3 — extensoes propostas pelos estudantes. Escopo apenas do app Estudos. */
 .navegacao-itens { grid-template-columns: repeat(5,minmax(0,1fr)); }
 .navegacao-itens button { font-size: .63rem; }
 .escola-header-controles { display:flex; align-items:center; gap:.55rem; }
@@ -136,7 +135,6 @@
 .escola-feedback-lista article p { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.55; font-size:.85rem; }
 .escola-feedback-lista article button { min-height:3rem; font-size:.78rem; }
 
-/* Tema noturno nao altera a identidade das outras propostas. */
 html[data-tema="escuro"] {
   color-scheme:dark;
   --paper:#111a2b; --sheet:#1c2940; --ink:#f0f4ff;
@@ -230,7 +228,6 @@ html[data-tema="escuro"] .escola-demo { color:#f4d784; }
   .escola-progresso > span { transition:none; }
 }
 
-/* Simulador de publicação: não oferece autorização docente real. */
 .mural-demo-controle { display:flex; flex-wrap:wrap; gap:.7rem; align-items:center; justify-content:space-between;
   padding:1.1rem; border:1px solid var(--line); border-radius:1rem; background:var(--blue-soft); }
 .mural-demo-controle > div { flex:1 1 230px; }

@@ -31,8 +31,6 @@ export function resumirFrequencia(aulas: readonly Aula[], materia?: string): Res
   }
 }
 
-// Quantas aulas inteiramente faltadas caberiam ANTES de cair abaixo da meta,
-// considerando que nenhuma outra aula seria frequentada nesse intervalo.
 export function faltasAteMeta(presencas: number, aulas: number, meta = 80): number {
   if (aulas <= 0 || meta <= 0 || meta > 100 || presencas < 0 || presencas > aulas) return 0
   return Math.max(0, Math.floor(((presencas * 100) - (meta * aulas)) / meta))
@@ -50,7 +48,6 @@ export function mediaNotas(notas: readonly (number | null)[]): number | null {
   return Math.round((disponiveis.reduce((soma, nota) => soma + nota, 0) / disponiveis.length) * 10) / 10
 }
 
-// A sequencia e voluntaria, iniciada somente quando aluno marca material ou responde quiz.
 export function diasConsecutivosEstudados(dias: readonly string[], agora = new Date()): number {
   const conhecidos = new Set(dias)
   const hoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())

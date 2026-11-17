@@ -17,8 +17,6 @@ export const materias: Array<'Todas' | Materia> = [
   'Todas', 'Matemática', 'Português', 'Física', 'História',
 ]
 
-// Conteudo original e resumido, apenas para demonstrar o prototipo.
-// Nao representa material revisado pelos professores da escola.
 export const materiais: Material[] = [
   {
     id: 'funcao-quadratica', materia: 'Matemática', titulo: 'Funções do 2º grau',

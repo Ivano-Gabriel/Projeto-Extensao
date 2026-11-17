@@ -61,8 +61,6 @@ public class AuthController {
         this.limite = limite;
     }
 
-    // Token legivel pelo navegador apenas para enviar no header X-XSRF-TOKEN.
-    // A sessao de login e separada, em cookie HttpOnly.
     @GetMapping("/csrf")
     public ResponseEntity<Map<String, String>> csrfToken(HttpServletRequest request) {
         CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
@@ -85,14 +83,13 @@ public class AuthController {
         }
         limite.registrarSucesso(email, ip);
 
-        // Evita session fixation e grava a autenticacao na sessao JDBC.
         request.getSession(true);
         request.changeSessionId();
         SecurityContext contextoAtual = SecurityContextHolder.createEmptyContext();
         contextoAtual.setAuthentication(autenticacao);
         SecurityContextHolder.setContext(contextoAtual);
         contexto.saveContext(contextoAtual, request, response);
-        csrf.saveToken(null, request, response); // girar o CSRF: buscar outro em GET /api/csrf
+        csrf.saveToken(null, request, response);
 
         Usuario usuario = usuarios.findByEmail(email)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));

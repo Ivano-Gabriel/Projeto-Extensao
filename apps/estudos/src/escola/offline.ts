@@ -1,4 +1,3 @@
-// So funciona no app publicado/preview, onde o service worker foi registrado.
 export async function baixarAplicativo(): Promise<void> {
   if (!('serviceWorker' in navigator)) throw new Error('Navegador sem Service Worker')
   const registro = await navigator.serviceWorker.ready
