@@ -4,6 +4,8 @@ O protótipo 3 foi escolhido na apresentação escolar. Esta branch implementa a
 
 ## O que já funciona no protótipo
 
+- **Plano semanal pessoal:** criar tarefas com matéria, data e material opcional; filtrar pendentes/concluídas, marcar feitas, reabrir e excluir. Limite de 50 tarefas no próprio dispositivo; sem envio para a escola ou cobrança escolar.
+
 - Resumos por matéria, leitura, busca, marcação como revisado e quiz com explicações
 - **Escola > Frequência**: semana, mês e ano; total ponderado pelas aulas/horas; detalhe por matéria; avisos de proximidade da referência de 80%
 - **Escola > Notas**: boletim de exemplo com médias parciais (não é boletim real)
@@ -51,6 +53,8 @@ Para usar dados reais, será preciso definir os papéis (aluno, professor, dire�
 
 ## Código
 
+- `src/plano/regras.ts` + `src/plano/Plano.tsx`: tarefas pessoais, validação, filtros, status e interface mobile
+- `tests/plano.test.mjs`: 7 casos sobre persistência, limites, datas, exclusão e cálculo de prioridades
 - `src/escola/dados.ts`: exemplos de presença, boletim e posts
 - `src/escola/regras.ts`: cálculo de frequência, indicadores, notas e sequência
 - `src/escola/estado.ts`: validação e persistência local
