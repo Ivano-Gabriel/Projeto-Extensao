@@ -8,10 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * Limite de tentativas por conta e IP, com memoria limitada.
- * Para varias instancias, substituir por controle distribuido no gateway/Redis.
- */
 @Component
 public class LoginRateLimiter {
     private final Cache<String, AtomicInteger> falhas = Caffeine.newBuilder()

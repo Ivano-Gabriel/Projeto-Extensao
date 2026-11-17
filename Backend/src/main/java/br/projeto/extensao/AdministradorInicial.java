@@ -6,10 +6,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-/**
- * Cria a primeira conta da direcao APENAS com variaveis de ambiente explicitas
- * e banco sem usuarios. Remover as variaveis apos o primeiro bootstrap.
- */
 @Component
 public class AdministradorInicial implements CommandLineRunner {
     private final UsuarioRepository usuarios;
