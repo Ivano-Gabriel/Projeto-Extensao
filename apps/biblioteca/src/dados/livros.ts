@@ -14,8 +14,6 @@ export type Livro = {
   destaque?: boolean
 }
 
-// Acervo ficticio para votacao dos alunos: titulos conhecidos, estoque inventado.
-// Nenhum registro aqui representa o inventario real da escola.
 export const livros: Livro[] = [
   {
     id: 'dom-casmurro', titulo: 'Dom Casmurro', autor: 'Machado de Assis',
