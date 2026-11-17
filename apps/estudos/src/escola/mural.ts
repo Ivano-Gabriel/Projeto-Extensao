@@ -52,7 +52,6 @@ export function validarPostsDemo(entrada: unknown): PostDemo[] {
     const dados=item as Record<string,unknown>
     if(!idValido(dados.id)||ids.has(dados.id)) continue
     try {
-      // Nenhum objeto externo é preservado diretamente.
       const valido=criarPostDemo({
         titulo:dados.titulo as string,texto:dados.texto as string,
         materia:dados.materia as Materia,criadoEm:dados.criadoEm as string,
