@@ -24,7 +24,7 @@ test('limita a 15 posts, nao permite ids duplicados e remove sem mutacao',()=>{
   for(let i=0;i<MAX_POSTS_DEMO;i++) posts=adicionarPostDemo(posts,entrada,'demo-'+i)
   assert.equal(posts.length,15)
   assert.throws(()=>adicionarPostDemo(posts,entrada,'demo-16'))
-  assert.throws(()=>adicionarPostDemo(posts.slice(0,1),entrada,'demo-0'))
+  assert.throws(()=>adicionarPostDemo(posts.slice(-1),entrada,'demo-0'))
   const menores=removerPostDemo(posts,'demo-0')
   assert.equal(menores.length,14)
   assert.equal(posts.length,15)
