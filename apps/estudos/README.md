@@ -7,7 +7,7 @@ O protótipo 3 foi escolhido na apresentação escolar. Esta branch implementa a
 - Resumos por matéria, leitura, busca, marcação como revisado e quiz com explicações
 - **Escola > Frequência**: semana, mês e ano; total ponderado pelas aulas/horas; detalhe por matéria; avisos de proximidade da referência de 80%
 - **Escola > Notas**: boletim de exemplo com médias parciais (não é boletim real)
-- **Escola > Feed**: publicações fictícias de professores, curtir, marcar como lido e acessar o material correspondente
+- **Escola > Feed**: publicações fictícias de professores, curtir, marcar lido e abrir o material; filtros por disciplina e não lidos. O botão "Simular publicação" cria até 15 posts de demonstração apenas neste navegador. Não representa autenticação nem publicação real de professores.
 - **Escola > Frequência**: intenção de comparecimento no próximo dia da semana (vou/talvez/não vou), *não é presença oficial*
 - **Escola > Feedback**: rascunhos locais que o aluno pode copiar para enviar manualmente à equipe; o app **não transmite** as mensagens
 - **Foguinho**: sequência de dias em que o estudante realmente marcou uma revisão ou respondeu quiz; não substitui a frequência
@@ -43,7 +43,7 @@ Abra a URL do preview online, entre na aba **Escola**, clique em **Guardar para 
 - A referência de 80% é informativa; a elegibilidade do Pé-de-Meia, a frequência oficial e os pagamentos dependem das regras e dos dados validados pelo poder público
 - Alertas **por matéria** são educativos, não equivalem ao cálculo oficial do Pé-de-Meia
 - Previsão de comparecimento não equivale a uma presença, falta justificada ou comprovante
-- Feedback é salvo apenas no dispositivo, não enviado à equipe; evitar nomes, CPF, endereço ou informações pessoais
+- Feedback e posts demonstrativos são salvos apenas no dispositivo, não enviados à equipe nem a outros alunos. Evitar nomes, CPF, endereço ou informações pessoais
 - Notas não determinam situação de aprovação/reprovação
 - O dia letivo previsto ignora apenas fins de semana, não tem calendário de feriados ou interrupções da escola
 
@@ -51,6 +51,9 @@ Para usar dados reais, será preciso definir os papéis (aluno, professor, dire�
 
 ## Código
 
+- `src/escola/mural.ts`: validação de posts locais de demonstração
+- `src/escola/MuralDemo.tsx`: formulário de simulação de publicações sem autenticação
+- `tests/mural.test.mjs`: regras, limites, privacidade local e recuperação de estado
 - `src/escola/dados.ts`: exemplos de presença, boletim e posts
 - `src/escola/regras.ts`: cálculo de frequência, indicadores, notas e sequência
 - `src/escola/estado.ts`: validação e persistência local
