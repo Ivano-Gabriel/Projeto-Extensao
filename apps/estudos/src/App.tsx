@@ -12,8 +12,10 @@ import { carregarEstado, salvarEstado, type EstadoEstudos } from './logica/persi
 import Escola from './escola/Escola'
 import { carregarEscola, salvarEscola } from './escola/estado'
 import { diasConsecutivosEstudados, formatarDataLocal } from './escola/regras'
+import Plano from './plano/Plano'
+import { adicionarTarefa, alternarTarefa, carregarPlano, removerTarefa, resumoPlano, salvarPlano, type NovaTarefa } from './plano/regras'
 
-type Tela = 'inicio' | 'materiais' | 'revisao' | 'escola' | 'progresso'
+type Tela = 'inicio' | 'materiais' | 'revisao' | 'escola' | 'progresso' | 'plano'
 type FiltroMateria = 'Todas' | Materia
 const menu = [
   { id: 'inicio', nome: 'Início', Icone: Home },
@@ -84,7 +86,8 @@ function CartaoMaterial({ material, revisado, onAbrir }: {
   )
 }
 
-function Inicio({ estado, sequencia, abrirMaterial, escolherMateria, irMateriais, irRevisao, irProgresso, irEscola }: {
+function Inicio({ estado, sequencia, pendentesPlano, abrirMaterial, escolherMateria, irMateriais, irRevisao, irProgresso, irEscola, irPlano }: {
+  pendentesPlano: number
   sequencia: number
   estado: EstadoEstudos
   abrirMaterial: (material: Material) => void
@@ -93,6 +96,7 @@ function Inicio({ estado, sequencia, abrirMaterial, escolherMateria, irMateriais
   irRevisao: () => void
   irProgresso: () => void
   irEscola: () => void
+  irPlano: () => void
 }) {
   const resumo = resumoEstudos(materiais, estado.revisados, estado.respostas)
   const desempenho = resumirRespostas(questoes, estado.respostas)
@@ -123,6 +127,15 @@ function Inicio({ estado, sequencia, abrirMaterial, escolherMateria, irMateriais
         <span><strong>Protótipo demonstrativo.</strong> Os resumos e as questões são exemplos, não materiais oficiais da escola</span>
       </div>
 
+      <section className="plano-chamada-inicio" aria-label="Seu plano de estudos">
+        <div><span className="sobretitulo">ORGANIZE SEU ESTUDO</span>
+          <h2>Um plano pra revisar sem correria</h2>
+          <p>{pendentesPlano > 0 ? `Você tem ${pendentesPlano} ${pendentesPlano === 1 ? 'tarefa pendente' : 'tarefas pendentes'} no seu plano.` :
+            'Crie tarefas por matéria, escolha datas e acompanhe suas conquistas.'}</p></div>
+        <button type="button" className="botao-principal" onClick={irPlano}>
+          {pendentesPlano > 0 ? 'Abrir meu plano' : 'Criar meu plano'} <ArrowRight size={18}/>
+        </button>
+      </section>
       <section className="escola-chamada-inicio" aria-label="Novidades propostas pelos alunos">
         <div className="escola-chamada-icon"><School size={25}/></div>
         <div><span className="sobretitulo">VOCÊS PEDIRAM, A GENTE OUVIU</span>
@@ -349,11 +362,13 @@ function QuizPagina({ estado, indice, setIndice, responder, irMateriais, reinici
   )
 }
 
-function Progresso({ estado, irMateriais, irRevisao, limparProgresso }: {
+function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, limparProgresso }: {
+  pendentesPlano: number
   estado: EstadoEstudos
   irMateriais: () => void
   irRevisao: () => void
   limparProgresso: () => void
+  irPlano: () => void
 }) {
   const [confirmarLimpeza, setConfirmarLimpeza] = useState(false)
   const resumo = resumoEstudos(materiais, estado.revisados, estado.respostas)
@@ -395,6 +410,11 @@ function Progresso({ estado, irMateriais, irRevisao, limparProgresso }: {
           )
         })}
       </section>
+      <section className="plano-progresso-atalho">
+        <h2>Seu plano semanal</h2>
+        <p>{pendentesPlano ? `${pendentesPlano} ${pendentesPlano === 1 ? 'tarefa pendente' : 'tarefas pendentes'} para organizar.` : 'Monte um plano de estudos por matéria.'}</p>
+        <button type="button" className="botao-principal" onClick={irPlano}>Abrir plano <ArrowRight size={17}/></button>
+      </section>
       <section className="limpar-progresso" aria-label="Reiniciar a demonstração">
         <h2>Quer começar do zero?</h2>
         <p>Isso apaga só as marcações e respostas desta simulação neste navegador</p>
@@ -418,11 +438,13 @@ export default function App() {
   const [indiceQuiz, setIndiceQuiz] = useState(0)
   const [estado, setEstado] = useState<EstadoEstudos>(() => carregarEstado(armazenamento(), materiais, questoes))
   const [escola, setEscola] = useState(() => carregarEscola(armazenamento()))
+  const [plano, setPlano] = useState(() => carregarPlano(armazenamento()))
   const [aviso, setAviso] = useState('')
   const materialAtual = materialAberto ? materiais.find((item) => item.id === materialAberto) : undefined
 
   useEffect(() => { salvarEstado(armazenamento(), estado) }, [estado])
   useEffect(() => { salvarEscola(armazenamento(), escola) }, [escola])
+  useEffect(() => { salvarPlano(armazenamento(), plano) }, [plano])
   useEffect(() => {
     document.documentElement.dataset.tema = escola.tema
     return () => { delete document.documentElement.dataset.tema }
@@ -467,6 +489,17 @@ export default function App() {
     registrarEstudo()
     setEstado((atual) => ({ ...atual, respostas: responderQuestao(atual.respostas, questao, opcao) }))
   }
+  const incluirTarefa = (tarefa: NovaTarefa) => {
+    const id = `t-${crypto.randomUUID()}`
+    const proximo = adicionarTarefa(plano, tarefa, id)
+    setPlano(proximo)
+  }
+  const concluirTarefa = (id: string) => {
+    if (plano.some((t) => t.id === id && !t.feito)) registrarEstudo()
+    setPlano((atual) => alternarTarefa(atual, id))
+  }
+  const excluirTarefa = (id: string) => setPlano((atual) => removerTarefa(atual, id))
+
   const reiniciarQuiz = () => { setEstado((atual) => ({ ...atual, respostas: [] })); setIndiceQuiz(0); setAviso('Quiz reiniciado! Bora tentar novamente') }
 
   return (
@@ -503,6 +536,7 @@ export default function App() {
           ) : (
             <>
               {tela === 'inicio' && <Inicio estado={estado} sequencia={diasConsecutivosEstudados(escola.diasEstudo)}
+                pendentesPlano={resumoPlano(plano).pendentes} irPlano={() => navegar('plano')}
                 irEscola={() => navegar('escola')} abrirMaterial={abrirMaterial}
                 escolherMateria={escolherMateria} irMateriais={() => navegar('materiais')}
                 irRevisao={() => navegar('revisao')} irProgresso={() => navegar('progresso')}/>}
@@ -511,7 +545,10 @@ export default function App() {
               {tela === 'revisao' && <QuizPagina estado={estado} indice={indiceQuiz} setIndice={setIndiceQuiz}
                 responder={responder} irMateriais={() => navegar('materiais')} reiniciar={reiniciarQuiz}/>}
               {tela === 'escola' && <Escola estado={escola} atualizar={setEscola} abrirMaterial={abrirPorId}/>}
-              {tela === 'progresso' && <Progresso estado={estado} irMateriais={() => navegar('materiais')}
+              {tela === 'plano' && <Plano tarefas={plano} adicionar={incluirTarefa} alternar={concluirTarefa}
+                remover={excluirTarefa} abrirMaterial={abrirPorId} voltar={() => navegar('inicio')}/>}
+              {tela === 'progresso' && <Progresso estado={estado} pendentesPlano={resumoPlano(plano).pendentes}
+                irPlano={() => navegar('plano')} irMateriais={() => navegar('materiais')}
                 irRevisao={() => navegar('revisao')}
                 limparProgresso={() => {setEstado({ revisados: [], respostas: [] }); setAviso('Demonstração reiniciada')}} />}
             </>
