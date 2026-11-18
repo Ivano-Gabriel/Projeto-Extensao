@@ -1,0 +1,29 @@
+.atividade-quiz { display:grid; gap:1rem; padding:clamp(.85rem,2vw,1.2rem); border-top:1px solid var(--line); background:var(--sheet); }
+.atividade-cabecalho { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.5rem; }
+.atividade-cabecalho>span { display:inline-flex; gap:.4rem; align-items:center; color:var(--blue-dark); font-size:.69rem; font-weight:900; letter-spacing:.05em; }
+.atividade-cabecalho small { font-size:.61rem; color:var(--muted); font-weight:900; }
+.atividade-quiz h4 { margin:0; font:900 clamp(1.05rem,3vw,1.32rem)/1.45 var(--font-display); }
+.atividade-respostas { display:grid; gap:.5rem; }
+.atividade-respostas button { display:flex; align-items:center; gap:.7rem; width:100%; min-height:3.3rem; padding:.75rem; border:1px solid var(--line-strong); border-radius:.8rem; text-align:left; color:var(--ink); background:var(--paper); font-size:.85rem; line-height:1.5; }
+.atividade-respostas button:focus-visible { outline:3px solid var(--blue); outline-offset:3px; }
+.atividade-respostas button:disabled { cursor:default; opacity:1; }
+.atividade-respostas button:not(:disabled):hover { border-color:var(--blue); transform:translateY(-1px); }
+.atividade-respostas button>span { display:grid; flex:0 0 2rem; height:2rem; place-items:center; border-radius:.55rem; background:var(--blue-soft); color:var(--blue-dark); font-weight:900; }
+.atividade-respostas button.correta { border-color:#33a67f; background:#e1f7ed; color:#12553b; }
+.atividade-respostas button.errada { border-color:#d48b80; background:#fff0ea; color:#82382b; }
+.atividade-explicacao { display:grid; gap:.6rem; padding:1rem; border:1px solid var(--line); border-radius:.85rem; background:var(--yellow-soft); }
+.atividade-explicacao.acertou { background:var(--mint-soft); }
+.atividade-explicacao strong { display:flex; align-items:center; gap:.4rem; font-size:.95rem; }
+.atividade-explicacao p { margin:0; line-height:1.6; font-size:.84rem; }
+.atividade-explicacao button { justify-self:start; }
+.atividade-rodape { color:var(--muted); font-size:.72rem; line-height:1.5; margin:0; }
+.atividade-form-gerar { display:grid; gap:.5rem; padding:.8rem; background:var(--blue-soft); border:1px solid var(--line); border-radius:.8rem; }
+.atividade-form-gerar>strong { font-size:.8rem; }
+.atividade-form-gerar p { margin:0; color:var(--muted); font-size:.74rem; line-height:1.55; }
+.atividade-form-gerar button { justify-self:start; min-height:3rem; padding:.55rem .75rem; border-radius:.6rem; border:1px solid var(--blue); color:var(--blue-dark); background:var(--sheet); font-weight:900; font-size:.8rem; }
+.escola-post-acoes button.atividade-abrir { color:var(--blue-dark); font-weight:900; }
+html[data-tema="escuro"] .atividade-quiz { background:var(--sheet); }
+html[data-tema="escuro"] .atividade-respostas button { background:var(--paper); }
+html[data-tema="escuro"] .atividade-respostas button.correta { background:#1c4d3a; color:#d5ffec; }
+html[data-tema="escuro"] .atividade-respostas button.errada { background:#603b39; color:#ffe0d6; }
+html[data-tema="escuro"] .atividade-form-gerar { background:var(--blue-soft); }
