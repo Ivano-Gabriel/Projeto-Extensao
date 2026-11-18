@@ -1,5 +1,5 @@
 const PREFIX = 'extensao-estudos-'
-const CACHE = PREFIX + 'v2'
+const CACHE = PREFIX + 'v3'
 
 async function guardarApp() {
   const cache = await caches.open(CACHE)
@@ -38,6 +38,7 @@ self.addEventListener('message',(evento)=>{
 self.addEventListener('fetch',(evento)=>{
   const pedido = evento.request
   const destino = new URL(pedido.url)
+  if (destino.pathname === '/api' || destino.pathname.startsWith('/api/')) return
   if (pedido.method !== 'GET' || destino.origin !== self.location.origin ||
     !destino.href.startsWith(self.registration.scope)) return
   const recursoEstatico = /\.(?:js|css|svg|webmanifest|png|webp|ico|woff2?)$/i.test(destino.pathname)

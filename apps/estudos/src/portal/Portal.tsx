@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { ArrowLeft, ArrowRight, BookOpenCheck, CheckCircle2, GraduationCap, LockKeyhole, LogOut, School, ShieldCheck, Users, UserRoundCog, Sparkles } from 'lucide-react'
 import { apiEscolar } from './api'
+import PortalLogin from './PortalLogin'
+import { areaDoUsuario } from './perfis'
 import type { AtividadeEscolar, EscolaResumo, TurmaEscolar, UsuarioEscolar, UsuarioResumido, ResultadoAtividade } from './api'
 import './portal.css'
 
@@ -16,35 +18,6 @@ function Aviso({estado}:{estado:Feedback}){return <>
 </>}
 function Cartao({titulo,children}:{titulo:string;children:ReactNode}){
   return <section className="portal-cartao"><h2>{titulo}</h2>{children}</section>
-}
-function Login({entrar}:{entrar:(p:UsuarioEscolar)=>void}){
-  const [email,setEmail]=useState(''),[senha,setSenha]=useState('')
-  const [enviando,setEnviando]=useState(false),[estado,setEstado]=useState<Feedback>({})
-  const enviar=async(e:FormEvent)=>{
-    e.preventDefault();setEstado({});setEnviando(true)
-    try{const pessoa=await apiEscolar.login(email.trim(),senha);setSenha('');entrar(pessoa)}
-    catch(err){setEstado({erro:falha(err)})}finally{setEnviando(false)}
-  }
-  return <div className="portal-login">
-    <div className="portal-login-cabecalho"><span className="portal-identidade"><LockKeyhole size={22}/></span>
-      <span className="sobretitulo">ACESSO ESCOLAR PROTEGIDO</span>
-      <h2>Entre na sua escola</h2>
-      <p>Uma conta, somente suas turmas e atividades.</p>
-    </div>
-    <form onSubmit={enviar} className="portal-form">
-      <label htmlFor="portal-email">E-mail institucional</label>
-      <input id="portal-email" type="email" autoComplete="username" value={email} required maxLength={254}
-        onChange={e=>setEmail(e.target.value)} placeholder="seu.email@escola.edu.br"/>
-      <label htmlFor="portal-senha">Senha</label>
-      <input id="portal-senha" type="password" autoComplete="current-password" required
-        value={senha} maxLength={200} onChange={e=>setSenha(e.target.value)}/>
-      <button className="botao-principal" type="submit" disabled={enviando}>
-        <LockKeyhole size={18}/>{enviando?'Verificando...':'Entrar no portal'}
-      </button>
-      <Aviso estado={estado}/>
-    </form>
-    <p className="portal-nota">Este login só funciona com a API escolar configurada. Não há modo de acesso fictício, cadastro aberto ou senhas de demonstração.</p>
-  </div>
 }
 function Aluno(){
   const [turmas,setTurmas]=useState<TurmaEscolar[]>([])
@@ -251,8 +224,8 @@ export default function Portal({voltar}:Props){
     try{await apiEscolar.logout();setUsuario(null)}
     catch(e){setErro(falha(e))}finally{setSaindo(false)}
   }
-  const admin=usuario?.administrador===true
-  const perfil=admin?'ADMINISTRADOR':usuario?.papel==='DIRECAO'?'DIREÇÃO':usuario?.papel==='PROFESSOR'?'PROFESSOR':'ALUNO'
+  const area=usuario?areaDoUsuario(usuario):null
+  const perfil=area==='ADMIN'?'ADMINISTRADOR':area==='DIRECAO'?'DIREÇÃO':area==='PROFESSOR'?'PROFESSOR':'ALUNO'
   return <div className="pagina portal-pagina">
     <button type="button" className="botao-voltar" onClick={voltar}><ArrowLeft size={17}/> Voltar ao Estudos</button>
     <header className="portal-hero">
@@ -266,10 +239,10 @@ export default function Portal({voltar}:Props){
     </header>
     {erro&&<p className="portal-feedback falha" role="alert">{erro}</p>}
     {carregando?<p className="portal-carregando">Verificando sua sessão...</p>:
-      !usuario?<Login entrar={u=>setUsuario(u)}/>:
-      admin?<Administrador/>:
-      usuario.papel==='DIRECAO'?<Direcao/>:
-      usuario.papel==='PROFESSOR'?<Professor/>:<Aluno/>}
+      !usuario?<PortalLogin entrar={u=>setUsuario(u)}/>:
+      area==='ADMIN'?<Administrador/>:
+      area==='DIRECAO'?<Direcao/>:
+      area==='PROFESSOR'?<Professor/>:<Aluno/>}
     <footer className="portal-rodape"><GraduationCap size={18}/> Portal institucional em implementação. Nunca use contas reais antes da homologação da escola.</footer>
   </div>
 }
