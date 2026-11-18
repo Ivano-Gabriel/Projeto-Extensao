@@ -13,16 +13,19 @@ public class AdministradorInicial implements CommandLineRunner {
     private final String email;
     private final String senha;
     private final String nome;
+    private final boolean administrador;
 
     public AdministradorInicial(UsuarioRepository usuarios, PasswordEncoder encoder,
           @Value("${app.bootstrap.email:}") String email,
           @Value("${app.bootstrap.password:}") String senha,
-          @Value("${app.bootstrap.name:Direcao}") String nome) {
+          @Value("${app.bootstrap.name:Direcao}") String nome,
+          @Value("${app.bootstrap.admin:false}") boolean administrador) {
         this.usuarios = usuarios;
         this.encoder = encoder;
         this.email = email;
         this.senha = senha;
         this.nome = nome;
+        this.administrador = administrador;
     }
 
     @Override
@@ -31,8 +34,13 @@ public class AdministradorInicial implements CommandLineRunner {
         if (email.isBlank() || senha.length() < 12 || nome.isBlank() || !email.contains("@")) {
             throw new IllegalStateException("Bootstrap de direcao incompleto ou inseguro.");
         }
+        if (administrador && senha.length() < 16) {
+            throw new IllegalStateException("A senha do administrador deve conter pelo menos 16 caracteres.");
+        }
         if (usuarios.count() == 0) {
-            usuarios.save(new Usuario(nome, email.toLowerCase(Locale.ROOT), encoder.encode(senha), Papel.DIRECAO));
+            Usuario primeiro = new Usuario(nome, email.toLowerCase(Locale.ROOT), encoder.encode(senha), Papel.DIRECAO);
+            if (administrador) primeiro.ativarAdministradorPlataforma();
+            usuarios.save(primeiro);
         }
     }
 }

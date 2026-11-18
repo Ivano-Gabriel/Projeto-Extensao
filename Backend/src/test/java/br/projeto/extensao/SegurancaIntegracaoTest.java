@@ -22,15 +22,36 @@ class SegurancaIntegracaoTest {
 
     @Autowired MockMvc mvc;
     @Autowired UsuarioRepository usuarios;
+    @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
     @Autowired PasswordEncoder encoder;
 
     private Long alunoId;
+    private Long escolaId;
 
     @BeforeEach
     void preparar() {
+        jdbc.update("DELETE FROM respostas_atividade");
+        jdbc.update("DELETE FROM questoes_atividade");
+        jdbc.update("DELETE FROM atividades");
+        jdbc.update("DELETE FROM vinculos_docentes");
+        jdbc.update("DELETE FROM matriculas");
+        jdbc.update("DELETE FROM turmas");
         usuarios.deleteAll();
-        alunoId = usuarios.save(new Usuario("Aluno Teste", "aluno.teste@escola.edu.br",
-                encoder.encode("TesteSeguro123!"), Papel.ALUNO)).getId();
+        jdbc.update("DELETE FROM escolas");
+        jdbc.update("INSERT INTO escolas(codigo,nome) VALUES ('escola-teste','Escola Teste')");
+        escolaId=jdbc.queryForObject("SELECT id FROM escolas WHERE codigo='escola-teste'",Long.class);
+        Usuario aluno=new Usuario("Aluno Teste","aluno.teste@escola.edu.br",
+            encoder.encode("TesteSeguro123!"),Papel.ALUNO);
+        aluno.vincularEscola(escolaId);
+        alunoId=usuarios.save(aluno).getId();
+        Usuario direcao=new Usuario("Direcao Teste","direcao@escola.edu.br",
+            encoder.encode("TesteSeguro123!"),Papel.DIRECAO);
+        direcao.vincularEscola(escolaId);
+        usuarios.save(direcao);
+        Usuario professor=new Usuario("Professor Teste","professor@escola.edu.br",
+            encoder.encode("TesteSeguro123!"),Papel.PROFESSOR);
+        professor.vincularEscola(escolaId);
+        usuarios.save(professor);
     }
 
     @Test

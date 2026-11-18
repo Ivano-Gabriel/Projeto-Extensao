@@ -71,7 +71,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/healthz", "/api/csrf").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/gestao/**").hasRole("DIRECAO")
+                .requestMatchers("/api/portal/**").hasAnyRole("ALUNO", "PROFESSOR", "DIRECAO")
                 .requestMatchers("/api/professor/**").hasAnyRole("PROFESSOR", "DIRECAO")
                 .anyRequest().authenticated())
             .exceptionHandling(config -> config.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
