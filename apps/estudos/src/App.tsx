@@ -15,11 +15,12 @@ import { apagarDadosDoEstudos } from './logica/privacidade'
 import { diasConsecutivosEstudados, formatarDataLocal } from './escola/regras'
 import Plano from './plano/Plano'
 import Jogo from './jogo/Jogo'
+import Portal from './portal/Portal'
 import DesafioDia from './desafio/DesafioDia'
 import { registrarRespostaDiaria, type RespostaDiaria } from './desafio/regras'
 import { adicionarTarefa, alternarTarefa, agendaDoDia, carregarPlano, reagendarTarefa, removerTarefa, resumoPlano, salvarPlano, type NovaTarefa, type TarefaPlano } from './plano/regras'
 
-type Tela = 'inicio' | 'materiais' | 'revisao' | 'escola' | 'progresso' | 'plano' | 'jogo'
+type Tela = 'inicio' | 'materiais' | 'revisao' | 'escola' | 'progresso' | 'plano' | 'jogo' | 'portal'
 type FiltroMateria = 'Todas' | Materia
 const menu = [
   { id: 'inicio', nome: 'Início', Icone: Home },
@@ -602,7 +603,11 @@ export default function App() {
               onClick={() => setEscola((atual) => ({...atual,tema:atual.tema === 'claro' ? 'escuro':'claro'}))}>
               {escola.tema === 'escuro' ? <Sun size={20}/> : <Moon size={20}/>}
             </button>
-            <span className="demo-tag"><span className="demo-ponto"/> DEMONSTRAÇÃO</span>
+            <button className="portal-atalho" type="button" onClick={() => navegar('portal')}
+              aria-current={tela==='portal'?'page':undefined}>
+              <School size={18}/> Portal escolar
+            </button>
+            <span className="demo-tag"><span className="demo-ponto"/> ESTUDOS DEMO</span>
           </div>
         </header>
         <main className="conteudo-principal">
@@ -625,6 +630,7 @@ export default function App() {
                 responder={responder} irMateriais={() => navegar('materiais')} reiniciar={reiniciarQuiz}/>}
               {tela === 'escola' && <Escola estado={escola} atualizar={setEscola} abrirMaterial={abrirPorId}/>}
               {tela === 'jogo' && <Jogo voltar={() => navegar('inicio')}/>}
+              {tela === 'portal' && <Portal voltar={() => navegar('inicio')}/>}
               {tela === 'plano' && <Plano tarefas={plano} adicionar={incluirTarefa} alternar={concluirTarefa}
                 remover={excluirTarefa} reagendar={reagendar} abrirMaterial={abrirPorId} voltar={() => navegar('inicio')}/>}
               {tela === 'progresso' && <Progresso estado={estado} pendentesPlano={resumoPlano(plano).pendentes}
