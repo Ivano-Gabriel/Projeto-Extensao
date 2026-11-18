@@ -1,6 +1,6 @@
 # Backend do Projeto de Extensao — etapa B
 
-Base do Mitchell refeita para login real e autorizacao por perfil. **Ainda nao publicar sem passar nos testes e concluir o banco (etapa C).**
+Base do Mitchell refeita para login real e autorizacao por perfil. **O portal escolar real exige base exclusiva, ambiente separado, homologacao de seguranca e conexao do frontend. Nao usar dados reais antes disso.**
 
 ## Requisitos
 
@@ -59,7 +59,30 @@ Nao fazer `ddl-auto=update`: o Flyway cria e versiona o esquema. O PostgreSQL e 
 ## Limites do PR B
 
 - Nao ha cadastro publico nem recuperacao de senha ainda.
-- Nao ha relacao professor/turma, logo professores NAO podem consultar qualquer aluno.
+- V2 cria escolas, turmas, matriculas e vinculos docentes. Toda consulta por turma verifica escola e perfil.
 - Nao ha notas reais ainda: nao expor boletim demonstrativo como dados reais.
+- V3 cria atividades publicadas por professores vinculados, questoes e respostas de alunos matriculados; nenhum gabarito e divulgado antes da resposta.
 - Falta integrar o React ao fluxo CSRF+cookies (etapa D) e testar o deploy.
 - Em producao, use Vercel com proxy no mesmo dominio para `/api`; nao abra CORS para `*`.
+
+## Estrutura real e perfis
+
+- Administrador da plataforma: inicializacao unica com `APP_BOOTSTRAP_ADMIN=true`, senha de pelo menos 16 caracteres. Acesso a `/api/admin/**`; nao recebe acesso automatico a notas ou turmas.
+- `POST /api/admin/escolas` cria escola; `POST /api/admin/escolas/{escolaId}/direcao` cria a conta da direcao.
+- Direcao da escola: cadastra somente contas de ALUNO e PROFESSOR da propria escola via `POST /api/gestao/usuarios`.
+- `POST /api/gestao/turmas` cria turma. `POST /api/gestao/turmas/{id}/matriculas` matricula aluno. `POST /api/gestao/turmas/{id}/professores` atribui docente por disciplina.
+- `GET /api/portal/turmas` retorna apenas as turmas do aluno, professor vinculado ou direcao daquela escola.
+- `GET /api/portal/turmas/{id}/alunos` exige direcao da escola ou professor efetivamente vinculado.
+- `POST /api/professor/atividades` cria atividade de multipla escolha por professor vinculado.
+- `GET /api/portal/atividades` nao expõe gabaritos e so retorna atividades da turma autorizada.
+- `POST /api/portal/atividades/{id}/respostas` aceita uma resposta por aluno matriculado, retorna acerto e explicacao e bloqueia outra tentativa.
+
+A escola provisoria no ambiente de teste deve ser cadastrada pelo ADM; nao existe cadastro publico de menores sem convite.
+
+## Deploy em staging
+
+O `Dockerfile` desta pasta usa Java 21 e build Maven. No Render, use contexto Docker `Backend`, Dockerfile `Backend/Dockerfile` e configure `PORT`, `DB_URL` (formato JDBC), `DB_USERNAME`, `DB_PASSWORD` e cookies seguros. Nunca escreva segredos no repositorio.
+
+O banco `extensao-staging` criado no Render (plano gratuito) expira em **18/12/2026**. Nao armazenar dados escolares reais nesse ambiente. Para uso institucional sera necessario banco persistente com backups, politicas de retencao, controle de acesso, logs, recuperacao de conta e homologacao LGPD.
+
+O aplicativo React publico atual ainda roda em modo demonstrativo, sem sessao com a API. Integracao de login real e atividades compartilhadas deve preceder qualquer cadastro real de estudantes.
