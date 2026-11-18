@@ -10,7 +10,8 @@ import { alternarRevisado, buscarMateriais, resumoEstudos } from './logica/estud
 import { responderQuestao, resumirRespostas } from './logica/revisao'
 import { carregarEstado, salvarEstado, type EstadoEstudos } from './logica/persistencia'
 import Escola from './escola/Escola'
-import { carregarEscola, salvarEscola } from './escola/estado'
+import { carregarEscola, estadoInicialEscola, salvarEscola } from './escola/estado'
+import { apagarDadosDoEstudos } from './logica/privacidade'
 import { diasConsecutivosEstudados, formatarDataLocal } from './escola/regras'
 import Plano from './plano/Plano'
 import { adicionarTarefa, alternarTarefa, agendaDoDia, carregarPlano, reagendarTarefa, removerTarefa, resumoPlano, salvarPlano, type NovaTarefa, type TarefaPlano } from './plano/regras'
@@ -384,15 +385,18 @@ function QuizPagina({ estado, indice, setIndice, responder, irMateriais, reinici
   )
 }
 
-function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, limparProgresso }: {
+function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, limparProgresso, apagarTudo }: {
   pendentesPlano: number
   estado: EstadoEstudos
   irMateriais: () => void
   irRevisao: () => void
   limparProgresso: () => void
+  apagarTudo: () => boolean
   irPlano: () => void
 }) {
   const [confirmarLimpeza, setConfirmarLimpeza] = useState(false)
+  const [confirmarTudo, setConfirmarTudo] = useState(false)
+  const [statusPrivacidade, setStatusPrivacidade] = useState('')
   const resumo = resumoEstudos(materiais, estado.revisados, estado.respostas)
   const quiz = resumirRespostas(questoes, estado.respostas)
   return (
@@ -436,6 +440,23 @@ function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, li
         <h2>Seu plano semanal</h2>
         <p>{pendentesPlano ? `${pendentesPlano} ${pendentesPlano === 1 ? 'tarefa pendente' : 'tarefas pendentes'} para organizar.` : 'Monte um plano de estudos por matéria.'}</p>
         <button type="button" className="botao-principal" onClick={irPlano}>Abrir plano <ArrowRight size={17}/></button>
+      </section>
+      <section className="privacidade-dispositivo" aria-label="Privacidade deste dispositivo">
+        <h2>Usando um computador compartilhado?</h2>
+        <p>Este aplicativo não tem contas. Seus exercícios, tarefas, mensagens de feedback e posts de exemplo ficam neste navegador e podem ser vistos por quem usar este aparelho.</p>
+        <p>Ao terminar, você pode apagar tudo do Estudos neste dispositivo. Isso não apaga outros projetos ou arquivos do computador.</p>
+        {confirmarTudo ? <div className="privacidade-confirmacao" role="group" aria-label="Confirmar exclusão total dos dados locais">
+          <strong>Apagar todas as informações locais do Estudos? Não tem como desfazer.</strong>
+          <button type="button" className="botao-perigo" onClick={() => {
+            const foiApagado=apagarTudo()
+            setStatusPrivacidade(foiApagado?'Dados locais do Estudos apagados.':'Não foi possível limpar o armazenamento. Tente novamente.')
+            setConfirmarTudo(false)
+          }}>Sim, apagar tudo</button>
+          <button type="button" className="botao-secundario" onClick={() => setConfirmarTudo(false)}>Cancelar</button>
+        </div> : <button type="button" className="botao-secundario" onClick={()=>{setConfirmarTudo(true);setStatusPrivacidade('')}}>
+          Apagar meus dados deste aparelho
+        </button>}
+        {statusPrivacidade && <p role="status" className="privacidade-status">{statusPrivacidade}</p>}
       </section>
       <section className="limpar-progresso" aria-label="Reiniciar a demonstração">
         <h2>Quer começar do zero?</h2>
@@ -523,6 +544,16 @@ export default function App() {
   const excluirTarefa = (id: string) => setPlano((atual) => removerTarefa(atual, id))
   const reagendar = (id: string, data: string) => setPlano((atual) => reagendarTarefa(atual, id, data))
 
+  const apagarTudo = (): boolean => {
+    const apagado=apagarDadosDoEstudos(armazenamento())
+    if(!apagado) return false
+    setEstado({revisados:[],respostas:[]})
+    setPlano([])
+    setEscola(estadoInicialEscola())
+    setIndiceQuiz(0)
+    setAviso('')
+    return true
+  }
   const reiniciarQuiz = () => { setEstado((atual) => ({ ...atual, respostas: [] })); setIndiceQuiz(0); setAviso('Quiz reiniciado! Bora tentar novamente') }
 
   return (
@@ -574,7 +605,8 @@ export default function App() {
               {tela === 'progresso' && <Progresso estado={estado} pendentesPlano={resumoPlano(plano).pendentes}
                 irPlano={() => navegar('plano')} irMateriais={() => navegar('materiais')}
                 irRevisao={() => navegar('revisao')}
-                limparProgresso={() => {setEstado({ revisados: [], respostas: [] }); setAviso('Demonstração reiniciada')}} />}
+                limparProgresso={() => {setEstado({ revisados: [], respostas: [] }); setAviso('Demonstração reiniciada')}}
+                apagarTudo={apagarTudo} />}
             </>
           )}
         </main>

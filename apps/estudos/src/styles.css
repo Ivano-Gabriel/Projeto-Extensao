@@ -352,3 +352,13 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--blue); outl
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+.privacidade-dispositivo { display:grid; justify-items:start; gap:.7rem; padding:1.2rem; margin-top:1.2rem; border:1px solid var(--line-strong); border-radius:1rem; background:var(--sheet); }
+.privacidade-dispositivo h2 { margin:0; font:850 1.13rem var(--font-display); }
+.privacidade-dispositivo p { margin:0; color:var(--muted); font-size:.84rem; line-height:1.6; }
+.privacidade-dispositivo>button { min-height:3rem; }
+.privacidade-confirmacao { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; padding:.85rem; border-radius:.8rem; background:var(--yellow-soft); }
+.privacidade-confirmacao strong { flex:1 0 100%; font-size:.84rem; line-height:1.5; }
+.privacidade-confirmacao button { min-height:3rem; }
+.privacidade-dispositivo .privacidade-status { font-weight:850; color:var(--blue-dark); }
+select:focus-visible,textarea:focus-visible { outline:3px solid var(--blue); outline-offset:3px; }
