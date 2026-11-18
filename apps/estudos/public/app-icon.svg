@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Livro do Projeto Extensão">
+<rect width="192" height="192" rx="44" fill="#17315A"/>
+<path d="M31 56q32-17 65 0 33-17 65 0v81q-32-17-65 0-33-17-65 0z" fill="#F8CB54" stroke="#FFE99D" stroke-width="5" stroke-linejoin="round"/>
+<path d="M96 56v81" stroke="#17315A" stroke-width="5"/>
+<path d="M44 77q21-10 40-2M44 92q21-8 40-1M108 75q19-8 40 2M108 93q19-8 40 1" stroke="#17315A" stroke-width="5" fill="none" stroke-linecap="round"/>
+<circle cx="150" cy="35" r="9" fill="#F8CB54"/>
+</svg>
