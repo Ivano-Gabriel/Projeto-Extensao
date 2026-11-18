@@ -4,6 +4,9 @@ O protótipo 3 foi escolhido na apresentação escolar. Esta branch implementa a
 
 ## O que já funciona no protótipo
 
+- **Atividade vinculada ao Feed:** no simulador do professor, escolha um tema que já possui material e clique em **Gerar atividade deste tema**. O aplicativo preenche um recado e vincula uma questão existente ao post; o aluno responde no Feed, vê explicação e pode refazer. O resultado fica só no navegador.
+- **Limite do gerador atual:** seleciona uma questão previamente cadastrada, não cria conteúdo novo com IA e não interpreta arquivos PDF. Isso exige backend protegido, fornecedor de IA, validação pedagógica e autorização antes de dados escolares reais.
+
 - **Arcade do Saber:** minigame próprio de 30 segundos, com livro que salta obstáculos, dois pontos de vida, pontuação local, botão de toque e teclas Espaço/Seta para cima. Sem cadastro, ranking, coleta de dados ou recompensas que afetem a avaliação escolar.
 - **Livro que se abre:** animação de apresentação do conteúdo com suporte a movimento reduzido e melhorias nas interações mobile.
 
