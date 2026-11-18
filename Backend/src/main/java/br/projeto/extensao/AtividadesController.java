@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.net.URI;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.CacheControl;
@@ -59,7 +58,7 @@ public class AtividadesController {
     private Long inserir(String sql,Object... valores){
         KeyHolder chave=new GeneratedKeyHolder();
         jdbc.update(conexao->{
-            PreparedStatement stmt=conexao.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement stmt=conexao.prepareStatement(sql,new String[]{"id"});
             for(int i=0;i<valores.length;i++)stmt.setObject(i+1,valores[i]);
             return stmt;
         },chave);
