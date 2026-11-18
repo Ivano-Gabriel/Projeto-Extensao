@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeft, ArrowRight, BookOpen, BookOpenCheck, Brain, Check, CheckCircle2,
   ChevronRight, Clock3, Home, Info,
-  Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X, School, Flame, Moon, Sun, LogOut, LockKeyhole,
+  Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X, School, Flame, Moon, Sun, LogOut,
 } from 'lucide-react'
 import { materiais, materias, type Material, type Materia } from './dados/materiais'
 import { questoes, type Questao } from './dados/questoes'
@@ -671,18 +671,20 @@ type FaseSessao = 'verificando' | 'login' | 'autenticado' | 'indisponivel'
 export default function App() {
   const [fase,setFase]=useState<FaseSessao>('verificando')
   const [usuario,setUsuario]=useState<UsuarioEscolar|null>(null)
+  const loginManual=useRef(false)
   useEffect(()=>{
     let ativa=true
     apiEscolar.me()
       .then(pessoa=>{
         paginaDoUsuario(pessoa)
-        if(ativa){setUsuario(pessoa);setFase('autenticado')}
+        if(ativa&&!loginManual.current){setUsuario(pessoa);setFase('autenticado')}
       })
-      .catch(erro=>{if(ativa)setFase(erroNaVerificacaoDeSessao(erro))})
+      .catch(erro=>{if(ativa&&!loginManual.current)setFase(erroNaVerificacaoDeSessao(erro))})
     return ()=>{ativa=false}
   },[])
   const entrar=(pessoa:UsuarioEscolar)=>{
     paginaDoUsuario(pessoa)
+    loginManual.current=true
     setUsuario(pessoa)
     setFase('autenticado')
   }
@@ -691,12 +693,10 @@ export default function App() {
     setUsuario(null)
     setFase('login')
   }
-  if(fase==='verificando')return <main className="entrada-extensao" aria-busy="true">
-    <section className="entrada-status" role="status">
-      <LockKeyhole size={27}/>
-      <h1>Verificando acesso...</h1>
-      <p>Estamos confirmando sua sessão com a escola.</p>
-    </section>
+  if(fase==='verificando')return <main className="entrada-extensao">
+    <div className="entrada-marca"><School size={23}/><span>PROJETO EXTENSÃO</span></div>
+    <PortalLogin entrar={entrar}/>
+    <p className="entrada-rodape" role="status">Verificando sessão existente. A primeira conexão pode demorar no servidor gratuito.</p>
   </main>
   if(fase==='indisponivel')return <main className="entrada-extensao">
     <section className="entrada-status" role="alert">
