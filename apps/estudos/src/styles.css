@@ -362,3 +362,31 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--blue); outl
 .privacidade-confirmacao button { min-height:3rem; }
 .privacidade-dispositivo .privacidade-status { font-weight:850; color:var(--blue-dark); }
 select:focus-visible,textarea:focus-visible { outline:3px solid var(--blue); outline-offset:3px; }
+
+.hero-arte { display:flex; min-height:225px; padding:0 1rem 2rem; perspective:1000px; }
+.folha-estudo { width:min(100%,255px); min-height:230px; padding:1.2rem 1.35rem; gap:.7rem; transform-origin:7% 50%; animation:livroAbrir 1.1s cubic-bezier(.15,.85,.25,1) both; box-shadow:12px 12px 0 #08183144, -8px 6px 0 #e4d0a3; border-radius:.2rem .65rem .65rem .2rem; }
+.folha-estudo::after { content:""; position:absolute; inset:0 auto 0 12px; width:2px; background:#bdcad9; box-shadow:4px 0 8px #1624411c; }
+.folha-estudo .folha-linha { font-size:.76rem; }
+.folha-estudo i { font-size:.72rem; }
+@keyframes livroAbrir { from { opacity:0; transform:rotateY(-75deg) rotate(5deg) translateY(18px); } to { opacity:1; transform:rotateY(-11deg) rotate(4deg) translateY(0); } }
+.hero::before { background:radial-gradient(circle at center,#ffffff10 0 30%,transparent 31%); }
+.botao-principal { box-shadow:0 3px 0 #0f328c42; }
+.botao-principal:active:not(:disabled) { transform:translateY(2px); box-shadow:0 1px 0 #0f328c42; }
+.escolha-materia,.cartao-material,.resumo-metrica { transition:transform .18s ease,box-shadow .18s ease; }
+.escolha-materia:hover,.cartao-material:hover { box-shadow:0 8px 24px #17203315; transform:translateY(-2px); }
+.marca-simbolo { box-shadow:3px 4px 0 #111e3540; }
+@media(min-width:640px) {
+  .hero-arte { min-height:auto; padding:2rem; }
+  .folha-estudo { width:min(100%,300px); min-height:325px; padding:2rem 1.5rem; gap:1rem; }
+  .folha-estudo .folha-linha { font-size:.84rem; }
+}
+@media(max-width:390px) {
+  .hero-texto { padding:1.25rem 1.25rem .5rem; }
+  .hero h1 { font-size:clamp(2rem,9.6vw,2.7rem); }
+  .hero-arte { min-height:205px; padding-bottom:1.25rem; }
+  .folha-estudo { min-height:220px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .folha-estudo {animation:none;transform:none}
+  .escolha-materia,.cartao-material,.resumo-metrica {transition:none}
+}

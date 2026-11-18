@@ -4,6 +4,9 @@ O protótipo 3 foi escolhido na apresentação escolar. Esta branch implementa a
 
 ## O que já funciona no protótipo
 
+- **Arcade do Saber:** minigame próprio de 30 segundos, com livro que salta obstáculos, dois pontos de vida, pontuação local, botão de toque e teclas Espaço/Seta para cima. Sem cadastro, ranking, coleta de dados ou recompensas que afetem a avaliação escolar.
+- **Livro que se abre:** animação de apresentação do conteúdo com suporte a movimento reduzido e melhorias nas interações mobile.
+
 - **Plano semanal pessoal:** criar tarefas com matéria, data e material opcional; filtrar pendentes/concluídas, marcar feitas, reabrir e excluir. Limite de 50 tarefas no próprio dispositivo; sem envio para a escola ou cobrança escolar.
 
 - Resumos por matéria, leitura, busca, marcação como revisado e quiz com explicações

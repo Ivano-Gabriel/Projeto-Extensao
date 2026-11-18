@@ -14,9 +14,10 @@ import { carregarEscola, estadoInicialEscola, salvarEscola } from './escola/esta
 import { apagarDadosDoEstudos } from './logica/privacidade'
 import { diasConsecutivosEstudados, formatarDataLocal } from './escola/regras'
 import Plano from './plano/Plano'
+import Jogo from './jogo/Jogo'
 import { adicionarTarefa, alternarTarefa, agendaDoDia, carregarPlano, reagendarTarefa, removerTarefa, resumoPlano, salvarPlano, type NovaTarefa, type TarefaPlano } from './plano/regras'
 
-type Tela = 'inicio' | 'materiais' | 'revisao' | 'escola' | 'progresso' | 'plano'
+type Tela = 'inicio' | 'materiais' | 'revisao' | 'escola' | 'progresso' | 'plano' | 'jogo'
 type FiltroMateria = 'Todas' | Materia
 const menu = [
   { id: 'inicio', nome: 'Início', Icone: Home },
@@ -87,7 +88,7 @@ function CartaoMaterial({ material, revisado, onAbrir }: {
   )
 }
 
-function Inicio({ estado, sequencia, pendentesPlano, tarefasPlano, concluirTarefa, abrirMaterial, escolherMateria, irMateriais, irRevisao, irProgresso, irEscola, irPlano }: {
+function Inicio({ estado, sequencia, pendentesPlano, tarefasPlano, concluirTarefa, abrirMaterial, escolherMateria, irMateriais, irRevisao, irProgresso, irEscola, irPlano, irJogo }: {
   tarefasPlano: readonly TarefaPlano[]
   concluirTarefa: (id:string)=>void
   pendentesPlano: number
@@ -100,6 +101,7 @@ function Inicio({ estado, sequencia, pendentesPlano, tarefasPlano, concluirTaref
   irProgresso: () => void
   irEscola: () => void
   irPlano: () => void
+  irJogo: () => void
 }) {
   const resumo = resumoEstudos(materiais, estado.revisados, estado.respostas)
   const desempenho = resumirRespostas(questoes, estado.respostas)
@@ -167,6 +169,13 @@ function Inicio({ estado, sequencia, pendentesPlano, tarefasPlano, concluirTaref
           <span className="escola-streak"><Flame size={17}/> {sequencia} {sequencia === 1 ? 'dia seguido estudando' : 'dias seguidos estudando'}</span>
         </div>
         <button type="button" className="botao-principal" onClick={irEscola}>Conhecer a escola <ArrowRight size={18}/></button>
+      </section>
+      <section className="arcade-chamada" aria-label="Jogo de pausa rápida">
+        <span className="arcade-chamada-selo" aria-hidden="true">✦</span>
+        <div><span className="sobretitulo">PAUSA RÁPIDA · 30 SEGUNDOS</span>
+          <h2>Arcade do Saber</h2>
+          <p>Jogue uma corrida curta com o Livrinho. Toque pra pular e volte ao seu plano.</p></div>
+        <button type="button" className="botao-principal" onClick={irJogo}>Jogar agora <ArrowRight size={17}/></button>
       </section>
       <section className="inicio-resumo" aria-label="Seu progresso neste navegador">
         <div className="resumo-destaque">
@@ -592,7 +601,7 @@ export default function App() {
               {tela === 'inicio' && <Inicio estado={estado} sequencia={diasConsecutivosEstudados(escola.diasEstudo)}
                 pendentesPlano={resumoPlano(plano).pendentes} tarefasPlano={plano} concluirTarefa={concluirTarefa}
                 irPlano={() => navegar('plano')}
-                irEscola={() => navegar('escola')} abrirMaterial={abrirMaterial}
+                irEscola={() => navegar('escola')} irJogo={() => navegar('jogo')} abrirMaterial={abrirMaterial}
                 escolherMateria={escolherMateria} irMateriais={() => navegar('materiais')}
                 irRevisao={() => navegar('revisao')} irProgresso={() => navegar('progresso')}/>}
               {tela === 'materiais' && <MateriaisPagina estado={estado} busca={busca} setBusca={setBusca}
@@ -600,6 +609,7 @@ export default function App() {
               {tela === 'revisao' && <QuizPagina estado={estado} indice={indiceQuiz} setIndice={setIndiceQuiz}
                 responder={responder} irMateriais={() => navegar('materiais')} reiniciar={reiniciarQuiz}/>}
               {tela === 'escola' && <Escola estado={escola} atualizar={setEscola} abrirMaterial={abrirPorId}/>}
+              {tela === 'jogo' && <Jogo voltar={() => navegar('inicio')}/>}
               {tela === 'plano' && <Plano tarefas={plano} adicionar={incluirTarefa} alternar={concluirTarefa}
                 remover={excluirTarefa} reagendar={reagendar} abrirMaterial={abrirPorId} voltar={() => navegar('inicio')}/>}
               {tela === 'progresso' && <Progresso estado={estado} pendentesPlano={resumoPlano(plano).pendentes}
