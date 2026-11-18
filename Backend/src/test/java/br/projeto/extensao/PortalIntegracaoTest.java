@@ -106,7 +106,7 @@ class PortalIntegracaoTest {
             .andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(alunoA));
         mvc.perform(get("/api/portal/turmas/"+classe+"/alunos")
             .with(user("professor.b@escola.test").roles("PROFESSOR")))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isNotFound());
         mvc.perform(get("/api/portal/turmas/"+classe+"/alunos")
             .with(user("aluno.a@escola.test").roles("ALUNO")))
             .andExpect(status().isForbidden());
@@ -129,6 +129,48 @@ class PortalIntegracaoTest {
             .with(user("direcao.a@escola.test").roles("DIRECAO")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[?(@.email == 'aluno.b@escola.test')]").isEmpty());
+    }
+
+    @Test
+    void direcaoCadastraTurmaMatriculaEProfessorDaPropriaEscola() throws Exception {
+        mvc.perform(post("/api/gestao/turmas")
+            .with(user("direcao.a@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"codigo\":\"3C\",\"nome\":\"Terceiro Ano C\",\"anoLetivo\":2026}"))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.codigo").value("3C"));
+        long classe=jdbc.queryForObject("SELECT id FROM turmas WHERE codigo='3C'",Long.class);
+
+        mvc.perform(post("/api/gestao/turmas/"+classe+"/matriculas")
+            .with(user("direcao.a@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"alunoId\":"+alunoA+"}")).andExpect(status().isCreated());
+
+        mvc.perform(post("/api/gestao/turmas/"+classe+"/professores")
+            .with(user("direcao.a@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"professorId\":"+professorA+",\"disciplina\":\"MATEMATICA\"}"))
+            .andExpect(status().isCreated());
+
+        mvc.perform(get("/api/portal/turmas")
+            .with(user("aluno.a@escola.test").roles("ALUNO")))
+            .andExpect(jsonPath("$[0].codigo").value("3C"));
+        mvc.perform(get("/api/portal/turmas/"+classe+"/alunos")
+            .with(user("professor.a@escola.test").roles("PROFESSOR")))
+            .andExpect(jsonPath("$[0].id").value(alunoA));
+
+        mvc.perform(post("/api/gestao/turmas/"+classe+"/matriculas")
+            .with(user("direcao.a@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"alunoId\":"+alunoA+"}")).andExpect(status().isConflict());
+    }
+
+    @Test
+    void naoPermiteProfessorDeMesmaEscolaSemVinculoConsultarTurma() throws Exception {
+        long classe=turma("3C",escolaA);
+        mvc.perform(get("/api/portal/turmas/"+classe+"/alunos")
+            .with(user("professor.a@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isForbidden());
     }
 
     @Test
