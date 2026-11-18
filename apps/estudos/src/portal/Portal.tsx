@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { ArrowLeft, ArrowRight, BookOpenCheck, CheckCircle2, GraduationCap, LockKeyhole, LogOut, School, ShieldCheck, Users, UserRoundCog, Sparkles } from 'lucide-react'
 import { apiEscolar } from './api'
-import PortalLogin from './PortalLogin'
 import { areaDoUsuario } from './perfis'
 import type { AtividadeEscolar, EscolaResumo, TurmaEscolar, UsuarioEscolar, UsuarioResumido, ResultadoAtividade } from './api'
 import './portal.css'
 
-type Props={voltar:()=>void}
+type Props={usuario:UsuarioEscolar;onSair:()=>Promise<void>;voltar?:()=>void}
 type Feedback={ok?:string;erro?:string}
 const disciplinas=['MATEMATICA','PORTUGUES','FISICA','HISTORIA','BIOLOGIA','QUIMICA','GEOGRAFIA','INGLES','SOCIOLOGIA','FILOSOFIA']
 const falha=(e:unknown)=>e instanceof Error?e.message:'Não foi possível concluir. Tente novamente.'
@@ -212,37 +211,31 @@ function Administrador(){
     </Cartao>
   </div>
 }
-export default function Portal({voltar}:Props){
-  const [usuario,setUsuario]=useState<UsuarioEscolar|null>(null)
-  const [carregando,setCarregando]=useState(true)
+export default function Portal({usuario,onSair,voltar}:Props){
   const [erro,setErro]=useState(''),[saindo,setSaindo]=useState(false)
-  useEffect(()=>{let ativo=true;apiEscolar.me().then(u=>{if(ativo)setUsuario(u)})
-    .catch(()=>{}).finally(()=>{if(ativo)setCarregando(false)})
-    return()=>{ativo=false}},[])
   const sair=async()=>{
     setErro('');setSaindo(true)
-    try{await apiEscolar.logout();setUsuario(null)}
-    catch(e){setErro(falha(e))}finally{setSaindo(false)}
+    try{await onSair()}
+    catch(e){setErro(falha(e));setSaindo(false)}
   }
-  const area=usuario?areaDoUsuario(usuario):null
+  const area=areaDoUsuario(usuario)
   const perfil=area==='ADMIN'?'ADMINISTRADOR':area==='DIRECAO'?'DIREÇÃO':area==='PROFESSOR'?'PROFESSOR':'ALUNO'
   return <div className="pagina portal-pagina">
-    <button type="button" className="botao-voltar" onClick={voltar}><ArrowLeft size={17}/> Voltar ao Estudos</button>
+    {voltar&&<button type="button" className="botao-voltar" onClick={voltar}><ArrowLeft size={17}/> Voltar aos estudos</button>}
     <header className="portal-hero">
       <span className="portal-hero-marca"><School size={23}/> EXTENSÃO ESCOLAR</span>
-      <h1>{usuario?`Bem-vindo, ${usuario.nome.split(' ')[0]}.`:'Sua escola, seu espaço.'}</h1>
-      <p>{usuario?'Acesse somente as turmas, atividades e funções autorizadas para sua conta.':'Entre para consultar turmas ou administrar suas atividades com segurança.'}</p>
-      {usuario&&<div className="portal-acesso">
+      <h1>Bem-vindo, {usuario.nome.split(' ')[0]}.</h1>
+      <p>Acesse as turmas e atividades autorizadas para sua conta.</p>
+      <div className="portal-acesso">
         <span><ShieldCheck size={18}/>{perfil}</span>
-        <button type="button" onClick={sair} disabled={saindo}><LogOut size={17}/>{saindo?'Saindo...':'Sair da conta'}</button>
-      </div>}
+        <button type="button" onClick={()=>{void sair()}} disabled={saindo}>
+          <LogOut size={17}/>{saindo?'Saindo...':'Sair da conta'}
+        </button>
+      </div>
     </header>
     {erro&&<p className="portal-feedback falha" role="alert">{erro}</p>}
-    {carregando?<p className="portal-carregando">Verificando sua sessão...</p>:
-      !usuario?<PortalLogin entrar={u=>setUsuario(u)}/>:
-      area==='ADMIN'?<Administrador/>:
-      area==='DIRECAO'?<Direcao/>:
+    {area==='ADMIN'?<Administrador/>:area==='DIRECAO'?<Direcao/>:
       area==='PROFESSOR'?<Professor/>:<Aluno/>}
-    <footer className="portal-rodape"><GraduationCap size={18}/> Portal institucional em implementação. Nunca use contas reais antes da homologação da escola.</footer>
+    <footer className="portal-rodape"><GraduationCap size={18}/> Ambiente em homologação. Use apenas dados fictícios de teste.</footer>
   </div>
 }

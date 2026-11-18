@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeft, ArrowRight, BookOpen, BookOpenCheck, Brain, Check, CheckCircle2,
   ChevronRight, Clock3, Home, Info,
-  Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X, School, Flame, Moon, Sun,
+  Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X, School, Flame, Moon, Sun, LogOut,
 } from 'lucide-react'
 import { materiais, materias, type Material, type Materia } from './dados/materiais'
 import { questoes, type Questao } from './dados/questoes'
@@ -16,6 +16,10 @@ import { diasConsecutivosEstudados, formatarDataLocal } from './escola/regras'
 import Plano from './plano/Plano'
 import Jogo from './jogo/Jogo'
 import Portal from './portal/Portal'
+import PortalLogin from './portal/PortalLogin'
+import { apiEscolar, type UsuarioEscolar } from './portal/api'
+import { paginaDoUsuario, erroNaVerificacaoDeSessao } from './portal/sessao'
+import { armazenamentoDaConta } from './portal/armazenamento'
 import DesafioDia from './desafio/DesafioDia'
 import { registrarRespostaDiaria, type RespostaDiaria } from './desafio/regras'
 import { adicionarTarefa, alternarTarefa, agendaDoDia, carregarPlano, reagendarTarefa, removerTarefa, resumoPlano, salvarPlano, type NovaTarefa, type TarefaPlano } from './plano/regras'
@@ -490,21 +494,22 @@ function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, li
   )
 }
 
-export default function App() {
+function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<void>}) {
   const [tela, setTela] = useState<Tela>('inicio')
   const [materialAberto, setMaterialAberto] = useState<string | null>(null)
   const [busca, setBusca] = useState('')
   const [materia, setMateria] = useState<FiltroMateria>('Todas')
   const [indiceQuiz, setIndiceQuiz] = useState(0)
-  const [estado, setEstado] = useState<EstadoEstudos>(() => carregarEstado(armazenamento(), materiais, questoes))
-  const [escola, setEscola] = useState(() => carregarEscola(armazenamento()))
-  const [plano, setPlano] = useState(() => carregarPlano(armazenamento()))
+  const [estado, setEstado] = useState<EstadoEstudos>(() => carregarEstado(armazenamentoDaConta(armazenamento(),usuario.id), materiais, questoes))
+  const [escola, setEscola] = useState(() => carregarEscola(armazenamentoDaConta(armazenamento(),usuario.id)))
+  const [plano, setPlano] = useState(() => carregarPlano(armazenamentoDaConta(armazenamento(),usuario.id)))
   const [aviso, setAviso] = useState('')
+  const [saindo,setSaindo] = useState(false)
   const materialAtual = materialAberto ? materiais.find((item) => item.id === materialAberto) : undefined
 
-  useEffect(() => { salvarEstado(armazenamento(), estado) }, [estado])
-  useEffect(() => { salvarEscola(armazenamento(), escola) }, [escola])
-  useEffect(() => { salvarPlano(armazenamento(), plano) }, [plano])
+  useEffect(() => { salvarEstado(armazenamentoDaConta(armazenamento(),usuario.id), estado) }, [estado])
+  useEffect(() => { salvarEscola(armazenamentoDaConta(armazenamento(),usuario.id), escola) }, [escola])
+  useEffect(() => { salvarPlano(armazenamentoDaConta(armazenamento(),usuario.id), plano) }, [plano])
   useEffect(() => {
     document.documentElement.dataset.tema = escola.tema
     return () => { delete document.documentElement.dataset.tema }
@@ -568,7 +573,7 @@ export default function App() {
   }
 
   const apagarTudo = (): boolean => {
-    const apagado=apagarDadosDoEstudos(armazenamento())
+    const apagado=apagarDadosDoEstudos(armazenamentoDaConta(armazenamento(),usuario.id))
     if(!apagado) return false
     setEstado({revisados:[],respostas:[]})
     setPlano([])
@@ -576,6 +581,12 @@ export default function App() {
     setIndiceQuiz(0)
     setAviso('')
     return true
+  }
+  const encerrarSessao = async () => {
+    if (saindo) return
+    setSaindo(true)
+    try { await onSair() }
+    catch { setAviso('Não foi possível sair. Tente novamente.'); setSaindo(false) }
   }
   const reiniciarQuiz = () => { setEstado((atual) => ({ ...atual, respostas: [] })); setIndiceQuiz(0); setAviso('Quiz reiniciado! Bora tentar novamente') }
 
@@ -605,7 +616,11 @@ export default function App() {
             </button>
             <button className="portal-atalho" type="button" onClick={() => navegar('portal')}
               aria-current={tela==='portal'?'page':undefined}>
-              <School size={18}/> Portal escolar
+              <School size={18}/> Minha turma
+            </button>
+            <button type="button" className="portal-atalho" disabled={saindo}
+              onClick={()=>{void encerrarSessao()}}>
+              <LogOut size={17}/>{saindo?'Saindo...':'Sair'}
             </button>
             <span className="demo-tag"><span className="demo-ponto"/> ESTUDOS DEMO</span>
           </div>
@@ -630,7 +645,7 @@ export default function App() {
                 responder={responder} irMateriais={() => navegar('materiais')} reiniciar={reiniciarQuiz}/>}
               {tela === 'escola' && <Escola estado={escola} atualizar={setEscola} abrirMaterial={abrirPorId}/>}
               {tela === 'jogo' && <Jogo voltar={() => navegar('inicio')}/>}
-              {tela === 'portal' && <Portal voltar={() => navegar('inicio')}/>}
+              {tela === 'portal' && <Portal usuario={usuario} onSair={onSair} voltar={() => navegar('inicio')}/>}
               {tela === 'plano' && <Plano tarefas={plano} adicionar={incluirTarefa} alternar={concluirTarefa}
                 remover={excluirTarefa} reagendar={reagendar} abrirMaterial={abrirPorId} voltar={() => navegar('inicio')}/>}
               {tela === 'progresso' && <Progresso estado={estado} pendentesPlano={resumoPlano(plano).pendentes}
@@ -649,4 +664,58 @@ export default function App() {
       </div>}
     </div>
   )
+}
+
+type FaseSessao = 'verificando' | 'login' | 'autenticado' | 'indisponivel'
+
+export default function App() {
+  const [fase,setFase]=useState<FaseSessao>('verificando')
+  const [usuario,setUsuario]=useState<UsuarioEscolar|null>(null)
+  const loginManual=useRef(false)
+  useEffect(()=>{
+    let ativa=true
+    apiEscolar.me()
+      .then(pessoa=>{
+        paginaDoUsuario(pessoa)
+        if(ativa&&!loginManual.current){setUsuario(pessoa);setFase('autenticado')}
+      })
+      .catch(erro=>{if(ativa&&!loginManual.current)setFase(erroNaVerificacaoDeSessao(erro))})
+    return ()=>{ativa=false}
+  },[])
+  const entrar=(pessoa:UsuarioEscolar)=>{
+    paginaDoUsuario(pessoa)
+    loginManual.current=true
+    setUsuario(pessoa)
+    setFase('autenticado')
+  }
+  const sair=async()=>{
+    await apiEscolar.logout()
+    setUsuario(null)
+    setFase('login')
+  }
+  if(fase==='verificando')return <main className="entrada-extensao">
+    <div className="entrada-marca"><School size={23}/><span>PROJETO EXTENSÃO</span></div>
+    <PortalLogin entrar={entrar}/>
+    <p className="entrada-rodape" role="status">Verificando sessão existente. A primeira conexão pode demorar no servidor gratuito.</p>
+  </main>
+  if(fase==='indisponivel')return <main className="entrada-extensao">
+    <section className="entrada-status" role="alert">
+      <School size={29}/>
+      <h1>Acesso temporariamente indisponível</h1>
+      <p>Não foi possível confirmar sua sessão. Tente novamente quando a API estiver disponível.</p>
+      <button type="button" className="botao-principal" onClick={()=>window.location.reload()}>Tentar novamente</button>
+    </section>
+  </main>
+  if(fase==='autenticado'&&usuario){
+    if(paginaDoUsuario(usuario)==='estudos')
+      return <EstudosApp key={usuario.id} usuario={usuario} onSair={sair}/>
+    return <div className="entrada-funcionario">
+      <Portal key={usuario.id} usuario={usuario} onSair={sair}/>
+    </div>
+  }
+  return <main className="entrada-extensao">
+    <div className="entrada-marca"><School size={23}/><span>PROJETO EXTENSÃO</span></div>
+    <PortalLogin entrar={entrar}/>
+    <p className="entrada-rodape">Área escolar protegida · Alunos, professores e direção</p>
+  </main>
 }
