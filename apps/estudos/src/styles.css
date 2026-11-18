@@ -396,3 +396,17 @@ select:focus-visible,textarea:focus-visible { outline:3px solid var(--blue); out
 .portal-atalho[aria-current="page"] { background:var(--blue);border-color:var(--blue);color:white; }
 .portal-atalho:focus-visible { outline:3px solid var(--blue);outline-offset:3px; }
 @media(max-width:420px){.portal-atalho{font-size:.7rem;padding:.45rem .55rem}.escola-header-controles{gap:.3rem}}
+
+.entrada-extensao{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.3rem;min-height:100dvh;padding:clamp(1rem,4vw,2.5rem);background:radial-gradient(circle at 20% 4%,#e4edff 0%,transparent 38%),var(--paper)}
+.entrada-marca{display:flex;align-items:center;gap:.6rem;color:var(--ink);font-weight:950;letter-spacing:.08em;font-size:.77rem}
+.entrada-marca svg{color:var(--blue-dark)}
+.entrada-rodape{font-size:.73rem;color:var(--muted);text-align:center;margin:0}
+.entrada-extensao>.portal-login{width:min(100%,520px);box-shadow:0 12px 34px #1a2c4412}
+.entrada-status{display:grid;justify-items:center;text-align:center;gap:.7rem;max-width:440px;padding:2rem 1.5rem;border:1px solid var(--line);border-radius:1rem;background:var(--sheet)}
+.entrada-status h1{font:900 clamp(1.4rem,5vw,1.8rem)/1.2 var(--font-display);margin:0}
+.entrada-status p{color:var(--muted);font-size:.86rem;line-height:1.55;margin:0}
+.entrada-status>svg{color:var(--blue-dark)}
+.entrada-status button{margin-top:.6rem}
+.entrada-funcionario{min-height:100dvh;max-width:1180px;padding:clamp(.8rem,3vw,1.8rem);margin:0 auto}
+.entrada-funcionario>.portal-pagina{max-width:100%}
+html[data-tema="escuro"] .entrada-extensao{background:radial-gradient(circle at 20% 4%,#1b2d40,transparent 40%),var(--paper)}

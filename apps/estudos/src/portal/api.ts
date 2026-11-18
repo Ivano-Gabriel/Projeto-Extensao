@@ -16,6 +16,10 @@ export type AtividadeEscolar = {
 export type ResultadoAtividade = {acertou:boolean;explicacao:string}
 type Metodo = 'GET' | 'POST'
 
+export class ErroApi extends Error {
+  constructor(mensagem:string,readonly status:number){super(mensagem);this.name='ErroApi'}
+}
+
 function validarRota(path:string) {
   if(!/^\/api\/(?:[a-z-]+\/)*[a-z0-9-]+(?:\/\d+)*(?:\/[a-z-]+)*$/.test(path))
     throw new Error('Caminho de API inválido.')
@@ -43,8 +47,8 @@ export async function requisitar<T>(
     headers,...(corpo===undefined?{}:{body:JSON.stringify(corpo)}),
   })
   if(!resposta.ok){
-    if(resposta.status===401)throw new Error('Faça login para continuar.')
-    if(resposta.status===403)throw new Error('Você não tem permissão para esta ação.')
+    if(resposta.status===401)throw new ErroApi('Faça login para continuar.',401)
+    if(resposta.status===403)throw new ErroApi('Você não tem permissão para esta ação.',403)
     if(resposta.status===404)throw new Error('Informação não encontrada ou indisponível.')
     if(resposta.status===409)throw new Error('Este registro já existe ou já foi respondido.')
     if(resposta.status===400)throw new Error('Revise os dados e tente novamente.')
