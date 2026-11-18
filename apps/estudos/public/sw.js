@@ -1,5 +1,5 @@
 const PREFIX = 'extensao-estudos-'
-const CACHE = PREFIX + 'v1'
+const CACHE = PREFIX + 'v2'
 
 async function guardarApp() {
   const cache = await caches.open(CACHE)
@@ -12,7 +12,7 @@ async function guardarApp() {
     .map((caminho)=>new URL(caminho,inicio))
     .filter((url)=>url.origin === self.location.origin && url.href.startsWith(inicio))
     .map((url)=>url.href)
-  await cache.addAll([inicio,htmlUrl,...ativos])
+  await cache.addAll([inicio,htmlUrl,new URL('manifest.webmanifest',inicio).href,new URL('app-icon.svg',inicio).href,...ativos])
   return true
 }
 
@@ -40,7 +40,7 @@ self.addEventListener('fetch',(evento)=>{
   const destino = new URL(pedido.url)
   if (pedido.method !== 'GET' || destino.origin !== self.location.origin ||
     !destino.href.startsWith(self.registration.scope)) return
-  const recursoEstatico = /\.(?:js|css|svg|png|webp|ico|woff2?)$/i.test(destino.pathname)
+  const recursoEstatico = /\.(?:js|css|svg|webmanifest|png|webp|ico|woff2?)$/i.test(destino.pathname)
   if (pedido.mode !== 'navigate' && !recursoEstatico) return
   if (pedido.mode === 'navigate') {
     evento.respondWith(fetch(pedido).then(async resposta=>{

@@ -4,6 +4,9 @@ O protótipo 3 foi escolhido na apresentação escolar. Esta branch implementa a
 
 ## O que já funciona no protótipo
 
+- **Desafio do Dia:** uma pergunta do catálogo muda a cada dia, com feedback e explicação; resposta local validada, histórico de até 30 dias e contribuição para a sequência de estudo.
+- **Instalável como aplicativo:** manifesto PWA, ícone próprio e cache de HTML/assets estáticos para reabrir após a primeira visita online em navegador compatível. Não sincroniza dados entre aparelhos nem envia notificações.
+
 - **Atividade vinculada ao Feed:** no simulador do professor, escolha um tema que já possui material e clique em **Gerar atividade deste tema**. O aplicativo preenche um recado e vincula uma questão existente ao post; o aluno responde no Feed, vê explicação e pode refazer. O resultado fica só no navegador.
 - **Limite do gerador atual:** seleciona uma questão previamente cadastrada, não cria conteúdo novo com IA e não interpreta arquivos PDF. Isso exige backend protegido, fornecedor de IA, validação pedagógica e autorização antes de dados escolares reais.
 

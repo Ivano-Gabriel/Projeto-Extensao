@@ -15,6 +15,8 @@ import { apagarDadosDoEstudos } from './logica/privacidade'
 import { diasConsecutivosEstudados, formatarDataLocal } from './escola/regras'
 import Plano from './plano/Plano'
 import Jogo from './jogo/Jogo'
+import DesafioDia from './desafio/DesafioDia'
+import { registrarRespostaDiaria, type RespostaDiaria } from './desafio/regras'
 import { adicionarTarefa, alternarTarefa, agendaDoDia, carregarPlano, reagendarTarefa, removerTarefa, resumoPlano, salvarPlano, type NovaTarefa, type TarefaPlano } from './plano/regras'
 
 type Tela = 'inicio' | 'materiais' | 'revisao' | 'escola' | 'progresso' | 'plano' | 'jogo'
@@ -88,7 +90,10 @@ function CartaoMaterial({ material, revisado, onAbrir }: {
   )
 }
 
-function Inicio({ estado, sequencia, pendentesPlano, tarefasPlano, concluirTarefa, abrirMaterial, escolherMateria, irMateriais, irRevisao, irProgresso, irEscola, irPlano, irJogo }: {
+function Inicio({ estado, sequencia, pendentesPlano, tarefasPlano, concluirTarefa, abrirMaterial, escolherMateria, irMateriais, irRevisao, irProgresso, irEscola, irPlano, irJogo, dataDesafio, respostaDesafio, responderDesafio }: {
+  dataDesafio: string
+  respostaDesafio?: RespostaDiaria
+  responderDesafio: (questaoId:string,opcao:number)=>void
   tarefasPlano: readonly TarefaPlano[]
   concluirTarefa: (id:string)=>void
   pendentesPlano: number
@@ -152,6 +157,8 @@ function Inicio({ estado, sequencia, pendentesPlano, tarefasPlano, concluirTaref
           <Clock3 size={16}/> {agenda.proximas.length} {agenda.proximas.length===1?'tarefa planejada':'tarefas planejadas'} para os próximos 7 dias
         </p>}
       </section>
+      <DesafioDia data={dataDesafio} resposta={respostaDesafio} responder={responderDesafio}
+        abrirMaterial={(id)=>{const item=materiais.find((m)=>m.id===id);if(item)abrirMaterial(item)}}/>
       <section className="plano-chamada-inicio" aria-label="Seu plano de estudos">
         <div><span className="sobretitulo">ORGANIZE SEU ESTUDO</span>
           <h2>Um plano pra revisar sem correria</h2>
@@ -552,6 +559,12 @@ export default function App() {
   }
   const excluirTarefa = (id: string) => setPlano((atual) => removerTarefa(atual, id))
   const reagendar = (id: string, data: string) => setPlano((atual) => reagendarTarefa(atual, id, data))
+  const dataDesafio = formatarDataLocal(new Date())
+  const responderDesafio = (questaoId:string,opcao:number) => {
+    if(escola.desafiosDiarios.some((r)=>r.data===dataDesafio))return
+    setEscola((atual)=>({...atual,desafiosDiarios:registrarRespostaDiaria(atual.desafiosDiarios,dataDesafio,questaoId,opcao)}))
+    registrarEstudo()
+  }
 
   const apagarTudo = (): boolean => {
     const apagado=apagarDadosDoEstudos(armazenamento())
@@ -600,6 +613,8 @@ export default function App() {
             <>
               {tela === 'inicio' && <Inicio estado={estado} sequencia={diasConsecutivosEstudados(escola.diasEstudo)}
                 pendentesPlano={resumoPlano(plano).pendentes} tarefasPlano={plano} concluirTarefa={concluirTarefa}
+                dataDesafio={dataDesafio} respostaDesafio={escola.desafiosDiarios.find((r)=>r.data===dataDesafio)}
+                responderDesafio={responderDesafio}
                 irPlano={() => navegar('plano')}
                 irEscola={() => navegar('escola')} irJogo={() => navegar('jogo')} abrirMaterial={abrirMaterial}
                 escolherMateria={escolherMateria} irMateriais={() => navegar('materiais')}

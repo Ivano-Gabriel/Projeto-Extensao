@@ -1,0 +1,30 @@
+.desafio-dia { margin:1.1rem 0; border-radius:1.25rem; overflow:hidden; border:1px solid #c9d8f0; background:var(--sheet); box-shadow:0 10px 28px #1427440d; }
+.desafio-dia-cabecalho { display:flex; align-items:start; justify-content:space-between; gap:.8rem; padding:1.2rem; background:linear-gradient(115deg,#16345f,#244e82); color:white; }
+.desafio-dia-selo { display:inline-flex; align-items:center; gap:.35rem; padding:.25rem .5rem; border-radius:999px; background:#ffffff20; font-weight:900; font-size:.66rem; letter-spacing:.05em; color:#ffdb7d; }
+.desafio-dia-cabecalho h2 { display:flex; align-items:center; gap:.5rem; margin:.6rem 0 .4rem; font:900 clamp(1.5rem,4vw,2.1rem)/1.1 var(--font-display); letter-spacing:-.04em; }
+.desafio-dia-cabecalho h2 svg { color:#ffcf55; }
+.desafio-dia-cabecalho p { margin:0; font-size:.82rem; line-height:1.55; color:#dbe9f9; }
+.desafio-dia-data { padding:.4rem .5rem; border:1px solid #ffffff65; border-radius:.5rem; white-space:nowrap; font-weight:900; font-size:.62rem; color:#f6e3aa; }
+.desafio-dia-corpo { display:grid; gap:.9rem; padding:clamp(1rem,2.6vw,1.5rem); }
+.desafio-dia-tema { display:inline-flex; align-items:center; gap:.4rem; justify-self:start; padding:.4rem .55rem; background:var(--blue-soft); color:var(--blue-dark); border-radius:.6rem; font-size:.74rem; font-weight:900; }
+.desafio-dia-corpo h3 { margin:0; font:850 clamp(1.1rem,3vw,1.45rem)/1.45 var(--font-display); }
+.desafio-dia-opcoes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.55rem; }
+.desafio-dia-opcoes button { display:flex; align-items:center; gap:.55rem; min-height:3.3rem; padding:.65rem; background:var(--paper); color:var(--ink); border:1px solid var(--line-strong); border-radius:.8rem; text-align:left; font-size:.81rem; line-height:1.45; }
+.desafio-dia-opcoes button>span { display:grid; flex:0 0 1.8rem; place-items:center; height:1.8rem; border-radius:.5rem; background:var(--blue-soft); color:var(--blue-dark); font-weight:900; }
+.desafio-dia-opcoes button:not(:disabled):hover { border-color:var(--blue); transform:translateY(-1px); }
+.desafio-dia-opcoes button:disabled { opacity:1; cursor:default; }
+.desafio-dia-opcoes button.certa { border-color:#28a07d; background:#e2f7ea; color:#145c44; }
+.desafio-dia-opcoes button.errada { border-color:#c77266; background:#fff0ed; color:#8c342d; }
+.desafio-dia-opcoes :focus-visible, .desafio-dia-material:focus-visible { outline:3px solid var(--blue); outline-offset:3px; }
+.desafio-dia-resposta { display:grid; gap:.5rem; padding:.9rem 1rem; border-radius:.8rem; background:var(--yellow-soft); border:1px solid #d6bd67; }
+.desafio-dia-resposta.acerto { background:var(--mint-soft); border-color:var(--mint); }
+.desafio-dia-resposta strong { display:flex; align-items:center; gap:.4rem; font-weight:900; font-size:.9rem; }
+.desafio-dia-resposta p { margin:0; font-size:.83rem; line-height:1.65; }
+.desafio-dia-resposta small { color:var(--muted); font-size:.7rem; }
+.desafio-dia-material { display:flex; justify-content:center; align-items:center; justify-self:start; min-height:3rem; gap:.4rem; padding:.65rem .8rem; border:1px solid var(--line-strong); border-radius:.65rem; background:var(--sheet); color:var(--blue-dark); font-weight:900; font-size:.8rem; }
+@media(max-width:420px){.desafio-dia-opcoes {grid-template-columns:1fr;}.desafio-dia-data {display:none;}}
+html[data-tema="escuro"] .desafio-dia {background:var(--sheet);border-color:var(--line);}
+html[data-tema="escuro"] .desafio-dia-opcoes button {background:var(--paper);}
+html[data-tema="escuro"] .desafio-dia-opcoes button.certa {background:#205341;color:#d1ffeb;}
+html[data-tema="escuro"] .desafio-dia-opcoes button.errada {background:#633d3b;color:#ffe0d6;}
+@media(prefers-reduced-motion:reduce){.desafio-dia-opcoes button {transition:none;}}
