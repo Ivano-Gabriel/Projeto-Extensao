@@ -48,3 +48,15 @@ html[data-tema="escuro"] .portal-feedback.falha{background:#5b3434;color:#ffe2d8
 html[data-tema="escuro"] .portal-feedback.sucesso{color:#b1f3d8}
 @media(min-width:1000px){.portal-paineis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:420px){.portal-campos{grid-template-columns:1fr}.portal-hero{padding:1.1rem}}
+
+.portal-perfis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}
+.portal-perfis button{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;min-height:5rem;padding:.75rem .35rem;border:1px solid var(--line-strong);border-radius:.9rem;background:var(--paper);color:var(--ink);font-size:.83rem}
+.portal-perfis button.selecionado{border-color:var(--blue);background:var(--blue-soft);color:var(--blue-dark);box-shadow:0 0 0 2px var(--blue-soft)}
+.portal-perfis button:focus-visible,.portal-senha-visivel:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.portal-senha-campo{display:flex;align-items:center;border:1px solid var(--line-strong);border-radius:.65rem;overflow:hidden;background:var(--paper)}
+.portal-senha-campo:focus-within{outline:2px solid var(--blue);outline-offset:2px}
+.portal-form .portal-senha-campo input{flex:1;border:0;background:transparent;border-radius:0;outline:none;min-width:0}
+.portal-senha-visivel{display:grid;place-items:center;flex:0 0 3rem;min-height:3rem;border:0;background:transparent;color:var(--ink)}
+.portal-login-seguranca{display:flex;align-items:flex-start;gap:.45rem}
+.portal-login-seguranca svg{flex:none}
+@media(max-width:360px){.portal-perfis button{font-size:.75rem}}
