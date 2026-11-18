@@ -390,3 +390,9 @@ select:focus-visible,textarea:focus-visible { outline:3px solid var(--blue); out
   .folha-estudo {animation:none;transform:none}
   .escolha-materia,.cartao-material,.resumo-metrica {transition:none}
 }
+
+.portal-atalho { display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:2.75rem;padding:.55rem .75rem;background:var(--blue-soft);color:var(--blue-dark);border:1px solid var(--line-strong);border-radius:.65rem;font-size:.74rem;font-weight:900;line-height:1.2; }
+.portal-atalho:hover { border-color:var(--blue); }
+.portal-atalho[aria-current="page"] { background:var(--blue);border-color:var(--blue);color:white; }
+.portal-atalho:focus-visible { outline:3px solid var(--blue);outline-offset:3px; }
+@media(max-width:420px){.portal-atalho{font-size:.7rem;padding:.45rem .55rem}.escola-header-controles{gap:.3rem}}
