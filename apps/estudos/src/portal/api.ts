@@ -17,7 +17,12 @@ export type ResultadoAtividade = {acertou:boolean;explicacao:string}
 type Metodo = 'GET' | 'POST'
 
 export class ErroApi extends Error {
-  constructor(mensagem:string,readonly status:number){super(mensagem);this.name='ErroApi'}
+  readonly status:number
+  constructor(mensagem:string,status:number){
+    super(mensagem)
+    this.name='ErroApi'
+    this.status=status
+  }
 }
 
 function validarRota(path:string) {
