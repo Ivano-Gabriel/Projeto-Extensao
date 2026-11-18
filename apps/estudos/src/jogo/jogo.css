@@ -1,41 +1,51 @@
-.arcade-pagina { display:grid; gap:1.1rem; max-width:990px; }
-.arcade-navegacao { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.7rem; }
-.arcade-navegacao>span { display:flex; align-items:center; gap:.35rem; padding:.5rem .75rem; background:var(--yellow-soft); color:var(--ink); border-radius:999px; font-size:.7rem; font-weight:900; }
-.arcade-cabecalho { display:flex; align-items:center; justify-content:space-between; gap:1rem; }
-.arcade-cabecalho h1 { font:900 clamp(2rem,6vw,3.3rem)/1 var(--font-display); letter-spacing:-.05em; margin:.35rem 0 .65rem; }
-.arcade-cabecalho p { color:var(--muted); line-height:1.6; font-size:.87rem; margin:0; max-width:58ch; }
-.arcade-medalha { display:grid; flex:0 0 3.5rem; height:3.5rem; place-items:center; font-size:2.2rem; border-radius:1rem; background:var(--yellow); color:var(--ink); transform:rotate(9deg); }
-.arcade-painel { padding:clamp(.65rem,2vw,1.25rem); background:#11223e; border:3px solid #2d4880; border-radius:1.4rem; box-shadow:0 16px 35px #10244724; }
-.arcade-placar { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; margin-bottom:.85rem; }
-.arcade-placar span { display:grid; justify-items:center; gap:.15rem; padding:.65rem .3rem; color:white; border:1px solid #44628f; background:#1c3150; border-radius:.8rem; }
-.arcade-placar strong { display:flex; align-items:center; gap:.3rem; font:900 clamp(1.15rem,3.5vw,1.75rem) var(--font-display); color:#ffe084; }
-.arcade-placar small { color:#b9d0eb; font-size:.65rem; font-weight:900; letter-spacing:.09em; }
-.arcade-cenario { position:relative; overflow:hidden; width:100%; height:clamp(205px,43vw,340px); border-radius:1rem; background:linear-gradient(#3b6795,#577fa0 65%,#e9d4a2 65%,#e3bf80); }
-.arcade-estrelas span { position:absolute; color:#fff3ac; opacity:.8; font-size:clamp(1.1rem,5vw,2.1rem); }
-.arcade-estrelas span:nth-child(1){left:12%;top:18%}.arcade-estrelas span:nth-child(2){left:55%;top:11%}.arcade-estrelas span:nth-child(3){left:84%;top:25%}
-.arcade-personagem { position:absolute; z-index:2; left:12%; bottom:16%; width:65px; height:66px; transition:transform .08s linear; }
-.arcade-livro { display:grid; place-items:center; width:58px; height:58px; border:3px solid #17344f; border-radius:12px 12px 5px 5px; color:#1b3857; background:linear-gradient(95deg,#fff7dd 47%,#f7c948 49%); box-shadow:4px 6px 0 #11223e45; transform:rotate(-6deg); }
-.arcade-sombra { position:absolute; bottom:-2px; left:4px; width:46px; height:6px; background:#132e3e43; filter:blur(3px); border-radius:50%; }
-.arcade-obstaculo { position:absolute; z-index:1; bottom:16%; display:grid; place-items:center; width:clamp(30px,8vw,42px); height:clamp(38px,10vw,50px); border:3px solid #7a3124; border-radius:.65rem; background:#ef6b53; color:white; font:950 1.5rem var(--font-display); box-shadow:4px 5px 0 #1e324448; transition:left .1s linear; }
-.arcade-chao { position:absolute; bottom:12%; left:0; right:0; border-bottom:5px dashed #40614e80; }
-.arcade-overlay { position:absolute; z-index:3; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.6rem; padding:1.2rem; text-align:center; background:#11223edd; color:white; backdrop-filter:blur(4px); }
-.arcade-overlay-icone { font-size:2.7rem; color:#ffe084; }
-.arcade-overlay h2 { margin:0; font:900 clamp(1.45rem,5vw,2.2rem) var(--font-display); }
-.arcade-overlay p { margin:0; line-height:1.5; max-width:36ch; font-size:.86rem; color:#dbe9f7; }
-.arcade-overlay .botao-principal { margin-top:.5rem; color:#13223d; background:#f7c948; border-color:#f7c948; }
-.arcade-controles { display:grid; justify-items:center; gap:.7rem; padding:.85rem .2rem .15rem; color:#e3efff; }
-.arcade-pular { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; width:min(100%,350px); min-height:3.7rem; border:2px solid #d7a63f; background:#f7c948; color:#13223d; border-radius:1rem; font:950 1.05rem var(--font-display); box-shadow:0 5px 0 #b78a31; }
-.arcade-pular:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 #b78a31}
-.arcade-pular:disabled {opacity:.55}
-.arcade-controles p { margin:0; color:#c4d8f1; font-size:.74rem; line-height:1.55; text-align:center; }
-.arcade-controles kbd { padding:.15rem .35rem; background:#203b61; border:1px solid #476991; border-radius:.3rem; }
-.arcade-nota { margin:0; color:var(--muted); font-size:.78rem; line-height:1.55; text-align:center; }
-.arcade-chamada { display:flex; align-items:center; flex-wrap:wrap; gap:1rem; margin:1.1rem 0; padding:1rem 1.2rem; border-radius:1.1rem; border:1px solid #dbc49a; background:linear-gradient(105deg,#fff3c8,#fff9ed); }
-.arcade-chamada-selo { display:grid; flex:0 0 3.2rem; height:3.2rem; place-items:center; background:#132b4a; color:#f7c948; border-radius:.9rem; font-size:1.8rem; transform:rotate(-9deg); }
-.arcade-chamada>div { flex:1 1 170px; }
-.arcade-chamada h2 { margin:.2rem 0 .3rem; font:900 1.25rem var(--font-display); }
-.arcade-chamada p { font-size:.81rem; line-height:1.5; color:#5c523e; margin:0; }
-.arcade-chamada button { flex:0 0 auto; }
-html[data-tema="escuro"] .arcade-chamada { background:linear-gradient(105deg,#4b3c21,#222f49); border-color:#776342; }
-html[data-tema="escuro"] .arcade-chamada p { color:#e5d5b2; }
-@media(prefers-reduced-motion:reduce){.arcade-personagem,.arcade-obstaculo {transition:none}}
+.arcade-pagina{display:grid;gap:1.2rem;max-width:970px}
+.arcade-navegacao{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+.arcade-navegacao>span{display:inline-flex;align-items:center;gap:.4rem;font-size:.67rem;font-weight:900;letter-spacing:.07em;color:var(--blue-dark)}
+.arcade-cabecalho{display:grid;gap:.55rem;padding:1rem 0}
+.arcade-cabecalho h1{margin:0;max-width:20ch;font:900 clamp(1.9rem,5vw,3.3rem)/1.06 var(--font-display);letter-spacing:-.04em}
+.arcade-cabecalho p{margin:0;color:var(--muted);font-size:.85rem;line-height:1.55;max-width:55ch}
+.missao-grade{display:grid;gap:.85rem;grid-template-columns:1fr}
+.missao-card{display:grid;justify-items:start;gap:.8rem;min-height:235px;padding:1.3rem;text-align:left;border:1px solid var(--line);border-radius:1.15rem;color:var(--ink);background:var(--sheet);box-shadow:0 7px 22px #14274412;transition:transform .17s,box-shadow .17s}
+.missao-card:hover{transform:translateY(-3px);box-shadow:0 11px 26px #14274423}
+.missao-icon{display:grid;place-items:center;width:3.3rem;height:3.3rem;border-radius:.9rem;background:var(--blue-soft);color:var(--blue-dark)}
+.missao-amarelo .missao-icon{background:var(--yellow-soft);color:#996012}
+.missao-verde .missao-icon{background:var(--mint-soft);color:#178065}
+.missao-card strong{font:900 1.32rem var(--font-display)}
+.missao-card small{color:var(--muted);font-size:.82rem;line-height:1.5}
+.missao-cta{display:flex;align-items:center;gap:.4rem;font-size:.79rem;font-weight:900;color:var(--blue-dark)}
+.missao-trilha{height:.53rem;background:var(--line);border-radius:999px;overflow:hidden}
+.missao-trilha>span{display:block;height:100%;background:var(--mint);transition:width .2s ease;border-radius:inherit}
+.missao-jogo,.missao-final{display:grid;gap:1.1rem;padding:clamp(1rem,3vw,2rem);background:var(--sheet);border:1px solid var(--line);border-radius:1.15rem}
+.missao-situacao{display:inline-flex;justify-self:start;padding:.5rem .7rem;border-radius:.6rem;font-size:.78rem;font-weight:850;color:var(--blue-dark);background:var(--blue-soft)}
+.missao-jogo h2{margin:0;font:900 clamp(1.16rem,3vw,1.6rem)/1.38 var(--font-display)}
+.missao-opcoes{display:grid;gap:.7rem;grid-template-columns:1fr}
+.missao-opcoes button{display:flex;align-items:center;gap:.65rem;min-height:3.7rem;padding:.85rem;border:1px solid var(--line-strong);border-radius:.8rem;color:var(--ink);background:var(--paper);text-align:left;font-weight:700;font-size:.82rem;line-height:1.45}
+.missao-opcoes button:not(:disabled):hover{border-color:var(--blue);transform:translateY(-1px)}
+.missao-opcoes button:disabled{opacity:1;cursor:default}
+.missao-letra{display:grid;place-items:center;flex:0 0 2rem;height:2rem;border-radius:.55rem;font-weight:900;color:var(--blue-dark);background:var(--blue-soft)}
+.missao-opcoes button>span:nth-child(2){flex:1}
+.missao-opcoes button.correta{border-color:#2f9972;background:#ddf3e7;color:#135d43}
+.missao-opcoes button.errada{border-color:#ce7d72;background:#fde8e5;color:#873527}
+.missao-explicacao{display:grid;justify-items:start;gap:.65rem;padding:1rem;border:1px solid var(--line);border-radius:.8rem;background:var(--yellow-soft)}
+.missao-explicacao.acertou{background:var(--mint-soft)}
+.missao-explicacao strong{font-size:1.08rem}
+.missao-explicacao p{margin:0;line-height:1.6;font-size:.86rem}
+.missao-trocar{justify-self:start;padding:.5rem;border:0;background:transparent;color:var(--blue-dark);font-weight:850;font-size:.79rem}
+.missao-final{text-align:center;justify-items:center;padding:3rem 1rem}
+.missao-final>span{font-size:3rem;color:var(--blue)}
+.missao-final h2{font:950 clamp(2rem,7vw,3.5rem) var(--font-display);margin:0}
+.missao-final p{color:var(--muted);max-width:36ch;margin:0;line-height:1.5}
+.missao-acoes{display:flex;flex-wrap:wrap;justify-content:center;gap:.7rem}
+.arcade-nota{font-size:.74rem;color:var(--muted);text-align:center;line-height:1.5}
+.arcade-chamada{display:flex;align-items:center;flex-wrap:wrap;gap:1rem;margin:1.1rem 0;padding:1.05rem;border:1px solid #dbc49a;border-radius:1.1rem;background:linear-gradient(110deg,#fff3ce,#fff8e9)}
+.arcade-chamada-selo{display:grid;place-items:center;flex:0 0 3.2rem;height:3.2rem;background:#19375c;color:#ffdc73;border-radius:.85rem;font-size:1.8rem}
+.arcade-chamada>div{flex:1 1 165px}
+.arcade-chamada h2{margin:.2rem 0 .3rem;font:900 1.2rem var(--font-display)}
+.arcade-chamada p{margin:0;color:#5e5647;font-size:.81rem;line-height:1.5}
+.arcade-chamada button{flex:0 0 auto}
+html[data-tema="escuro"] .missao-opcoes button.correta{background:#214836;color:#e3ffec}
+html[data-tema="escuro"] .missao-opcoes button.errada{background:#5b3434;color:#ffdfd9}
+html[data-tema="escuro"] .missao-amarelo .missao-icon{color:#ffe0a0}
+html[data-tema="escuro"] .missao-verde .missao-icon{color:#a7f5d0}
+@media(min-width:680px){.missao-grade{grid-template-columns:repeat(3,minmax(0,1fr))}.missao-opcoes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.missao-card,.missao-opcoes button,.missao-trilha>span{transition:none}}

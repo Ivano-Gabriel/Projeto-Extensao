@@ -137,9 +137,9 @@
 
 html[data-tema="escuro"] {
   color-scheme:dark;
-  --paper:#111a2b; --sheet:#1c2940; --ink:#f0f4ff;
-  --muted:#b5c4dd; --line:#41516c; --line-strong:#657593;
-  --blue:#74a3ff; --blue-dark:#bfd3ff; --blue-soft:#293e64;
+  --paper:#0f1521; --sheet:#1a2637; --ink:#f2f5fb;
+  --muted:#c1cada; --line:#38475d; --line-strong:#63758c;
+  --blue:#96c1ff; --blue-dark:#c7dfff; --blue-soft:#233a54;
   --yellow:#f7c948; --yellow-soft:#473b20;
   --mint:#64cba5; --mint-soft:#24493c;
   --coral:#f58272; --coral-soft:#543832;
@@ -275,3 +275,17 @@ html[data-tema="escuro"] .mural-simulador, html[data-tema="escuro"] .mural-vazio
 html[data-tema="escuro"] .mural-alerta { background:var(--paper); }
 html[data-tema="escuro"] .mural-local-tag { color:#a5e8cd; }
 @media(max-width:390px) { .mural-form-campos { grid-template-columns:1fr; } }
+
+.escola-streak svg, .escola-chamada-icon svg { transform-origin:50% 80%; animation:chamaSuave 2.8s ease-in-out infinite; }
+.escola-streak svg { fill:#e79a39; stroke:#93482a; filter:drop-shadow(0 2px 3px #c76b303d); }
+@keyframes chamaSuave { 0%,100%{transform:rotate(-3deg) scale(.98)} 50%{transform:rotate(3deg) scale(1.05)} }
+html[data-tema="escuro"] .arcade-chamada { background:linear-gradient(115deg,#28364b,#252a37); border-color:#51627b; }
+html[data-tema="escuro"] .arcade-chamada h2 { color:var(--ink); }
+html[data-tema="escuro"] .arcade-chamada p { color:var(--muted); }
+html[data-tema="escuro"] .mural-form input,
+html[data-tema="escuro"] .mural-form select,
+html[data-tema="escuro"] .mural-form textarea,
+html[data-tema="escuro"] .mural-filtros select,
+html[data-tema="escuro"] .plano-reagendar input { background:var(--sheet);color:var(--ink);border-color:var(--line-strong); }
+html[data-tema="escuro"] .demo-tag { color:#ffe6ac; background:#483920; border-color:#8f7946; }
+@media(prefers-reduced-motion:reduce) { .escola-streak svg, .escola-chamada-icon svg { animation:none; } }

@@ -1,76 +1,77 @@
-import { useEffect, useState } from 'react'
-import { ArrowLeft, BookOpen, Heart, Play, RotateCcw, Sparkles } from 'lucide-react'
-import { avancar, DURACAO_TICKS, estadoInicial, iniciarJogo, pular, type EstadoJogo } from './regras'
+import { useState } from 'react'
+import { ArrowLeft, ArrowRight, BriefcaseBusiness, Check, Code2, RotateCcw, ScanSearch, Sparkles } from 'lucide-react'
+import { avancar, estadoInicial, iniciarJogo, missoes, pontos, responder, type MissaoId } from './regras'
 import './jogo.css'
 
-type Props = {voltar:()=>void}
-const TOTAL_SEGUNDOS=DURACAO_TICKS/10
-function saltoAltura(puloRestante:number){
-  if(puloRestante<=0) return 0
-  return Math.round(68*Math.sin((9-puloRestante)/9*Math.PI))
-}
-export default function Jogo({voltar}:Props) {
-  const [jogo,setJogo]=useState<EstadoJogo>(estadoInicial)
-  useEffect(()=>{
-    if(jogo.fase!=='jogando') return
-    const interval=window.setInterval(()=>setJogo((atual)=>avancar(atual)),100)
-    return ()=>window.clearInterval(interval)
-  },[jogo.fase])
-  useEffect(()=>{
-    const tecla=(evento:KeyboardEvent)=>{
-      if((evento.code==='Space'||evento.code==='ArrowUp')&&jogo.fase==='jogando'){
-        evento.preventDefault()
-        setJogo((atual)=>pular(atual))
-      }
-    }
-    window.addEventListener('keydown',tecla)
-    return ()=>window.removeEventListener('keydown',tecla)
-  },[jogo.fase])
-  const tempo=Math.max(0,Math.ceil(TOTAL_SEGUNDOS-jogo.ticks/10))
-  const iniciar=()=>setJogo(iniciarJogo())
+type Props={voltar:()=>void}
+const icons={tecnologia:Code2,negocios:BriefcaseBusiness,jornalismo:ScanSearch}
+export default function Jogo({voltar}:Props){
+  const [partida,setPartida]=useState(estadoInicial)
+  const missao=missoes.find(m=>m.id===partida.missao)
+  const pergunta=missao?.perguntas[partida.indice]
+  const respondeu=partida.respostas.length>partida.indice
+  const resposta=partida.respostas[partida.indice]
+  const correta=pergunta?.correta===resposta
+  const reiniciar=()=>setPartida(estadoInicial())
   return <div className="pagina arcade-pagina">
-    <div className="arcade-navegacao">
-      <button type="button" className="botao-voltar" onClick={voltar}><ArrowLeft size={18}/> Voltar aos estudos</button>
-      <span><Sparkles size={16}/> PAUSA RÁPIDA</span>
-    </div>
-    <header className="arcade-cabecalho">
-      <div><span className="sobretitulo">ARCADE DO SABER · JOGO ORIGINAL</span>
-        <h1>Pula, Livrinho!</h1>
-        <p>Uma pausa de 30 segundos entre os estudos. Pule os obstáculos, tente sua pontuação e volte pro que importa.</p>
-      </div>
-      <span className="arcade-medalha" aria-hidden="true">✦</span>
+    <nav className="arcade-navegacao" aria-label="Navegação dos desafios">
+      <button type="button" className="botao-voltar" onClick={voltar}><ArrowLeft size={18}/> Voltar</button>
+      <span><Sparkles size={16}/> DESAFIOS DE CARREIRA</span>
+    </nav>
+    {!missao?<><header className="arcade-cabecalho">
+      <span className="sobretitulo">MISSÕES DO FUTURO</span>
+      <h1>Qual problema você resolveria?</h1>
+      <p>Escolha uma área e teste suas decisões em três situações reais do mundo do trabalho.</p>
     </header>
-    <section className="arcade-painel" aria-label="Minigame de pulo">
-      <div className="arcade-placar">
-        <span><strong>{jogo.pontos}</strong><small>PONTOS</small></span>
-        <span><strong>{tempo}s</strong><small>TEMPO</small></span>
-        <span><strong><Heart size={18} fill="currentColor"/> {jogo.vidas}</strong><small>VIDAS</small></span>
+      <div className="missao-grade">{missoes.map(m=>{
+        const Icon=icons[m.id]
+        return <button type="button" key={m.id} className={`missao-card missao-${m.cor}`}
+            onClick={()=>setPartida(iniciarJogo(m.id))}>
+          <span className="missao-icon"><Icon size={28}/></span>
+          <span className="sobretitulo">{m.profissao}</span>
+          <strong>{m.nome}</strong>
+          <small>{m.descricao}</small>
+          <span className="missao-cta">Começar <ArrowRight size={18}/></span>
+        </button>})}</div>
+    </>:<><header className="arcade-cabecalho">
+      <span className="sobretitulo">{missao.profissao}</span>
+      <h1>{missao.nome}</h1>
+      <p>{partida.concluido?'Missão concluída. O aprendizado continua.':`Situação ${partida.indice+1} de ${missao.perguntas.length}`}</p>
+    </header>
+    <div className="missao-trilha" role="progressbar" aria-label="Progresso da missão"
+      aria-valuemin={0} aria-valuemax={missao.perguntas.length}
+      aria-valuenow={partida.concluido?missao.perguntas.length:partida.indice}>
+      <span style={{width:`${100*(partida.concluido?1:partida.indice/missao.perguntas.length)}%`}}/>
+    </div>
+    {partida.concluido?<section className="missao-final">
+      <span aria-hidden="true">✦</span>
+      <h2>{pontos(partida)} pontos</h2>
+      <p>Você concluiu três situações. Cada escolha é uma chance de aprender.</p>
+      <div className="missao-acoes">
+        <button type="button" className="botao-principal" onClick={()=>setPartida(iniciarJogo(missao.id))}><RotateCcw size={18}/> Refazer</button>
+        <button type="button" className="botao-secundario" onClick={reiniciar}>Outra missão <ArrowRight size={18}/></button>
       </div>
-      <div className="arcade-cenario" aria-label="Livrinho pulando os obstáculos">
-        <div className="arcade-estrelas" aria-hidden="true"><span>✦</span><span>✳</span><span>✦</span></div>
-        <div className="arcade-personagem" style={{transform:`translateY(-${saltoAltura(jogo.pulo)}px)`}} aria-hidden="true">
-          <div className="arcade-livro"><BookOpen size={32} strokeWidth={2.3}/></div>
-          <span className="arcade-sombra"/>
-        </div>
-        {jogo.obstaculos.map((x,i)=><div key={i} className="arcade-obstaculo" style={{left:`${x}%`}} aria-hidden="true">?</div>)}
-        <div className="arcade-chao"/>
-        {jogo.fase!=='jogando'&&<div className="arcade-overlay">
-          <span className="arcade-overlay-icone">{jogo.fase==='fim'?'★':'✦'}</span>
-          <h2>{jogo.fase==='fim'?(jogo.vidas>0?'Boa corrida!':'Fim de jogo!'):'Preparado pra pular?'}</h2>
-          <p>{jogo.fase==='fim'?`Você fez ${jogo.pontos} pontos. O legal é tentar e aprender!`:'Pule os pontos de interrogação. Duas vidas, uma corrida curta.'}</p>
-          <button type="button" className="botao-principal" onClick={iniciar}>
-            {jogo.fase==='fim'?<RotateCcw size={19}/>:<Play size={19}/>}
-            {jogo.fase==='fim'?'Jogar de novo':'Começar corrida'}
-          </button>
-        </div>}
+    </section>:<section className="missao-jogo" aria-label="Questão da missão">
+      <span className="missao-situacao">{pergunta?.situacao}</span>
+      <h2>{pergunta?.desafio}</h2>
+      <div className="missao-opcoes" role="group" aria-label="Opções da decisão">
+        {pergunta?.opcoes.map((texto,i)=><button type="button" key={i} disabled={respondeu}
+          className={respondeu?(i===pergunta.correta?'correta':i===resposta?'errada':''):''}
+          aria-pressed={resposta===i}
+          onClick={()=>setPartida(atual=>responder(atual,i))}>
+          <span className="missao-letra">{String.fromCharCode(65+i)}</span><span>{texto}</span>
+          {respondeu&&i===pergunta.correta&&<Check size={18} aria-hidden="true"/>}
+        </button>)}
       </div>
-      <div className="arcade-controles">
-        <button type="button" className="arcade-pular" disabled={jogo.fase!=='jogando'} onClick={()=>setJogo((atual)=>pular(atual))}>
-          <BookOpen size={21}/> PULAR!
+      {respondeu&&<div className={correta?'missao-explicacao acertou':'missao-explicacao'} role="status">
+        <strong>{correta?'Boa decisão!':'Olha essa dica:'}</strong>
+        <p>{pergunta?.explicacao}</p>
+        <button type="button" className="botao-principal" onClick={()=>setPartida(avancar)}>
+          {partida.indice===missao.perguntas.length-1?'Ver meu resultado':'Próxima situação'} <ArrowRight size={18}/>
         </button>
-        <p>No celular, toque em PULAR. No computador, use <kbd>Espaço</kbd> ou <kbd>↑</kbd>.</p>
-      </div>
-    </section>
-    <p className="arcade-nota">Este jogo não salva ranking, não coleta dados e não envia nada à escola. Faça pausas quando quiser.</p>
+      </div>}
+      <button type="button" className="missao-trocar" onClick={reiniciar}>Escolher outra área</button>
+    </section>}</>}
+    <p className="arcade-nota">Sem cadastro, ranking ou coleta de dados. Você aprende no seu ritmo.</p>
   </div>
 }

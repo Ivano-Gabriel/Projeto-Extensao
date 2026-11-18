@@ -179,10 +179,10 @@ function Inicio({ estado, sequencia, pendentesPlano, tarefasPlano, concluirTaref
       </section>
       <section className="arcade-chamada" aria-label="Jogo de pausa rápida">
         <span className="arcade-chamada-selo" aria-hidden="true">✦</span>
-        <div><span className="sobretitulo">PAUSA RÁPIDA · 30 SEGUNDOS</span>
-          <h2>Arcade do Saber</h2>
-          <p>Jogue uma corrida curta com o Livrinho. Toque pra pular e volte ao seu plano.</p></div>
-        <button type="button" className="botao-principal" onClick={irJogo}>Jogar agora <ArrowRight size={17}/></button>
+        <div><span className="sobretitulo">ESCOLHA SUA MISSÃO</span>
+          <h2>Missões do Futuro</h2>
+          <p>Três desafios curtos sobre tecnologia, negócios e investigação.</p></div>
+        <button type="button" className="botao-principal" onClick={irJogo}>Escolher missão <ArrowRight size={17}/></button>
       </section>
       <section className="inicio-resumo" aria-label="Seu progresso neste navegador">
         <div className="resumo-destaque">

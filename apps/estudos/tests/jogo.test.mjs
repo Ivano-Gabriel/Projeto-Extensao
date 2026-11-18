@@ -1,41 +1,47 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { estadoInicial, iniciarJogo, pular, avancar, DURACAO_TICKS } from '../src/jogo/regras.ts'
+import {estadoInicial,iniciarJogo,responder,avancar,pontos,missoes} from '../src/jogo/regras.ts'
 
-test('inicia rodada limpa, pula apenas quando esta no chao e termina em tempo finito',()=>{
-  const inicial=estadoInicial()
-  assert.equal(inicial.fase,'pronto')
-  const inicio=iniciarJogo()
-  assert.equal(inicio.fase,'jogando')
-  const pulando=pular(inicio)
-  assert.ok(pulando.pulo>0)
-  assert.equal(pular(pulando).pulo,pulando.pulo)
-  let jogo=iniciarJogo()
-  for(let i=0;i<DURACAO_TICKS;i++){
-    jogo=avancar({...jogo,vidas:999,obstaculos:[]})
+test('tres missoes de ensino medio com tres situacoes e explicacoes',()=>{
+  assert.equal(missoes.length,3)
+  for(const missao of missoes){
+    assert.equal(missao.perguntas.length,3)
+    for(const pergunta of missao.perguntas){
+      assert.equal(pergunta.opcoes.length,4)
+      assert.ok(pergunta.explicacao.length>30)
+      assert.ok(pergunta.correta>=0&&pergunta.correta<=3)
+    }
   }
-  assert.equal(jogo.fase,'fim')
-  assert.equal(jogo.ticks,DURACAO_TICKS)
 })
-test('pontua apenas obstaculos evitados e reduz vidas em colisoes',()=>{
-  let jogo={...iniciarJogo(),ticks:3,obstaculos:[9],vidas:2}
-  jogo=avancar(jogo)
-  assert.equal(jogo.vidas,1)
-  assert.equal(jogo.pontos,0)
-  assert.equal(jogo.obstaculos.length,0)
-  const evitando=avancar({...iniciarJogo(),ticks:4,obstaculos:[1],pulo:6})
-  assert.equal(evitando.pontos,10)
+test('nao avanca sem resposta, nem aceita a segunda alternativa',()=>{
+  let jogo=iniciarJogo('tecnologia')
+  assert.equal(avancar(jogo),jogo)
+  assert.equal(responder(jogo,99),jogo)
+  jogo=responder(jogo,1)
+  assert.equal(responder(jogo,2),jogo)
+  assert.equal(jogo.respostas.length,1)
+  const segundo=avancar(jogo)
+  assert.equal(segundo.indice,1)
+  assert.equal(segundo.respostas.length,1)
 })
-test('finaliza com zero vidas e ignora cliques em rodadas encerradas',()=>{
-  const fim=avancar({...iniciarJogo(),ticks:2,obstaculos:[9],vidas:1})
-  assert.equal(fim.fase,'fim')
-  assert.equal(fim.vidas,0)
-  assert.equal(pular(fim),fim)
-  assert.equal(avancar(fim),fim)
+test('pontuacao depende de acertos e partida termina apos tres desafios',()=>{
+  const missao=missoes.find(m=>m.id==='negocios')
+  let jogo=iniciarJogo('negocios')
+  for(let i=0;i<3;i++){
+    jogo=responder(jogo,missao.perguntas[i].correta)
+    jogo=avancar(jogo)
+  }
+  assert.equal(jogo.concluido,true)
+  assert.equal(jogo.respostas.length,3)
+  assert.equal(pontos(jogo),300)
+  assert.equal(responder(jogo,0),jogo)
+  assert.equal(avancar(jogo),jogo)
+  assert.deepEqual(estadoInicial(),{missao:null,indice:0,respostas:[],concluido:false})
 })
-test('gera obstaculos deterministicamente sem ultrapassar o limite do jogo',()=>{
-  const criado=avancar({...iniciarJogo(),ticks:19,obstaculos:[]})
-  assert.equal(criado.obstaculos.length,1)
-  const desativado=avancar({...iniciarJogo(),ticks:DURACAO_TICKS-1,obstaculos:[]})
-  assert.equal(desativado.fase,'fim')
+test('resposta errada nao impede conclusao e o jogo nao tem temporizador',()=>{
+  let jogo=iniciarJogo('jornalismo')
+  const perguntas=missoes.find(m=>m.id==='jornalismo').perguntas
+  for(const pergunta of perguntas){jogo=avancar(responder(jogo,(pergunta.correta+1)%4))}
+  assert.equal(jogo.concluido,true)
+  assert.equal(pontos(jogo),0)
 })
