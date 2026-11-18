@@ -35,11 +35,13 @@ public class AuthController {
         @NotBlank @Size(min = 1, max = 200) String senha) {}
     public record EstadoRequest(@NotBlank String aba, @NotBlank String dia) {}
     public record EstadoResposta(String aba, String dia) {}
-    public record MeResposta(Long id, String nome, String email, Papel papel, EstadoResposta estado) {
+    public record MeResposta(Long id, String nome, String email, Papel papel,
+                            Long escolaId, boolean administrador, EstadoResposta estado) {
         static MeResposta de(Usuario usuario) {
             EstadoResposta estado = usuario.getUltimaAba() == null ? null
                 : new EstadoResposta(usuario.getUltimaAba(), usuario.getUltimoDia());
-            return new MeResposta(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPapel(), estado);
+            return new MeResposta(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPapel(),
+                usuario.getEscolaId(), usuario.isAdministradorPlataforma(), estado);
         }
     }
 

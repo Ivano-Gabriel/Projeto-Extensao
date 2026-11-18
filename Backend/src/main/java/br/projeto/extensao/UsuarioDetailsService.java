@@ -20,7 +20,9 @@ public class UsuarioDetailsService implements UserDetailsService {
         return usuarios.findByEmail(email.trim().toLowerCase(Locale.ROOT))
             .map(usuario -> User.withUsername(usuario.getEmail())
                 .password(usuario.getSenhaHash())
-                .roles(usuario.getPapel().name())
+                .authorities(usuario.isAdministradorPlataforma()
+                    ? "ROLE_ADMIN"
+                    : "ROLE_" + usuario.getPapel().name())
                 .build())
             .orElseThrow(() -> new UsernameNotFoundException("Credenciais invalidas"));
     }

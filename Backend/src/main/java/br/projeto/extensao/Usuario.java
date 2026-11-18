@@ -23,6 +23,12 @@ public class Usuario {
     @Column(nullable = false, length = 20)
     private Papel papel;
 
+    @Column(name = "escola_id")
+    private Long escolaId;
+
+    @Column(name = "administrador_plataforma", nullable = false)
+    private boolean administradorPlataforma;
+
     @Column(name = "ultima_aba", length = 15)
     private String ultimaAba;
 
@@ -39,6 +45,19 @@ public class Usuario {
     }
 
     public Long getId() { return id; }
+    public Long getEscolaId() { return escolaId; }
+    public boolean isAdministradorPlataforma() { return administradorPlataforma; }
+
+    public void vincularEscola(Long id) {
+        if (administradorPlataforma || id == null || id <= 0 ||
+            (escolaId != null && !escolaId.equals(id))) throw new IllegalArgumentException("Vinculo escolar invalido.");
+        this.escolaId = id;
+    }
+
+    public void ativarAdministradorPlataforma() {
+        if (escolaId != null) throw new IllegalStateException("O administrador nao deve pertencer a escola.");
+        this.administradorPlataforma = true;
+    }
     public String getNome() { return nome; }
     public String getEmail() { return email; }
     public String getSenhaHash() { return senhaHash; }
