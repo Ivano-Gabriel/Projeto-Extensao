@@ -13,7 +13,7 @@ import Escola from './escola/Escola'
 import { carregarEscola, salvarEscola } from './escola/estado'
 import { diasConsecutivosEstudados, formatarDataLocal } from './escola/regras'
 import Plano from './plano/Plano'
-import { adicionarTarefa, alternarTarefa, carregarPlano, removerTarefa, resumoPlano, salvarPlano, type NovaTarefa } from './plano/regras'
+import { adicionarTarefa, alternarTarefa, agendaDoDia, carregarPlano, reagendarTarefa, removerTarefa, resumoPlano, salvarPlano, type NovaTarefa, type TarefaPlano } from './plano/regras'
 
 type Tela = 'inicio' | 'materiais' | 'revisao' | 'escola' | 'progresso' | 'plano'
 type FiltroMateria = 'Todas' | Materia
@@ -86,7 +86,9 @@ function CartaoMaterial({ material, revisado, onAbrir }: {
   )
 }
 
-function Inicio({ estado, sequencia, pendentesPlano, abrirMaterial, escolherMateria, irMateriais, irRevisao, irProgresso, irEscola, irPlano }: {
+function Inicio({ estado, sequencia, pendentesPlano, tarefasPlano, concluirTarefa, abrirMaterial, escolherMateria, irMateriais, irRevisao, irProgresso, irEscola, irPlano }: {
+  tarefasPlano: readonly TarefaPlano[]
+  concluirTarefa: (id:string)=>void
   pendentesPlano: number
   sequencia: number
   estado: EstadoEstudos
@@ -100,6 +102,8 @@ function Inicio({ estado, sequencia, pendentesPlano, abrirMaterial, escolherMate
 }) {
   const resumo = resumoEstudos(materiais, estado.revisados, estado.respostas)
   const desempenho = resumirRespostas(questoes, estado.respostas)
+  const agenda = agendaDoDia(tarefasPlano)
+  const urgentes = [...agenda.atrasadas,...agenda.hoje].slice(0,3)
   return (
     <div className="pagina">
       <section className="hero">
@@ -127,6 +131,24 @@ function Inicio({ estado, sequencia, pendentesPlano, abrirMaterial, escolherMate
         <span><strong>Protótipo demonstrativo.</strong> Os resumos e as questões são exemplos, não materiais oficiais da escola</span>
       </div>
 
+      <section className="agenda-hoje" aria-label="Suas tarefas de hoje">
+        <div className="agenda-hoje-topo">
+          <div><span className="sobretitulo">MEU DIA</span><h2>O que estudar hoje?</h2>
+            <p>{urgentes.length
+              ? `${agenda.atrasadas.length} atrasadas · ${agenda.hoje.length} para hoje`
+              : 'Tudo em dia! Escolha um assunto ou planeje uma revisão.'}</p></div>
+          <button type="button" className="botao-secundario" onClick={irPlano}>Abrir plano <ArrowRight size={17}/></button>
+        </div>
+        {urgentes.length ? <ul className="agenda-hoje-lista">{urgentes.map((tarefa)=>
+          <li key={tarefa.id}>
+            <div><strong>{tarefa.titulo}</strong><small>{tarefa.materia} · {tarefa.data < formatarDataLocal(new Date()) ? 'Data já passou' : 'Hoje'}</small></div>
+            <button type="button" onClick={()=>concluirTarefa(tarefa.id)}
+              aria-label={`Marcar como concluída: ${tarefa.titulo}`}><Check size={18}/> Feito</button>
+          </li>)}</ul> : <p className="agenda-hoje-vazia">Você ainda não tem tarefas para hoje. Um passo de cada vez.</p>}
+        {agenda.proximas.length>0 && <p className="agenda-hoje-proximas">
+          <Clock3 size={16}/> {agenda.proximas.length} {agenda.proximas.length===1?'tarefa planejada':'tarefas planejadas'} para os próximos 7 dias
+        </p>}
+      </section>
       <section className="plano-chamada-inicio" aria-label="Seu plano de estudos">
         <div><span className="sobretitulo">ORGANIZE SEU ESTUDO</span>
           <h2>Um plano pra revisar sem correria</h2>
@@ -499,6 +521,7 @@ export default function App() {
     setPlano((atual) => alternarTarefa(atual, id))
   }
   const excluirTarefa = (id: string) => setPlano((atual) => removerTarefa(atual, id))
+  const reagendar = (id: string, data: string) => setPlano((atual) => reagendarTarefa(atual, id, data))
 
   const reiniciarQuiz = () => { setEstado((atual) => ({ ...atual, respostas: [] })); setIndiceQuiz(0); setAviso('Quiz reiniciado! Bora tentar novamente') }
 
@@ -536,7 +559,8 @@ export default function App() {
           ) : (
             <>
               {tela === 'inicio' && <Inicio estado={estado} sequencia={diasConsecutivosEstudados(escola.diasEstudo)}
-                pendentesPlano={resumoPlano(plano).pendentes} irPlano={() => navegar('plano')}
+                pendentesPlano={resumoPlano(plano).pendentes} tarefasPlano={plano} concluirTarefa={concluirTarefa}
+                irPlano={() => navegar('plano')}
                 irEscola={() => navegar('escola')} abrirMaterial={abrirMaterial}
                 escolherMateria={escolherMateria} irMateriais={() => navegar('materiais')}
                 irRevisao={() => navegar('revisao')} irProgresso={() => navegar('progresso')}/>}
@@ -546,7 +570,7 @@ export default function App() {
                 responder={responder} irMateriais={() => navegar('materiais')} reiniciar={reiniciarQuiz}/>}
               {tela === 'escola' && <Escola estado={escola} atualizar={setEscola} abrirMaterial={abrirPorId}/>}
               {tela === 'plano' && <Plano tarefas={plano} adicionar={incluirTarefa} alternar={concluirTarefa}
-                remover={excluirTarefa} abrirMaterial={abrirPorId} voltar={() => navegar('inicio')}/>}
+                remover={excluirTarefa} reagendar={reagendar} abrirMaterial={abrirPorId} voltar={() => navegar('inicio')}/>}
               {tela === 'progresso' && <Progresso estado={estado} pendentesPlano={resumoPlano(plano).pendentes}
                 irPlano={() => navegar('plano')} irMateriais={() => navegar('materiais')}
                 irRevisao={() => navegar('revisao')}

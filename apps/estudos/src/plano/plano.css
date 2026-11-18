@@ -76,3 +76,24 @@ html[data-tema="escuro"] .plano-chamada-inicio,
 html[data-tema="escuro"] .plano-progresso-atalho { background:var(--blue-soft); border-color:var(--line); }
 html[data-tema="escuro"] .plano-erro { background:#4d2d32; color:#ffb6a4!important; }
 html[data-tema="escuro"] .plano-sucesso { color:#abeed1!important; }
+
+.agenda-hoje { display:grid; gap:1rem; margin:1.1rem 0; padding:1.15rem; border:1px solid var(--line); background:var(--sheet); border-radius:1rem; }
+.agenda-hoje-topo { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:.75rem; }
+.agenda-hoje-topo h2 { margin:.35rem 0; font:850 clamp(1.2rem,3vw,1.55rem)/1.2 var(--font-display); }
+.agenda-hoje-topo p,.agenda-hoje-vazia,.agenda-hoje-proximas { margin:0; color:var(--muted); font-size:.83rem; line-height:1.55; }
+.agenda-hoje-topo .botao-secundario { min-height:3rem; }
+.agenda-hoje-lista { display:grid; gap:.55rem; list-style:none; margin:0; padding:0; }
+.agenda-hoje-lista li { display:flex; align-items:center; flex-wrap:wrap; gap:.8rem; padding:.8rem; background:var(--paper); border:1px solid var(--line); border-radius:.75rem; }
+.agenda-hoje-lista li>div { display:grid; gap:.2rem; flex:1 1 180px; min-width:0; }
+.agenda-hoje-lista strong { font:850 .91rem/1.4 var(--font-display); overflow-wrap:anywhere; }
+.agenda-hoje-lista small { color:var(--muted); font-size:.74rem; }
+.agenda-hoje-lista button { display:inline-flex; align-items:center; justify-content:center; gap:.4rem; min-height:3rem; padding:.6rem .85rem; background:var(--mint-soft); color:#155e46; border:1px solid var(--mint); border-radius:.65rem; font-size:.79rem; font-weight:900; }
+.agenda-hoje-proximas { display:flex; gap:.4rem; align-items:center; }
+.plano-reagendar { display:flex; align-items:end; flex-wrap:wrap; gap:.45rem; padding:.7rem; border:1px solid var(--line); border-radius:.7rem; background:var(--sheet); }
+.plano-reagendar label { flex:1 0 100%; font-size:.77rem; font-weight:850; }
+.plano-reagendar input { flex:1 1 145px; min-height:2.9rem; padding:.55rem; color:var(--ink); background:var(--sheet); border:1px solid var(--line-strong); border-radius:.55rem; font:inherit; }
+.plano-reagendar button { min-height:2.9rem; padding:.55rem .7rem; background:var(--blue-soft); color:var(--blue-dark); border:1px solid var(--line); border-radius:.55rem; font-size:.78rem; font-weight:850; }
+.plano-reagendar :focus-visible, .agenda-hoje :focus-visible { outline:3px solid var(--blue); outline-offset:3px; }
+html[data-tema="escuro"] .agenda-hoje { background:var(--sheet); }
+html[data-tema="escuro"] .agenda-hoje-lista li { background:var(--paper); }
+html[data-tema="escuro"] .agenda-hoje-lista button { color:#b1efce; background:#224f3c; }

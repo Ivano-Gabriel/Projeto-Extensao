@@ -68,6 +68,29 @@ export function resumoPlano(lista: readonly TarefaPlano[], hoje = new Date()): R
   }
 }
 
+export type AgendaDia = { atrasadas: TarefaPlano[]; hoje: TarefaPlano[]; proximas: TarefaPlano[] }
+
+export function agendaDoDia(tarefas: readonly TarefaPlano[], agora = new Date()): AgendaDia {
+  const hoje = formatarDataLocal(agora)
+  const fim = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())
+  fim.setDate(fim.getDate() + 7)
+  const dataFinal = formatarDataLocal(fim)
+  const pendentes = tarefas.filter((tarefa)=>!tarefa.feito)
+    .sort((a,b)=>a.data.localeCompare(b.data)||a.titulo.localeCompare(b.titulo,'pt-BR'))
+  return {
+    atrasadas: pendentes.filter((t)=>t.data<hoje),
+    hoje: pendentes.filter((t)=>t.data===hoje),
+    proximas: pendentes.filter((t)=>t.data>hoje&&t.data<=dataFinal),
+  }
+}
+
+export function reagendarTarefa(tarefas: readonly TarefaPlano[], id: string, data: string): TarefaPlano[] {
+  if(!dataPlanoValida(data)) throw new Error('Informe uma data válida.')
+  const tarefa=tarefas.find((t)=>t.id===id)
+  if(!tarefa||tarefa.feito) throw new Error('Só é possível reagendar uma tarefa pendente.')
+  return tarefas.map((item)=>item.id===id?{...item,data}:item)
+}
+
 type Leitura = {getItem:(key:string)=>string|null}
 type Escrita = {setItem:(key:string,value:string)=>void}
 
