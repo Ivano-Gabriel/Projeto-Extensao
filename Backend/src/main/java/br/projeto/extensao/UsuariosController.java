@@ -39,44 +39,57 @@ public class UsuariosController {
         this.encoder = encoder;
     }
 
+    private Usuario direcao(Authentication auth) {
+        if(auth==null)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        Usuario user=usuarios.findByEmail(auth.getName())
+            .orElseThrow(()->new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        if(user.getPapel()!=Papel.DIRECAO||user.isAdministradorPlataforma()||user.getEscolaId()==null)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        return user;
+    }
+
     @GetMapping("/alunos/{id}")
-    public ResponseEntity<UsuarioPublico> consultarAluno(@PathVariable Long id, Authentication autenticacao) {
-        boolean direcao = autenticacao.getAuthorities().stream()
-            .anyMatch(role -> role.getAuthority().equals("ROLE_DIRECAO"));
-        if (!direcao) {
-            Usuario proprio = usuarios.findByEmail(autenticacao.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
-            if (!proprio.getId().equals(id)) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-        Usuario usuario = usuarios.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        if (usuario.getPapel() != Papel.ALUNO) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(UsuarioPublico.de(usuario));
+    public ResponseEntity<UsuarioPublico> consultarAluno(@PathVariable Long id,Authentication auth) {
+        if(auth==null)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        Usuario atual=usuarios.findByEmail(auth.getName())
+            .orElseThrow(()->new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        Usuario aluno=usuarios.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if(aluno.getPapel()!=Papel.ALUNO)throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        boolean proprio=atual.getPapel()==Papel.ALUNO&&atual.getId().equals(id);
+        boolean gestora=atual.getPapel()==Papel.DIRECAO&&!atual.isAdministradorPlataforma()
+            &&atual.getEscolaId()!=null&&atual.getEscolaId().equals(aluno.getEscolaId());
+        if(!proprio&&!gestora)throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(UsuarioPublico.de(aluno));
     }
 
     @GetMapping("/professor/area")
-    public ResponseEntity<java.util.Map<String, String>> professor() {
-        return ResponseEntity.ok(java.util.Map.of("area", "PROFESSOR"));
+    public ResponseEntity<java.util.Map<String,String>> professor() {
+        return ResponseEntity.ok(java.util.Map.of("area","PROFESSOR"));
     }
 
     @GetMapping("/gestao/usuarios")
-    public ResponseEntity<List<UsuarioPublico>> listarUsuarios() {
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
-            .body(usuarios.findAll().stream().map(UsuarioPublico::de).toList());
+    public ResponseEntity<List<UsuarioPublico>> listarUsuarios(Authentication auth) {
+        Usuario gestora=direcao(auth);
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(
+            usuarios.findByEscolaId(gestora.getEscolaId()).stream().map(UsuarioPublico::de).toList());
     }
 
     @PostMapping("/gestao/usuarios")
-    public ResponseEntity<UsuarioPublico> cadastrar(@Valid @RequestBody NovoUsuario dados) {
-        String email = dados.email().trim().toLowerCase(Locale.ROOT);
-        if (usuarios.existsByEmail(email)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail ja cadastrado.");
-        }
+    public ResponseEntity<UsuarioPublico> cadastrar(@Valid @RequestBody NovoUsuario dados,Authentication auth) {
+        Usuario gestora=direcao(auth);
+        if(dados.papel()!=Papel.ALUNO&&dados.papel()!=Papel.PROFESSOR)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Somente alunos e professores podem ser criados pela escola.");
+        String email=dados.email().trim().toLowerCase(Locale.ROOT);
+        if(usuarios.existsByEmail(email))
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"E-mail ja cadastrado.");
         try {
-            Usuario salvo = usuarios.saveAndFlush(
-                new Usuario(dados.nome(), email, encoder.encode(dados.senha()), dados.papel()));
-            return ResponseEntity.created(URI.create("/api/gestao/usuarios/" + salvo.getId()))
+            Usuario novo=new Usuario(dados.nome(),email,encoder.encode(dados.senha()),dados.papel());
+            novo.vincularEscola(gestora.getEscolaId());
+            Usuario salvo=usuarios.saveAndFlush(novo);
+            return ResponseEntity.created(URI.create("/api/gestao/usuarios/"+salvo.getId()))
                 .body(UsuarioPublico.de(salvo));
-        } catch (DataIntegrityViolationException ex) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail ja cadastrado.");
+        }catch(DataIntegrityViolationException ex) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"E-mail ja cadastrado.");
         }
     }
 }
