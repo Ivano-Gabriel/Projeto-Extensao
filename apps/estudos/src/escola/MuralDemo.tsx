@@ -5,6 +5,7 @@ import { materiais, type Materia } from '../dados/materiais'
 import { disciplinas } from './dados'
 import { formatarDataLocal } from './regras'
 import type { NovoPostDemo } from './mural'
+import { criarRascunhoDeTema } from './atividade'
 
 type Props = {criar:(post:NovoPostDemo)=>void; quantidade:number}
 
@@ -50,6 +51,20 @@ export default function MuralDemo({criar,quantidade}:Props) {
           <select id="mural-material" value={materialId} onChange={(e)=>setMaterialId(e.target.value)}>
             <option value="">Sem material</option>
             {lista.map(m=><option value={m.id} key={m.id}>{m.titulo}</option>)}</select></div>
+      </div>
+      <div className="atividade-form-gerar">
+        <strong>Gerar quiz de revisão a partir de um tema</strong>
+        <p>Escolha um material acima. O app prepara título, recado e uma questão já revisada do nosso catálogo. Não usa IA e ainda não lê PDFs.</p>
+        <button type="button" disabled={!materialId} onClick={()=>{
+          try {
+            const rascunho=criarRascunhoDeTema(materialId)
+            setMateria(rascunho.materia)
+            setTitulo(rascunho.titulo)
+            setTexto(rascunho.texto)
+            setErro('')
+            setStatus('Atividade preparada. Confira o recado e clique em Publicar na simulação.')
+          }catch(e){setErro(e instanceof Error?e.message:'Tema indisponível.')}
+        }}>Gerar atividade deste tema</button>
       </div>
       <div className="mural-form-acoes">
         <small><BookOpen size={16}/> {quantidade}/15 posts locais</small>

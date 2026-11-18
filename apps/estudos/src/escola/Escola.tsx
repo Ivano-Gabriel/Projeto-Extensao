@@ -11,6 +11,8 @@ import { faltasAteMeta, filtroPeriodo, formatarDataLocal, mediaNotas,
 import { type EstadoEscola, type MensagemFeedback } from './estado'
 import { baixarAplicativo } from './offline'
 import MuralDemo from './MuralDemo'
+import AtividadeQuiz from './AtividadeQuiz'
+import { questaoDoMaterial, registrarAtividade } from './atividade'
 import { adicionarPostDemo, removerPostDemo, type NovoPostDemo } from './mural'
 import type { Publicacao } from './dados'
 import type { Materia } from '../dados/materiais'
@@ -168,6 +170,7 @@ function Feed({estado,atualizar,abrirMaterial}:Props) {
   const [materia,setMateria] = useState<'Todas'|Materia>('Todas')
   const [somenteNaoLidos,setSomenteNaoLidos] = useState(false)
   const [simulador,setSimulador] = useState(false)
+  const [atividadeAberta,setAtividadeAberta] = useState<string|null>(null)
   const [confirmarExclusao,setConfirmarExclusao] = useState<string|null>(null)
   const todos: Array<Publicacao & {local:boolean}> = [
     ...estado.postsDemo.map((post)=>({
@@ -191,6 +194,7 @@ function Feed({estado,atualizar,abrirMaterial}:Props) {
       postsDemo:removerPostDemo(atual.postsDemo,id),
       lidos:atual.lidos.filter((x)=>x!==id),
       curtidos:atual.curtidos.filter((x)=>x!==id),
+      atividades:atual.atividades.filter((x)=>x.postId!==id),
     }))
     setConfirmarExclusao(null)
   }
@@ -228,6 +232,8 @@ function Feed({estado,atualizar,abrirMaterial}:Props) {
       {visiveis.map((post)=>{
         const curtiu=estado.curtidos.includes(post.id)
         const leu=estado.lidos.includes(post.id)
+        const questao=questaoDoMaterial(post.materialId)
+        const resposta=estado.atividades.find((item)=>item.postId===post.id)
         return <article className="escola-post" key={post.id}>
           <header className="escola-post-cabecalho">
             <span className="escola-avatar">{post.iniciais}</span>
@@ -250,9 +256,19 @@ function Feed({estado,atualizar,abrirMaterial}:Props) {
             {post.materialId && <button type="button" className="escola-abrir"
               onClick={()=>abrirMaterial(post.materialId!)}>
               Ver material <ArrowRight size={17}/></button>}
+            {questao && <button type="button" className="atividade-abrir"
+              aria-expanded={atividadeAberta===post.id}
+              onClick={()=>setAtividadeAberta((id)=>id===post.id?null:post.id)}>
+              {atividadeAberta===post.id?'Fechar atividade':resposta?'Refazer desafio':'Responder desafio'} <ArrowRight size={17}/>
+            </button>}
             {post.local && <button type="button" onClick={()=>setConfirmarExclusao(confirmarExclusao===post.id?null:post.id)}
               aria-label={`Excluir postagem de demonstração: ${post.titulo}`}>Excluir demo</button>}
           </div>
+          {atividadeAberta===post.id&&questao&&<AtividadeQuiz questao={questao} resposta={resposta}
+            responder={(opcao)=>atualizar((atual)=>({...atual,
+              atividades:registrarAtividade(atual.atividades,post.id,questao.id,opcao,todos)}))}
+            refazer={()=>atualizar((atual)=>({...atual,
+              atividades:atual.atividades.filter((item)=>item.postId!==post.id)}))}/>}
           {confirmarExclusao===post.id && <div className="mural-excluir-confirmar">
             <span>Excluir essa publicação só deste navegador?</span>
             <button type="button" onClick={()=>excluirLocal(post.id)}>Excluir</button>

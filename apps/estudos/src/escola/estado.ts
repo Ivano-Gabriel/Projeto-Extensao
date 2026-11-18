@@ -1,5 +1,6 @@
 import { publicacoes } from './dados.ts'
 import { validarPostsDemo, type PostDemo } from './mural.ts'
+import { validarAtividades, type RespostaAtividade } from './atividade.ts'
 
 export type Tema = 'claro' | 'escuro'
 export type Previsao = { data: string; valor: 'vou' | 'talvez' | 'nao' }
@@ -12,10 +13,11 @@ export type EstadoEscola = {
   curtidos: string[]
   feedback: MensagemFeedback[]
   postsDemo: PostDemo[]
+  atividades: RespostaAtividade[]
 }
 export const CHAVE_ESCOLA = 'extensao:estudos:escola-demo:v1'
 export function estadoInicialEscola(): EstadoEscola {
-  return {tema:'claro',diasEstudo:[],previsao:null,lidos:[],curtidos:[],feedback:[],postsDemo:[]}
+  return {tema:'claro',diasEstudo:[],previsao:null,lidos:[],curtidos:[],feedback:[],postsDemo:[],atividades:[]}
 }
 type Leitura = {getItem:(key:string)=>string|null}
 type Escrita = {setItem:(key:string,valor:string)=>void}
@@ -64,6 +66,7 @@ export function carregarEscola(store?: Leitura | null): EstadoEscola {
       curtidos:lista(bruto.curtidos,postValido),
       feedback,
       postsDemo,
+      atividades:validarAtividades(bruto.atividades,[...publicacoes,...postsDemo]),
     }
   } catch { return novo }
 }
