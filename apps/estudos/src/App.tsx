@@ -41,7 +41,7 @@ const cores: Record<Materia, string> = {
 }
 const materiasDisponiveis: Materia[] = ['Matemática', 'Português', 'Física', 'História']
 
-function armazenamentoDaConta(armazenamento(),usuario.id): Storage | null {
+function armazenamento(): Storage | null {
   try { return typeof window !== 'undefined' ? window.localStorage : null }
   catch { return null }
 }
