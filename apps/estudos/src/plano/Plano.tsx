@@ -12,6 +12,7 @@ type Props = {
   adicionar: (tarefa: NovaTarefa) => void
   alternar: (id: string) => void
   remover: (id: string) => void
+  reagendar: (id: string, data: string) => void
   abrirMaterial: (id: string) => void
   voltar: () => void
 }
@@ -33,7 +34,7 @@ function nomeData(data: string): string {
   return new Date(a,m-1,d).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'})
 }
 
-export default function Plano({tarefas,adicionar,alternar,remover,abrirMaterial,voltar}:Props) {
+export default function Plano({tarefas,adicionar,alternar,remover,reagendar,abrirMaterial,voltar}:Props) {
   const [titulo,setTitulo]=useState('')
   const [materia,setMateria]=useState<Materia>('Matemática')
   const [data,setData]=useState(()=>diaFuturo(1))
@@ -42,6 +43,8 @@ export default function Plano({tarefas,adicionar,alternar,remover,abrirMaterial,
   const [erro,setErro]=useState('')
   const [aviso,setAviso]=useState('')
   const [confirmarExclusao,setConfirmarExclusao]=useState<string|null>(null)
+  const [editando,setEditando]=useState<string|null>(null)
+  const [novaData,setNovaData]=useState('')
   const resumo=resumoPlano(tarefas)
   const filtradas=filtrarPlano(tarefas,filtro)
   const materiaisDaMateria=materiais.filter((m)=>m.materia===materia)
@@ -63,6 +66,14 @@ export default function Plano({tarefas,adicionar,alternar,remover,abrirMaterial,
       setAviso('Sugestão adicionada! Você pode mudar a data criando outra tarefa.')
       setFiltro('pendentes')
     }catch(e){setErro(e instanceof Error ? e.message:'Não foi possível adicionar.')}
+  }
+  const salvarData=(id:string)=>{
+    try {
+      reagendar(id,novaData)
+      setEditando(null)
+      setAviso('Data atualizada. Seu plano continua salvo neste aparelho.')
+      setErro('')
+    }catch(e){setErro(e instanceof Error?e.message:'Data inválida.')}
   }
   return <div className="pagina plano-pagina">
     <button type="button" className="botao-voltar" onClick={voltar}><ArrowLeft size={17}/> Voltar ao início</button>
@@ -142,6 +153,17 @@ export default function Plano({tarefas,adicionar,alternar,remover,abrirMaterial,
                 onClick={()=>setConfirmarExclusao(confirmarExclusao===tarefa.id?null:tarefa.id)}>
                 <Trash2 size={18}/></button>
             </div>
+            {!tarefa.feito && <button type="button" className="plano-abrir-material"
+              onClick={()=>{setEditando(editando===tarefa.id?null:tarefa.id);setNovaData(tarefa.data);setAviso('');setErro('')}}>
+              <CalendarDays size={16}/> Reagendar
+            </button>}
+            {editando===tarefa.id && <div className="plano-reagendar">
+              <label htmlFor={`data-${tarefa.id}`}>Nova data</label>
+              <input id={`data-${tarefa.id}`} type="date" min={formatarDataLocal(new Date())}
+                max="2100-12-31" value={novaData} onChange={(e)=>setNovaData(e.target.value)}/>
+              <button type="button" onClick={()=>salvarData(tarefa.id)}>Salvar data</button>
+              <button type="button" onClick={()=>setEditando(null)}>Cancelar</button>
+            </div>}
             {tarefa.materialId && <button type="button" className="plano-abrir-material"
               onClick={()=>abrirMaterial(tarefa.materialId!)}>
               Abrir material vinculado <ArrowRight size={16}/></button>}
