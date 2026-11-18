@@ -32,11 +32,11 @@ public class AtividadesController {
         @NotBlank @Size(max=150) String titulo,
         @NotBlank @Size(max=500) String pergunta,
         @NotNull @Size(min=4,max=4) List<@NotBlank @Size(max=200) String> opcoes,
-        @Min(0) @Max(3) int correta,
+        @NotNull @Min(0) @Max(3) Integer correta,
         @NotBlank @Size(max=1000) String explicacao) {}
     public record AtividadeResumo(
         Long id,Long turmaId,String disciplina,String titulo,String pergunta,List<String> opcoes) {}
-    public record NovaResposta(@Min(0) @Max(3) int opcao) {}
+    public record NovaResposta(@NotNull @Min(0) @Max(3) Integer opcao) {}
     public record ResultadoResposta(boolean acertou,String explicacao) {}
     private record QuestaoInterna(Long id,int correta,String explicacao) {}
 
