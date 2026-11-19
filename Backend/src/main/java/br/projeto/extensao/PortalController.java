@@ -29,6 +29,11 @@ public class PortalController {
         @NotBlank @Size(max=100) String nome,
         @Min(2020) @Max(2100) int anoLetivo) {}
     public record NovaMatricula(@NotNull Long alunoId) {}
+    public record MovimentarAluno(@NotNull Long alunoId,@NotNull Long destinoTurmaId) {}
+    public record MatriculaResumo(Long alunoId,String alunoNome,Long turmaId,
+                                  String turmaCodigo,String turmaNome,int anoLetivo) {}
+    public record TransferenciaResumo(Long id,Long origemTurmaId,Long destinoTurmaId,
+                                      Long direcaoId,int anoLetivo,String data) {}
     public record NovoVinculo(
         @NotNull Long professorId,
         @NotBlank @Pattern(regexp="[A-Z_]{3,60}") String disciplina) {}
@@ -155,4 +160,72 @@ public class PortalController {
             throw new ResponseStatusException(HttpStatus.CONFLICT,"Professor ja vinculado a disciplina.");
         }
     }
+
+    @GetMapping("/gestao/matriculas")
+    public ResponseEntity<List<MatriculaResumo>> matriculasDaEscola(Authentication auth){
+        Usuario user=atual(auth);
+        apenasDirecao(user);
+        Long escolaId=escola(user);
+        List<MatriculaResumo> registros=jdbc.query(
+            "SELECT u.id AS aluno_id,u.nome AS aluno_nome,t.id AS turma_id,"+
+            "t.codigo AS turma_codigo,t.nome AS turma_nome,m.ano_letivo "+
+            "FROM matriculas m JOIN turmas t ON t.id=m.turma_id "+
+            "JOIN usuarios u ON u.id=m.aluno_id "+
+            "WHERE t.escola_id=? AND u.escola_id=? AND u.papel='ALUNO' "+
+            "ORDER BY u.nome,m.ano_letivo DESC",
+            (rs,i)->new MatriculaResumo(rs.getLong("aluno_id"),rs.getString("aluno_nome"),
+                rs.getLong("turma_id"),rs.getString("turma_codigo"),
+                rs.getString("turma_nome"),rs.getInt("ano_letivo")),
+            escolaId,escolaId);
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(registros);
+    }
+    @Transactional
+    @PostMapping("/gestao/turmas/{origemId}/transferencias")
+    public ResponseEntity<Void> transferirAluno(@PathVariable Long origemId,
+            @Valid @RequestBody MovimentarAluno dados,Authentication auth){
+        Usuario user=atual(auth);
+        apenasDirecao(user);
+        Long escolaId=escola(user);
+        TurmaResumo origem=verificarTurma(origemId,escolaId);
+        TurmaResumo destino=verificarTurma(dados.destinoTurmaId(),escolaId);
+        verificarUsuario(dados.alunoId(),escolaId,Papel.ALUNO);
+        if(origemId.equals(dados.destinoTurmaId()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Selecione outra turma.");
+        if(!origem.anoLetivo().equals(destino.anoLetivo()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "Transferencia entre anos letivos exige matricula de novo ano.");
+        List<Long> atuais=jdbc.query(
+            "SELECT m.turma_id FROM matriculas m JOIN turmas t ON t.id=m.turma_id "+
+            "WHERE m.aluno_id=? AND m.ano_letivo=? AND t.escola_id=? FOR UPDATE OF m",
+            (rs,i)->rs.getLong(1),dados.alunoId(),origem.anoLetivo(),escolaId);
+        if(atuais.size()!=1||!atuais.get(0).equals(origemId))
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "O aluno nao esta mais matriculado na turma de origem. Atualize a lista.");
+        int mudadas=jdbc.update("UPDATE matriculas SET turma_id=? WHERE aluno_id=? AND turma_id=? "+
+            "AND ano_letivo=?",destino.id(),dados.alunoId(),origem.id(),origem.anoLetivo());
+        if(mudadas!=1)
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Matricula alterada por outra operacao.");
+        jdbc.update("INSERT INTO transferencias_turma("+
+            "escola_id,aluno_id,origem_turma_id,destino_turma_id,direcao_id,ano_letivo) "+
+            "VALUES(?,?,?,?,?,?)",escolaId,dados.alunoId(),origemId,destino.id(),
+            user.getId(),origem.anoLetivo());
+        return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/gestao/alunos/{alunoId}/transferencias")
+    public ResponseEntity<List<TransferenciaResumo>> historicoDeTransferencias(
+            @PathVariable Long alunoId,Authentication auth){
+        Usuario user=atual(auth);
+        apenasDirecao(user);
+        Long escolaId=escola(user);
+        verificarUsuario(alunoId,escolaId,Papel.ALUNO);
+        List<TransferenciaResumo> historico=jdbc.query(
+            "SELECT id,origem_turma_id,destino_turma_id,direcao_id,ano_letivo,criada_em "+
+            "FROM transferencias_turma WHERE escola_id=? AND aluno_id=? ORDER BY criada_em DESC,id DESC",
+            (rs,i)->new TransferenciaResumo(rs.getLong("id"),rs.getLong("origem_turma_id"),
+                rs.getLong("destino_turma_id"),rs.getLong("direcao_id"),
+                rs.getInt("ano_letivo"),rs.getTimestamp("criada_em").toString()),
+            escolaId,alunoId);
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(historico);
+    }
+
 }

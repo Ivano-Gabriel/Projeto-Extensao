@@ -19,6 +19,10 @@ Projeto acadêmico desenvolvido em equipe para explorar soluções digitais que 
 - **Persistência:** PostgreSQL para a API; dados demonstrativos e armazenamento local nos protótipos.
 - **Organização:** GitHub, branches, pull requests e testes automatizados.
 
+## Rodar API e frontend juntos no localhost
+
+Para login, direção, professores, alunos, atividades persistidas e transferência entre turmas, siga o [guia completo para Windows/PowerShell](./COMO_RODAR_LOCAL.md).
+
 ## Executar um protótipo
 
 **Pré-requisito:** Node.js compatível com Vite 8.

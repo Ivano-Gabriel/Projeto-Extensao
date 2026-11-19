@@ -592,12 +592,29 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
             <div className="prime-menu-cabecalho"><div><span>ESCOLHA UM DESTINO</span><strong>Onde vamos agora?</strong></div>
               <button type="button" aria-label="Fechar menu" onClick={()=>setMenuAberto(false)}><X size={22}/></button>
             </div>
-            <div className="prime-menu-grid">
-              {menu.map(({id,nome,Icone})=><button key={id} type="button"
-                className={tela===id?'ativo':''} onClick={()=>navegar(id)}>
-                <Icone size={24}/><span>{nome}</span></button>)}
-              <button type="button" onClick={()=>navegar('plano')}><ListChecks size={24}/><span>Meu plano</span></button>
-              <button type="button" onClick={()=>navegar('jogo')}><Sparkles size={24}/><span>Missões do Futuro</span></button>
+            <div className="prime-menu-destaques" aria-label="Mais opções de estudo">
+              {menu.filter(x=>x.id==='escola'||x.id==='portal').map(({id,nome,Icone})=>
+                <button type="button" key={id} className="prime-menu-destaque"
+                  onClick={()=>navegar(id)}>
+                  <span className="prime-menu-destaque-icon"><Icone size={27}/></span>
+                  <span>{nome}</span><ArrowRight size={18}/>
+                </button>)}
+              <button type="button" className="prime-menu-destaque" onClick={()=>navegar('plano')}>
+                <span className="prime-menu-destaque-icon"><ListChecks size={27}/></span>
+                <span>Meu plano</span><ArrowRight size={18}/>
+              </button>
+              <button type="button" className="prime-menu-destaque" onClick={()=>navegar('jogo')}>
+                <span className="prime-menu-destaque-icon"><Sparkles size={27}/></span>
+                <span>Missões do Futuro</span><ArrowRight size={18}/>
+              </button>
+            </div>
+            <span className="prime-menu-subtitulo">Acesso rápido</span>
+            <div className="prime-menu-secundarios" aria-label="Navegação principal">
+              {menu.filter(x=>['inicio','materiais','revisao','progresso'].includes(x.id))
+                .map(({id,nome,Icone})=><button type="button" key={id}
+                  className={tela===id?'ativo':''} onClick={()=>navegar(id)}>
+                  <Icone size={19}/><span>{nome}</span>
+                </button>)}
             </div>
           </nav>
         </>}

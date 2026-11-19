@@ -4,6 +4,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.text.Normalizer;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.http.CacheControl;
@@ -48,7 +51,32 @@ public class AssistenteController {
         long alunoId=aluno.getId();
 
         Orientacao resposta;
-        if(fala(pergunta,"nota","media","boletim","aprovacao")){
+        if(fala(pergunta,"bhaskara","formula quadratica","equacao do segundo grau","equacao de 2 grau")){
+            resposta=retornar("Bhaskara resolve equações ax² + bx + c = 0, com a diferente de zero. "+
+                "Primeiro calcule Δ = b² - 4ac (delta). Depois use x = (-b ± √Δ) / (2a). "+
+                "Exemplo: x² - 5x + 6 = 0; a=1, b=-5, c=6, então Δ=25-24=1. "+
+                "As soluções são x=(5 ± 1)/2: x=3 e x=2. "+
+                "Se Δ<0, não existem raízes reais; se Δ=0, há uma raiz real dupla. "+
+                "Quer praticar? Tente resolver x² - 7x + 12 = 0.",
+                "ORIENTACAO","Explicação predefinida de matemática; não é IA generativa");
+        }else if(fala(pergunta,"que horas","qual a hora","horario agora","hora certa","horas sao","horas agora")){
+            ZonedDateTime agora=ZonedDateTime.now(ZoneId.of("America/Sao_Paulo"));
+            String horario=agora.format(DateTimeFormatter.ofPattern("HH:mm"));
+            resposta=retornar("Agora são "+horario+" no horário de Brasília. "+
+                "A hora pode variar em outras regiões; confira o relógio do seu dispositivo.",
+                "ORIENTACAO","Relógio do servidor; fuso horário de Brasília");
+        }else if(fala(pergunta,"que dia e hoje","dia de hoje","qual a data","data de hoje","que data e hoje")){
+            ZonedDateTime agora=ZonedDateTime.now(ZoneId.of("America/Sao_Paulo"));
+            String data=agora.format(DateTimeFormatter.ofPattern(
+                "EEEE, d 'de' MMMM 'de' yyyy",Locale.forLanguageTag("pt-BR")));
+            resposta=retornar("Hoje é "+data+" (horário de Brasília).",
+                "ORIENTACAO","Calendário do servidor; fuso horário de Brasília");
+        }else if(fala(pergunta,"bom dia","boa tarde","boa noite","ola","oi assistente")){
+            resposta=retornar("Bom dia! Que bom ter você por aqui. "+
+                "Posso consultar suas atividades e avisos, explicar Bhaskara ou informar a data "+
+                "e a hora de Brasília. Sou um assistente gratuito com respostas programadas.",
+                "ORIENTACAO","Saudação predefinida; não é IA generativa");
+        }else if(fala(pergunta,"nota","media","boletim","aprovacao")){
             resposta=retornar("Suas notas oficiais não estão cadastradas no Extensão. "+
                 "O resultado dos quizzes serve para revisar conteúdos, não é nota escolar.",
                 "INDISPONIVEL","Dados oficiais da escola");

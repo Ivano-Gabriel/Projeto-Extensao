@@ -21,7 +21,7 @@ test('menu do livro oferece acesso a todas as funcoes de estudo',()=>{
   assert.match(app,/prime-menu-livro/)
   assert.match(app,/aria-expanded=\{menuAberto\}/)
   assert.match(app,/prime-menu-painel/)
-  assert.match(app,/menu\.map\(/)
+  assert.match(app,/menu\.filter\(/)
   assert.match(app,/navegar\('plano'\)/)
   assert.match(app,/navegar\('jogo'\)/)
   assert.match(app,/navegar\('portal'\)/)
@@ -39,7 +39,7 @@ test('layout mobile elimina os filtros horizontais e acomoda cartoes em uma colu
 
 test('login ganhou cenario ilustrado e suporta movimento reduzido',()=>{
   assert.match(login,/prime-login-cena/)
-  assert.match(login,/prime-login-folha/)
+  assert.match(login,/prime-book-page/)
   assert.match(login,/Bem-vindo ao Extensão/)
   assert.match(css,/prefers-reduced-motion:reduce/)
   assert.match(css,/\.entrada-extensao>\.portal-login\.prime-login\{display:grid/)
@@ -51,4 +51,20 @@ test('progresso nao ensina incorretamente que contas nao existem',()=>{
   assert.doesNotMatch(app,/Usando um computador compartilhado\?/)
   assert.match(app,/Apagar dados locais de estudo/)
   assert.match(app,/Reiniciar demonstração/)
+})
+
+
+test('menu central destaca os quatro destinos fora da barra inferior',()=>{
+  assert.match(app,/prime-menu-destaques/)
+  assert.match(app,/prime-menu-destaque/)
+  assert.match(app,/navegar\('plano'\)/)
+  assert.match(app,/navegar\('jogo'\)/)
+  assert.match(app,/prime-menu-secundarios/)
+  assert.match(css,/prime-menu-destaque/)
+})
+test('livro da entrada abre folhas a partir da mesma lombada, sem folhas deslocadas',()=>{
+  assert.match(login,/prime-book-spread/)
+  assert.match(login,/prime-book-page/)
+  assert.match(css,/primeBookPageTurn/)
+  assert.doesNotMatch(login,/prime-login-folha folha-a/)
 })

@@ -33,9 +33,19 @@ export default function PortalLogin({entrar}:Props){
   }
   return <section className="portal-login prime-login" aria-labelledby="portal-titulo-login">
     <div className="prime-login-cena" aria-hidden="true">
-      <div className="prime-login-arte"><div className="prime-login-livro"><BookOpenCheck size={58}/></div>
-        <div className="prime-login-folha folha-a"/><div className="prime-login-folha folha-b"/>
-        <div className="prime-login-folha folha-c"/></div>
+      <div className="prime-login-arte">
+        <div className="prime-book-spread">
+          <div className="prime-book-cover prime-book-left"/>
+          <div className="prime-book-cover prime-book-right"/>
+          <div className="prime-book-page prime-book-page-one"/>
+          <div className="prime-book-page prime-book-page-two"/>
+          <div className="prime-book-page prime-book-page-three"/>
+          <div className="prime-book-spine"/>
+          <div className="prime-book-emblem"><BookOpenCheck size={37}/></div>
+        </div>
+        <span className="prime-book-spark prime-book-spark-left">✦</span>
+        <span className="prime-book-spark prime-book-spark-right">✦</span>
+      </div>
       <strong>Uma nova forma de aprender.</strong>
       <p>Suas aulas, descobertas e conquistas em um só lugar.</p>
     </div>
