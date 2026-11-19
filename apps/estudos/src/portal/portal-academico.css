@@ -1,0 +1,98 @@
+.portal-pagina{width:100%;max-width:1180px;min-width:0}
+.portal-paineis.portal-mobile{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:1rem}
+.portal-mobile>.portal-abas{grid-column:1/-1;display:flex;gap:.45rem;width:100%;overflow-x:auto;padding:.35rem .2rem .6rem;margin:.1rem 0 .4rem;scroll-snap-type:x mandatory;scrollbar-width:thin;overscroll-behavior-x:contain}
+.portal-abas button{flex:0 0 auto;scroll-snap-align:start;display:inline-flex;align-items:center;justify-content:center;min-height:3.5rem;padding:.75rem 1.1rem;border:1px solid var(--line);border-radius:.9rem;background:var(--sheet);color:var(--muted);font-size:.84rem;line-height:1.3;font-weight:850;white-space:nowrap}
+.portal-abas button.ativa{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 4px 12px #2d5b9a2b}
+.portal-abas button:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.portal-mobile>.portal-feedback,.portal-mobile>.portal-vazio,.portal-mobile>.portal-metricas,.portal-mobile>.portal-turma-barra{grid-column:1/-1}
+.portal-metricas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.55rem}
+.portal-metrica{display:grid;justify-items:start;gap:.2rem;min-width:0;padding:1rem;border:1px solid var(--line);border-radius:1rem;background:var(--sheet)}
+.portal-metrica strong{font:900 clamp(1.4rem,5vw,2rem)/1.1 var(--font-display);color:var(--blue-dark)}
+.portal-metrica span{font-size:.72rem;color:var(--muted);font-weight:750}
+.portal-mobile .portal-cartao{min-width:0;border-radius:1.15rem;box-shadow:0 7px 22px #1427440b}
+.portal-mobile .portal-cartao h2{font:900 clamp(1.12rem,3.3vw,1.4rem)/1.25 var(--font-display)}
+.portal-mobile .portal-cartao>p{font-size:.85rem;line-height:1.5}
+.portal-acoes-rapidas{display:flex;flex-wrap:wrap;gap:.6rem}
+.portal-acoes-rapidas button{flex:1 1 155px}
+.portal-mobile .botao-principal,.portal-mobile .botao-secundario,.portal-mobile .botao-perigo,.portal-link{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:3.55rem;padding:.8rem 1rem;border-radius:.85rem;font-size:.85rem;font-weight:850;line-height:1.3;transition:transform .18s,filter .18s}
+.portal-mobile .botao-principal:not(:disabled):hover,.portal-mobile .botao-secundario:not(:disabled):hover{transform:translateY(-2px);filter:brightness(1.03)}
+.portal-mobile .portal-form input,.portal-mobile .portal-form select,.portal-mobile .portal-form textarea,
+.portal-turma-barra select,.portal-linha-campos select,.portal-form>select,.assistente-escrita input{min-height:3.5rem;font-size:.88rem}
+.portal-form .portal-check{display:flex;align-items:center;gap:.7rem;font-size:.83rem;font-weight:800}
+.portal-check input{width:1.25rem!important;min-height:1.25rem!important;height:1.25rem;accent-color:var(--blue)}
+.portal-vazio{font-size:.86rem;color:var(--muted);line-height:1.55;padding:.35rem 0}
+.portal-aviso-discreto{display:flex;align-items:flex-start;gap:.45rem;font-size:.76rem!important;line-height:1.55;color:var(--muted);margin:0}
+.portal-aviso-discreto svg{flex:none}
+.portal-link{justify-self:start;background:var(--blue-soft);border:1px solid var(--line);color:var(--blue-dark)}
+.portal-turma-barra{display:flex;align-items:center;flex-wrap:wrap;gap:.6rem;padding:.75rem 1rem;background:var(--sheet);border:1px solid var(--line);border-radius:.8rem}
+.portal-turma-barra label{font-size:.77rem;font-weight:900;white-space:nowrap}
+.portal-turma-barra select{flex:1 1 210px;min-width:0;max-width:460px;padding:.6rem;border:1px solid var(--line-strong);background:var(--paper);color:var(--ink);border-radius:.65rem}
+.portal-chip{display:inline-flex;align-items:center;min-height:2.3rem;padding:.4rem .65rem;border-radius:.55rem;background:var(--mint-soft);color:var(--blue-dark);font-size:.72rem;font-weight:900}
+.portal-mural{display:grid;gap:.75rem}
+.mural-card{display:grid;gap:.55rem;padding:1rem;border:1px solid var(--line);border-radius:.95rem;background:var(--paper)}
+.mural-card.importante{border-color:#dca74d;background:linear-gradient(120deg,var(--sheet),var(--yellow-soft))}
+.mural-card h3{margin:0;font:900 1rem/1.3 var(--font-display)}
+.mural-card p{margin:0;color:var(--ink);line-height:1.55;font-size:.85rem;overflow-wrap:anywhere}
+.mural-card small{font-size:.7rem;color:var(--muted)}
+.mural-meta{display:flex;align-items:center;gap:.4rem;font-size:.67rem;font-weight:900;color:var(--blue-dark);letter-spacing:.04em}
+.portal-gerador{display:grid;gap:.65rem;border:1px solid var(--line);border-radius:.9rem;padding:1rem;background:var(--blue-soft)}
+.portal-gerador-marca{display:flex;align-items:center;gap:.4rem;color:var(--blue-dark);font-size:.85rem}
+.portal-gerador>p{font-size:.82rem;margin:0}
+.portal-gerador small{font-size:.71rem;line-height:1.5;color:var(--muted)}
+.portal-linha-campos{display:flex;flex-wrap:wrap;gap:.5rem}
+.portal-linha-campos>select{flex:1 1 160px;min-width:0;border:1px solid var(--line);border-radius:.65rem;padding:.65rem;background:var(--sheet);color:var(--ink)}
+.portal-linha-campos button{flex:0 0 auto}
+.portal-lista-alunos,.portal-lista-turmas{display:grid;gap:.65rem}
+.portal-lista-alunos>div,.portal-lista-turmas>div{display:flex;align-items:center;gap:.75rem;padding:.7rem;border:1px solid var(--line);border-radius:.75rem;background:var(--paper);min-width:0}
+.portal-lista-alunos>div>span:nth-child(2),.portal-lista-turmas>div>div{flex:1;min-width:0;overflow-wrap:anywhere;font-size:.85rem;font-weight:750}
+.portal-lista-alunos small,.portal-lista-turmas small{display:block;color:var(--muted);font-size:.7rem;font-weight:500}
+.portal-avatar{display:grid;flex:0 0 2.6rem;height:2.6rem;place-items:center;border-radius:.7rem;background:var(--blue-soft);color:var(--blue-dark);font-weight:900}
+.portal-vinculo{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.55rem;padding:.7rem;border-bottom:1px solid var(--line)}
+.portal-vinculo>div:first-child{display:grid;gap:.25rem}
+.portal-vinculo strong{font-size:.85rem}
+.portal-vinculo small{font-size:.73rem;color:var(--muted)}
+.portal-icone-botao{display:grid;place-items:center;min-width:3.1rem;min-height:3.1rem;border:1px solid var(--line);border-radius:.7rem;color:var(--ink);background:var(--paper)}
+.portal-mobile .botao-perigo{background:#a52b2b;color:#fff;border:1px solid #a52b2b}
+.portal-tabela{overflow-x:auto}
+.portal-tabela table{width:100%;border-collapse:collapse;font-size:.84rem}
+.portal-tabela th,.portal-tabela td{text-align:left;padding:.85rem .6rem;border-bottom:1px solid var(--line)}
+.portal-tabela th{color:var(--muted);font-size:.73rem;font-weight:850}
+.portal-tabela td{color:var(--ink)}
+.portal-chamada{display:grid;gap:.65rem}
+.portal-chamada-linha{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;border:1px solid var(--line);border-radius:.7rem;padding:.75rem}
+.portal-chamada-linha strong{font-size:.83rem}
+.portal-chamada-botoes{display:flex;gap:.45rem}
+.portal-chamada-botoes button{min-height:3rem;padding:.5rem .75rem;border:1px solid var(--line-strong);border-radius:.65rem;background:var(--paper);color:var(--blue-dark);font-weight:850}
+.portal-situacao{display:inline-flex;align-items:center;gap:.4rem;color:var(--blue-dark);font-weight:850;font-size:.76rem}
+.portal-resultado{display:grid;gap:.5rem}
+.portal-resultado strong{display:inline-flex;gap:.4rem;align-items:center}
+.portal-resultado small{font-size:.72rem;color:var(--muted);line-height:1.5}
+.assistente-escolar{display:grid;gap:1.2rem;padding:clamp(1rem,3vw,1.4rem);border:1px solid var(--line);background:var(--sheet);border-radius:1.15rem;min-width:0}
+.assistente-topo{display:flex;gap:.8rem;align-items:center}
+.assistente-avatar{display:grid;place-items:center;flex:0 0 3.2rem;height:3.2rem;border-radius:.9rem;background:var(--blue-soft);color:var(--blue-dark)}
+.assistente-topo h2{margin:.15rem 0;font:900 clamp(1.15rem,3vw,1.5rem) var(--font-display)}
+.assistente-topo p{margin:0;font-size:.8rem;color:var(--muted)}
+.assistente-sugestoes{display:flex;flex-wrap:wrap;gap:.5rem}
+.assistente-sugestoes button{display:inline-flex;align-items:center;gap:.35rem;min-height:2.95rem;padding:.6rem .75rem;border:1px solid var(--line-strong);border-radius:.7rem;background:var(--paper);color:var(--ink);font-size:.75rem;font-weight:800;text-align:left}
+.assistente-mensagens{display:grid;gap:.8rem;min-height:110px;max-height:50vh;overflow-y:auto;align-content:start}
+.assistente-turno{display:grid;gap:.6rem}
+.assistente-pergunta{justify-self:end;max-width:85%;display:flex;gap:.5rem;padding:.8rem;border-radius:1rem 1rem .25rem 1rem;color:#fff;background:var(--blue);font-size:.84rem;line-height:1.5;margin:0}
+.assistente-pergunta svg{flex:none}
+.assistente-resposta{justify-self:start;max-width:92%;display:grid;gap:.45rem;padding:1rem;background:var(--paper);border:1px solid var(--line);border-radius:1rem 1rem 1rem .25rem}
+.assistente-resposta strong{font-size:.75rem;color:var(--blue-dark)}
+.assistente-resposta p{font-size:.83rem;line-height:1.58;margin:0;overflow-wrap:anywhere}
+.assistente-resposta small{font-size:.68rem;line-height:1.5;color:var(--muted)}
+.assistente-form{display:grid;gap:.35rem}
+.assistente-form label{font-size:.75rem;font-weight:850}
+.assistente-escrita{display:flex;gap:.4rem;border:1px solid var(--line-strong);padding:.3rem;border-radius:.8rem;background:var(--paper)}
+.assistente-escrita input{min-width:0;flex:1;border:0;padding:.65rem;background:transparent;color:var(--ink)}
+.assistente-escrita button{display:grid;place-items:center;min-width:3rem;min-height:3rem;border:0;border-radius:.65rem;background:var(--blue);color:white}
+.assistente-escrita button:disabled{opacity:.45}
+.assistente-aviso{margin:0;color:var(--muted);font-size:.71rem;line-height:1.6}
+.portal-mobile .portal-form select:focus-visible,.portal-mobile button:focus-visible,.assistente-escrita input:focus-visible,.assistente-sugestoes button:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+html[data-tema="escuro"] .mural-card.importante{background:linear-gradient(110deg,var(--sheet),#3f3325)}
+html[data-tema="escuro"] .portal-resultado{background:#234737}
+html[data-tema="escuro"] .portal-metrica strong{color:#c5ddff}
+@media(min-width:940px){.portal-paineis.portal-mobile{grid-template-columns:repeat(2,minmax(0,1fr))}.portal-paineis.portal-mobile>.portal-cartao:only-child,.portal-paineis.portal-mobile>.assistente-escolar{grid-column:1/-1}}
+@media(max-width:450px){.portal-paineis.portal-mobile .portal-metricas{gap:.4rem}.portal-metrica{padding:.7rem}.portal-metrica span{font-size:.65rem}.portal-abas button{padding:.65rem .9rem;min-height:3.35rem;font-size:.79rem}.portal-mobile .portal-cartao{padding:.95rem}}
+@media(prefers-reduced-motion:reduce){.portal-abas button,.portal-mobile button{transition:none}}
