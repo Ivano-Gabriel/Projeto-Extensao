@@ -65,7 +65,7 @@ test('menu central destaca os quatro destinos fora da barra inferior',()=>{
 test('livro da entrada abre folhas a partir da mesma lombada, sem folhas deslocadas',()=>{
   assert.match(login,/prime-book-spread/)
   assert.match(login,/prime-book-page/)
-  assert.match(css,/primeBookPageTurn/)
+  assert.match(css,/primeBookTurnOne/)
   assert.doesNotMatch(login,/prime-login-folha folha-a/)
 })
 
@@ -82,7 +82,7 @@ test('livro didatico exibe conteudo proprio na frente e no verso das quatro folh
 
 test('animacao em diagonal percorre sequencialmente folhas e tem alternativa para reduced-motion',()=>{
   for(const name of ['primeBookTurnOne','primeBookTurnTwo','primeBookTurnThree',
-    'primeBookTurnFour','primeBookFloat','primeBookPageTurn']){
+    'primeBookTurnFour','primeBookFloat']){
     assert.ok(css.includes(name),'Falta animacao '+name)
   }
   assert.match(css,/transform-origin:\s*left center/)
