@@ -1,0 +1,205 @@
+import { useEffect, useState } from 'react'
+import type { FormEvent } from 'react'
+import { ArrowRight, Bell, CalendarDays, Link2, School, Trash2, UserPlus, Users } from 'lucide-react'
+import { apiEscolar } from './api'
+import type { Aviso, TurmaEscolar, UsuarioResumido, Vinculo } from './api'
+import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
+import { CriarAviso, Mural } from './Avisos'
+import { acoesPorPerfil } from './navegacao'
+
+const disciplinas=['MATEMATICA','PORTUGUES','FISICA','HISTORIA','BIOLOGIA','QUIMICA','GEOGRAFIA','INGLES','SOCIOLOGIA','FILOSOFIA']
+export default function DirecaoPainel(){
+  const [aba,setAba]=useState('inicio')
+  const [turmas,setTurmas]=useState<TurmaEscolar[]>([])
+  const [usuarios,setUsuarios]=useState<UsuarioResumido[]>([])
+  const [avisos,setAvisos]=useState<Aviso[]>([])
+  const [turma,setTurma]=useState(0)
+  const [vinculos,setVinculos]=useState<Vinculo[]>([])
+  const [mensagem,setMensagem]=useState<Feedback>({})
+  const [carregando,setCarregando]=useState(true)
+  const [enviando,setEnviando]=useState(false)
+  const [codigo,setCodigo]=useState('')
+  const [nomeTurma,setNomeTurma]=useState('')
+  const [ano,setAno]=useState(new Date().getFullYear())
+  const [nome,setNome]=useState('')
+  const [email,setEmail]=useState('')
+  const [senha,setSenha]=useState('')
+  const [papel,setPapel]=useState<'ALUNO'|'PROFESSOR'>('ALUNO')
+  const [pessoa,setPessoa]=useState(0)
+  const [disciplina,setDisciplina]=useState('MATEMATICA')
+  const [confirmarRemocao,setConfirmarRemocao]=useState<string|null>(null)
+  const atualizar=async()=>{
+    const [t,u,a]=await Promise.all([apiEscolar.turmas(),apiEscolar.usuarios(),apiEscolar.avisos()])
+    setTurmas(t);setUsuarios(u);setAvisos(a);setTurma(prev=>prev||t[0]?.id||0)
+  }
+  useEffect(()=>{
+    let ativo=true
+    Promise.all([apiEscolar.turmas(),apiEscolar.usuarios(),apiEscolar.avisos()])
+      .then(([t,u,a])=>{if(ativo){setTurmas(t);setUsuarios(u);setAvisos(a);setTurma(t[0]?.id||0)}})
+      .catch(e=>{if(ativo)setMensagem({erro:falha(e)})})
+      .finally(()=>{if(ativo)setCarregando(false)})
+    return()=>{ativo=false}
+  },[])
+  useEffect(()=>{
+    if(!turma){setVinculos([]);return}
+    let ativo=true
+    apiEscolar.vinculos(turma).then(v=>{if(ativo)setVinculos(v)})
+      .catch(e=>{if(ativo)setMensagem({erro:falha(e)})})
+    return()=>{ativo=false}
+  },[turma])
+  const executar=async(acao:()=>Promise<unknown>,texto:string)=>{
+    if(enviando)return
+    setEnviando(true);setMensagem({})
+    try{await acao();await atualizar()
+      if(turma)setVinculos(await apiEscolar.vinculos(turma))
+      setMensagem({ok:texto})
+    }catch(e){setMensagem({erro:falha(e)})}
+    finally{setEnviando(false)}
+  }
+  const criarTurma=async(e:FormEvent)=>{
+    e.preventDefault()
+    await executar(async()=>{await apiEscolar.criarTurma({codigo,nome:nomeTurma,anoLetivo:ano})
+      setCodigo('');setNomeTurma('')},'Turma criada.')
+  }
+  const criarConta=async(e:FormEvent)=>{
+    e.preventDefault()
+    await executar(async()=>{await apiEscolar.criarUsuario({nome,email,senha,papel})
+      setNome('');setEmail('');setSenha('')},'Conta criada. Agora vincule à turma.')
+  }
+  const vincular=async()=>{
+    const selecionada=usuarios.find(u=>u.id===pessoa)
+    if(!selecionada||!turma)return
+    await executar(async()=>{
+      if(selecionada.papel==='PROFESSOR')
+        await apiEscolar.vincularProfessor(turma,pessoa,disciplina)
+      else if(selecionada.papel==='ALUNO')
+        await apiEscolar.matricular(turma,pessoa)
+    },'Pessoa vinculada à turma.')
+  }
+  const remover=async(v:Vinculo)=>{
+    await executar(()=>apiEscolar.desvincular(turma,v.professorId,v.disciplina),
+      'Vínculo de professor removido.')
+    setConfirmarRemocao(null)
+  }
+  return <div className="portal-paineis portal-mobile">
+    <Abas abas={acoesPorPerfil('DIRECAO')} atual={aba} mudar={setAba}/>
+    <MensagemStatus estado={mensagem}/>
+    {carregando&&<Vazio texto="Carregando sua escola..."/>}
+    {!carregando&&aba==='inicio'&&<>
+      <div className="portal-metricas">
+        <Selo valor={turmas.length} legenda="Turmas"/>
+        <Selo valor={usuarios.filter(u=>u.papel==='PROFESSOR').length} legenda="Professores"/>
+        <Selo valor={usuarios.filter(u=>u.papel==='ALUNO').length} legenda="Alunos"/>
+      </div>
+      <Cartao titulo="Organizar a escola">
+        <div className="portal-acoes-rapidas">
+          <button type="button" className="botao-principal" onClick={()=>setAba('vinculos')}>
+            <Link2 size={18}/> Organizar turmas <ArrowRight size={17}/></button>
+          <button type="button" className="botao-secundario" onClick={()=>setAba('avisos')}>
+            <Bell size={18}/> Publicar comunicado</button>
+        </div>
+      </Cartao>
+      <Cartao titulo="Avisos recentes"><Mural avisos={avisos.slice(0,3)}/></Cartao>
+      <Cartao titulo="Calendário escolar">
+        <p className="portal-aviso-discreto"><CalendarDays size={17}/> Horários e calendário oficial entrarão na próxima etapa.
+          Por enquanto, a direção pode informar datas no mural.</p>
+      </Cartao>
+    </>}
+    {!carregando&&aba==='turmas'&&<>
+      <Cartao titulo="Turmas cadastradas">
+        {turmas.length?<div className="portal-lista-turmas">{turmas.map(t=><div key={t.id}>
+          <span className="portal-avatar"><School size={19}/></span>
+          <div><strong>{t.codigo} · {t.nome}</strong><small>{t.anoLetivo}</small></div>
+          <button type="button" className="portal-link" onClick={()=>{setTurma(t.id);setAba('vinculos')}}>Organizar <ArrowRight size={16}/></button>
+        </div>)}</div>:<Vazio texto="Nenhuma turma cadastrada."/>}
+      </Cartao>
+      <Cartao titulo="Nova turma">
+        <form className="portal-form" onSubmit={e=>void criarTurma(e)}>
+          <div className="portal-campos">
+            <div><label htmlFor="dir-codigo">Código</label>
+              <input id="dir-codigo" value={codigo} maxLength={32} required pattern="[a-zA-Z0-9-]{1,32}"
+                placeholder="3A" onChange={e=>setCodigo(e.target.value)}/></div>
+            <div><label htmlFor="dir-ano">Ano</label>
+              <input id="dir-ano" type="number" min={2020} max={2100} value={ano}
+                onChange={e=>setAno(Number(e.target.value))}/></div>
+          </div>
+          <label htmlFor="dir-turma">Nome</label>
+          <input id="dir-turma" required maxLength={100} value={nomeTurma}
+            placeholder="3º ano A" onChange={e=>setNomeTurma(e.target.value)}/>
+          <button className="botao-principal" type="submit" disabled={enviando}>
+            <Users size={18}/> Criar turma</button>
+        </form>
+      </Cartao>
+    </>}
+    {!carregando&&aba==='pessoas'&&<>
+      <Cartao titulo="Criar conta">
+        <form className="portal-form" onSubmit={e=>void criarConta(e)}>
+          <label htmlFor="dir-nome">Nome</label><input id="dir-nome" required maxLength={150}
+            value={nome} onChange={e=>setNome(e.target.value)}/>
+          <label htmlFor="dir-email">E-mail</label><input id="dir-email" required type="email" maxLength={254}
+            value={email} onChange={e=>setEmail(e.target.value)}/>
+          <label htmlFor="dir-senha">Senha inicial</label><input id="dir-senha" required type="password"
+            minLength={12} maxLength={200} autoComplete="new-password" value={senha}
+            onChange={e=>setSenha(e.target.value)}/>
+          <label htmlFor="dir-papel">Perfil</label><select id="dir-papel" value={papel}
+            onChange={e=>setPapel(e.target.value as 'ALUNO'|'PROFESSOR')}>
+            <option value="ALUNO">Aluno</option><option value="PROFESSOR">Professor</option>
+          </select>
+          <button type="submit" className="botao-principal" disabled={enviando}>
+            <UserPlus size={18}/> Criar conta</button>
+        </form>
+        <p className="portal-aviso-discreto">Somente contas fictícias neste ambiente. Falta implementar convites e recuperação de senha.</p>
+      </Cartao>
+      <Cartao titulo="Pessoas da escola">
+        {usuarios.length?<div className="portal-lista-alunos">{usuarios.map(u=><div key={u.id}>
+          <span className="portal-avatar">{u.nome.charAt(0)}</span>
+          <span>{u.nome}<small>{u.papel==='PROFESSOR'?'Professor':u.papel==='ALUNO'?'Aluno':'Direção'}</small></span>
+        </div>)}</div>:<Vazio texto="Nenhuma conta cadastrada."/>}
+      </Cartao>
+    </>}
+    {!carregando&&aba==='vinculos'&&<>
+      <Cartao titulo="Professores e alunos">
+        <div className="portal-form">
+          <label htmlFor="vinc-turma">Turma</label>
+          <select id="vinc-turma" value={turma} onChange={e=>{setTurma(Number(e.target.value));setConfirmarRemocao(null)}}>
+            {turmas.length===0&&<option value={0}>Sem turmas</option>}
+            {turmas.map(t=><option key={t.id} value={t.id}>{t.codigo} · {t.nome}</option>)}
+          </select>
+          <label htmlFor="vinc-pessoa">Pessoa</label>
+          <select id="vinc-pessoa" value={pessoa} onChange={e=>setPessoa(Number(e.target.value))}>
+            <option value={0}>Selecione</option>
+            {usuarios.filter(u=>u.papel==='ALUNO'||u.papel==='PROFESSOR').map(u=>
+              <option key={u.id} value={u.id}>{u.nome} · {u.papel}</option>)}
+          </select>
+          {usuarios.find(u=>u.id===pessoa)?.papel==='PROFESSOR'&&<>
+            <label htmlFor="vinc-disciplina">Disciplina</label>
+            <select id="vinc-disciplina" value={disciplina} onChange={e=>setDisciplina(e.target.value)}>
+              {disciplinas.map(d=><option key={d} value={d}>{d}</option>)}
+            </select>
+          </>}
+          <button type="button" className="botao-principal" disabled={!turma||!pessoa||enviando}
+            onClick={()=>void vincular()}><Link2 size={18}/> Vincular à turma</button>
+        </div>
+      </Cartao>
+      <Cartao titulo="Vínculos docentes">
+        {vinculos.length?vinculos.map(v=><div className="portal-vinculo" key={v.professorId+v.disciplina}>
+          <div><strong>{v.nome}</strong><small>{v.disciplina}</small></div>
+          {confirmarRemocao===`${v.professorId}:${v.disciplina}`?
+            <div className="portal-acoes-rapidas">
+              <button type="button" className="botao-perigo" onClick={()=>void remover(v)}>Confirmar</button>
+              <button type="button" className="botao-secundario" onClick={()=>setConfirmarRemocao(null)}>Cancelar</button>
+            </div>:
+            <button type="button" className="portal-icone-botao" aria-label={`Desvincular ${v.nome} de ${v.disciplina}`}
+              onClick={()=>setConfirmarRemocao(`${v.professorId}:${v.disciplina}`)}><Trash2 size={17}/></button>}
+        </div>):<Vazio texto="Nenhum professor vinculado a esta turma."/>}
+        <p className="portal-aviso-discreto">Vínculos repetidos não são duplicados. Use Remover para corrigir uma atribuição.</p>
+      </Cartao>
+    </>}
+    {!carregando&&aba==='avisos'&&<>
+      <Cartao titulo="Novo comunicado">
+        <CriarAviso turmas={turmas} como="DIRECAO" enviado={async()=>setAvisos(await apiEscolar.avisos())}/>
+      </Cartao>
+      <Cartao titulo="Mural da escola"><Mural avisos={avisos}/></Cartao>
+    </>}
+  </div>
+}

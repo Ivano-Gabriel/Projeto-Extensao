@@ -14,7 +14,17 @@ export type AtividadeEscolar = {
   id:number;turmaId:number;disciplina:string;titulo:string;pergunta:string;opcoes:string[]
 }
 export type ResultadoAtividade = {acertou:boolean;explicacao:string}
-type Metodo = 'GET' | 'POST'
+export type PublicoAviso = 'TODOS'|'ALUNOS'|'FUNCIONARIOS'
+export type Aviso = {id:number;turmaId:number|null;publico:PublicoAviso;titulo:string;texto:string;importante:boolean;criadoEm:string}
+export type Vinculo = {professorId:number;nome:string;disciplina:string}
+export type DesempenhoAluno = {alunoId:number;alunoNome:string;atividades:number;respondidas:number;acertos:number}
+export type MeuDesempenho = {atividades:number;respondidas:number;acertos:number}
+export type RespostaSalva = {atividadeId:number;opcao:number;acertou:boolean;explicacao:string}
+export type AulaEscolar = {id:number;turmaId:number;disciplina:string;data:string;ordem:number;tema:string}
+export type FrequenciaEscolar = {aulasRegistradas:number;registrosDePresenca:number;presencas:number;faltas:number}
+export type RespostaAssistente = {resposta:string;tipo:'ESCOLAR'|'ORIENTACAO'|'INDISPONIVEL';fontes:string[]}
+export type AlunoResumo = {id:number;nome:string}
+type Metodo = 'GET' | 'POST' | 'DELETE'
 
 export class ErroApi extends Error {
   readonly status:number
@@ -26,7 +36,7 @@ export class ErroApi extends Error {
 }
 
 function validarRota(path:string) {
-  if(!/^\/api\/(?:[a-z-]+\/)*[a-z0-9-]+(?:\/\d+)*(?:\/[a-z-]+)*$/.test(path))
+  if(!/^\/api\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)*$/.test(path))
     throw new Error('Caminho de API inválido.')
 }
 async function jsonSeguro<T>(resposta:Response):Promise<T> {
@@ -39,7 +49,7 @@ export async function requisitar<T>(
 ):Promise<T> {
   validarRota(path)
   const headers:Record<string,string> = {Accept:'application/json'}
-  if(metodo==='POST'){
+  if(metodo!=='GET'){
     const csrf=await transport('/api/csrf',{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}})
     if(!csrf.ok)throw new Error('Não foi possível iniciar a sessão segura. Tente novamente.')
     const dados=await jsonSeguro<{token:string}>(csrf)
@@ -86,4 +96,24 @@ export const apiEscolar={
     requisitar<EscolaResumo>('POST','/api/admin/escolas',{codigo,nome}),
   criarDirecao:(id:number,body:{nome:string;email:string;senha:string})=>
     requisitar<UsuarioResumido>('POST',`/api/admin/escolas/${id}/direcao`,body),
+  avisos:()=>requisitar<Aviso[]>('GET','/api/portal/avisos'),
+  enviarAvisoDirecao:(body:{turmaId:number|null;publico:PublicoAviso;titulo:string;texto:string;importante:boolean})=>
+    requisitar<Aviso>('POST','/api/gestao/avisos',body),
+  enviarAvisoProfessor:(body:{turmaId:number;publico:'ALUNOS';titulo:string;texto:string;importante:boolean})=>
+    requisitar<Aviso>('POST','/api/professor/avisos',body),
+  vinculos:(turmaId:number)=>requisitar<Vinculo[]>('GET',`/api/gestao/turmas/${turmaId}/vinculos`),
+  desvincular:(turmaId:number,professorId:number,disciplina:string)=>
+    requisitar<void>('DELETE',`/api/gestao/turmas/${turmaId}/professores/${professorId}/disciplinas/${disciplina}`),
+  disciplinas:(turmaId:number)=>requisitar<string[]>('GET',`/api/professor/turmas/${turmaId}/disciplinas`),
+  alunos:(turmaId:number)=>requisitar<AlunoResumo[]>('GET',`/api/portal/turmas/${turmaId}/alunos`),
+  desempenhoTurma:(turmaId:number)=>requisitar<DesempenhoAluno[]>('GET',`/api/professor/turmas/${turmaId}/desempenho`),
+  meuDesempenho:()=>requisitar<MeuDesempenho>('GET','/api/portal/meu-desempenho'),
+  minhasRespostas:()=>requisitar<RespostaSalva[]>('GET','/api/portal/minhas-respostas'),
+  minhaFrequencia:()=>requisitar<FrequenciaEscolar>('GET','/api/portal/minha-frequencia'),
+  aulas:(turmaId:number)=>requisitar<AulaEscolar[]>('GET',`/api/professor/turmas/${turmaId}/aulas`),
+  criarAula:(body:{turmaId:number;disciplina:string;data:string;ordem:number;tema:string})=>
+    requisitar<AulaEscolar>('POST','/api/professor/aulas',body),
+  registrarPresenca:(aulaId:number,body:{alunoId:number;presente:boolean})=>
+    requisitar<void>('POST',`/api/professor/aulas/${aulaId}/presencas`,body),
+  assistente:(pergunta:string)=>requisitar<RespostaAssistente>('POST','/api/portal/assistente',{pergunta}),
 }

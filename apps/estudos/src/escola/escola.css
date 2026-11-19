@@ -289,3 +289,15 @@ html[data-tema="escuro"] .mural-filtros select,
 html[data-tema="escuro"] .plano-reagendar input { background:var(--sheet);color:var(--ink);border-color:var(--line-strong); }
 html[data-tema="escuro"] .demo-tag { color:#ffe6ac; background:#483920; border-color:#8f7946; }
 @media(prefers-reduced-motion:reduce) { .escola-streak svg, .escola-chamada-icon svg { animation:none; } }
+
+.escola-barra-superior .streak-aceso,.escola-barra-superior .streak-dormindo{display:inline-flex;align-items:center;gap:.55rem;min-height:3.4rem;padding:.35rem .7rem;border-radius:.9rem;background:var(--yellow-soft);color:var(--ink)}
+.escola-barra-superior .streak-dormindo{background:var(--blue-soft)}
+.foguinho-cenario{position:relative;display:grid;place-items:center;width:2.8rem;height:2.8rem}
+.foguinho-cenario svg:first-child{width:2.2rem;height:2.2rem;fill:#ffb733;color:#e86427;filter:drop-shadow(0 3px 4px #ff9a2e59)}
+.streak-aceso .foguinho-cenario{animation:fogoAnimado 1.65s ease-in-out infinite}
+.streak-dormindo .foguinho-cenario svg:first-child{fill:#97b2c8;color:#577795;filter:none}
+.gota-agua{position:absolute;top:-.5rem;right:-.3rem;color:#4b9bce;animation:gotaPingando 2.2s ease-in-out infinite}
+.escola-barra-superior .streak-aceso>strong,.escola-barra-superior .streak-dormindo>strong{font-size:.9rem;font-weight:950}
+@keyframes fogoAnimado{0%,100%{transform:rotate(-5deg) scale(.97)}45%{transform:rotate(4deg) scale(1.17)}75%{transform:rotate(-1deg) scale(1.07)}}
+@keyframes gotaPingando{0%,35%{transform:translateY(-8px);opacity:0}55%,80%{transform:translateY(5px);opacity:1}100%{transform:translateY(17px);opacity:0}}
+@media(prefers-reduced-motion:reduce){.streak-aceso .foguinho-cenario,.gota-agua{animation:none}}

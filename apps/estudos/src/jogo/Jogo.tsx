@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import MemoriaJogo from './MemoriaJogo'
 import { ArrowLeft, ArrowRight, BriefcaseBusiness, Check, Code2, RotateCcw, ScanSearch, Sparkles } from 'lucide-react'
 import { avancar, estadoInicial, iniciarJogo, missoes, pontos, responder, type MissaoId } from './regras'
 import './jogo.css'
@@ -7,6 +8,8 @@ type Props={voltar:()=>void}
 const icons={tecnologia:Code2,negocios:BriefcaseBusiness,jornalismo:ScanSearch}
 export default function Jogo({voltar}:Props){
   const [partida,setPartida]=useState(estadoInicial)
+  const [memoria,setMemoria]=useState(false)
+  if(memoria)return <MemoriaJogo voltar={()=>setMemoria(false)}/>
   const missao=missoes.find(m=>m.id===partida.missao)
   const pergunta=missao?.perguntas[partida.indice]
   const respondeu=partida.respostas.length>partida.indice
@@ -32,7 +35,14 @@ export default function Jogo({voltar}:Props){
           <strong>{m.nome}</strong>
           <small>{m.descricao}</small>
           <span className="missao-cta">Começar <ArrowRight size={18}/></span>
-        </button>})}</div>
+        </button>})}
+        <button type="button" className="missao-card missao-memoria" onClick={()=>setMemoria(true)}>
+          <span className="missao-icon"><Sparkles size={28}/></span>
+          <span className="sobretitulo">RECUPERAÇÃO ATIVA</span>
+          <strong>Memória Flash</strong><small>Encontre pares de conceitos em 3 matérias.</small>
+          <span className="missao-cta">Jogar <ArrowRight size={18}/></span>
+        </button>
+      </div>
     </>:<><header className="arcade-cabecalho">
       <span className="sobretitulo">{missao.profissao}</span>
       <h1>{missao.nome}</h1>

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import type { Dispatch, SetStateAction, ReactNode } from 'react'
 import {
   ArrowRight, BookOpen, CalendarCheck, Check, CheckCheck, ClipboardCheck,
-  Clock3, Download, Flame, Heart, Info, MessageSquareText, Newspaper,
+  Clock3, Download, Flame, Droplets, Heart, Info, MessageSquareText, Newspaper,
   Send, ShieldAlert, SunMoon, TrendingUp, X,
 } from 'lucide-react'
 import { disciplinas, gerarFrequenciaDemo, notasDemo, publicacoes } from './dados'
@@ -354,7 +354,10 @@ export default function Escola({estado,atualizar,abrirMaterial}:Props) {
         <p>Frequência, notas, conteúdos e sugestões, tudo no mesmo cantinho do seu estudo</p>
       </header>
       <div className="escola-barra-superior">
-        <span><Flame size={20}/> {seq} {seq===1 ? 'dia seguido de estudo':'dias seguidos de estudo'}</span>
+        <span className={seq===0?'streak-dormindo':'streak-aceso'} aria-label={seq===0?'Sequência de estudos para recomeçar':`${seq} dias seguidos de estudo`}>
+          <span className="foguinho-cenario">{seq>0?<Flame size={34}/>:<><Flame size={34}/><Droplets size={18} className="gota-agua"/></>}</span>
+          <strong>{seq>0?`${seq} ${seq===1?'dia':'dias'}`:'Recomece hoje'}</strong>
+        </span>
         <button type="button" onClick={baixarOffline}><Download size={18}/> Guardar para offline</button>
       </div>
       {offlineStatus && <div className="escola-lembrete" role="status"><Info size={18}/>{offlineStatus}
