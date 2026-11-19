@@ -8,9 +8,9 @@ function resp(valor,status=200){
     headers:{get:()=> 'application/json'},json:async()=>valor}
 }
 test('professor e direção têm navegacao propria; aluno nao enxerga gestao',()=>{
-  assert.deepEqual(acoesPorPerfil('PROFESSOR').map(x=>x.id),['inicio','turmas','atividades','mural','resultados','presenca'])
+  assert.deepEqual(acoesPorPerfil('PROFESSOR').map(x=>x.id),['inicio','turmas','atividades','materiais','mural','resultados','presenca'])
   assert.deepEqual(acoesPorPerfil('DIRECAO').map(x=>x.id),['inicio','turmas','pessoas','vinculos','avisos'])
-  assert.deepEqual(acoesPorPerfil('ALUNO').map(x=>x.id),['inicio','atividades','avisos','assistente','progresso'])
+  assert.deepEqual(acoesPorPerfil('ALUNO').map(x=>x.id),['inicio','atividades','materiais','avisos','assistente','progresso'])
 })
 test('disciplina do professor depende de vinculo devolvido pela API',()=>{
   assert.deepEqual(opcoesProfessor(['PORTUGUES','MATEMATICA','PORTUGUES']),['MATEMATICA','PORTUGUES'])
@@ -31,4 +31,16 @@ test('exclusao recusa dominio externo e consultas com parâmetros inseguros',asy
   await assert.rejects(()=>requisitar('GET','/api/portal/avisos?escolaId=999'),/inválido/)
   assert.equal(typeof apiEscolar.avisos,'function')
   assert.equal(typeof apiEscolar.assistente,'function')
+})
+
+test('personalizacao e edicao de atividades usam PUT autenticado com CSRF',async()=>{
+  const chamadas=[]
+  const req=async(url,opts)=>{chamadas.push({url,opts});return url==='/api/csrf'?resp({token:'csrf'}):resp(undefined,204)}
+  await requisitar('PUT','/api/gestao/turmas/7',{codigo:'3A'},req)
+  assert.equal(chamadas[1].opts.method,'PUT')
+  assert.equal(chamadas[1].opts.headers['X-XSRF-TOKEN'],'csrf')
+  assert.equal(chamadas[1].opts.credentials,'same-origin')
+  assert.equal(typeof apiEscolar.gerarRascunho,'function')
+  assert.equal(typeof apiEscolar.criarMaterial,'function')
+  assert.equal(typeof apiEscolar.editarAtividade,'function')
 })
