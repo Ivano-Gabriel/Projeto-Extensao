@@ -6,6 +6,7 @@ import type { AlunoResumo, AtividadeEscolar, AulaEscolar, Aviso, DesempenhoAluno
 import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
 import { CriarAviso, Mural } from './Avisos'
 import { acoesPorPerfil, opcoesProfessor } from './navegacao'
+import SalaDocente from './SalaDocente'
 import { materiais } from '../dados/materiais'
 import { questoes } from '../dados/questoes'
 
@@ -194,6 +195,7 @@ export default function ProfessorPainel(){
         </div>):<Vazio texto="Nenhuma atividade publicada."/>}
       </Cartao>
     </>}
+    {!carregando&&aba==='materiais'&&<SalaDocente turmaId={turma} disciplina={disciplina} disciplinas={disciplinas}/>}
     {!carregando&&aba==='mural'&&<>
       <Cartao titulo="Postar aviso">
         <CriarAviso key={turma} turmaInicial={turma} turmas={turmas} como="PROFESSOR" enviado={async()=>setAvisos(await apiEscolar.avisos())}/>
