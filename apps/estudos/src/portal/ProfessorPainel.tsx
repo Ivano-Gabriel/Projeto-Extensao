@@ -196,7 +196,7 @@ export default function ProfessorPainel(){
     </>}
     {!carregando&&aba==='mural'&&<>
       <Cartao titulo="Postar aviso">
-        <CriarAviso key={turma} turmas={turmas} como="PROFESSOR" enviado={async()=>setAvisos(await apiEscolar.avisos())}/>
+        <CriarAviso key={turma} turmaInicial={turma} turmas={turmas} como="PROFESSOR" enviado={async()=>setAvisos(await apiEscolar.avisos())}/>
       </Cartao>
       <Cartao titulo="Mural"><Mural avisos={avisos}/></Cartao>
     </>}

@@ -14,8 +14,8 @@ export function Mural({avisos}:{avisos:readonly Aviso[]}){
     <small>{new Date(a.criadoEm).toLocaleDateString('pt-BR')}</small>
   </article>)}</div>
 }
-export function CriarAviso({turmas,como,enviado}:{turmas:readonly TurmaEscolar[];como:'DIRECAO'|'PROFESSOR';enviado:()=>Promise<void>}){
-  const [turma,setTurma]=useState(como==='PROFESSOR'?String(turmas[0]?.id||''):'')
+export function CriarAviso({turmas,como,enviado,turmaInicial}:{turmas:readonly TurmaEscolar[];como:'DIRECAO'|'PROFESSOR';enviado:()=>Promise<void>;turmaInicial?:number}){
+  const [turma,setTurma]=useState(como==='PROFESSOR'?String(turmaInicial||turmas[0]?.id||''):'')
   const [publico,setPublico]=useState<PublicoAviso>(como==='PROFESSOR'?'ALUNOS':'TODOS')
   const [titulo,setTitulo]=useState('')
   const [texto,setTexto]=useState('')

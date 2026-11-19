@@ -30,6 +30,6 @@ export function acoesPorPerfil(perfil:PapelEscolar): readonly AbaPortal[] {
   return abas[perfil]
 }
 export function opcoesProfessor(entrada:readonly string[]):string[] {
-  if(entrada.some(m=>!/[A-Z_]{3,60}/.test(m)))throw new Error('Disciplina inválida.')
+  if(entrada.some(m=>!/^[A-Z_]{3,60}$/.test(m)))throw new Error('Disciplina inválida.')
   return [...new Set(entrada)].sort()
 }
