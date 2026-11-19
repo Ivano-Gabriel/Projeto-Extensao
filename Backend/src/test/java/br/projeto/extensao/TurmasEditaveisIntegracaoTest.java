@@ -24,6 +24,7 @@ class TurmasEditaveisIntegracaoTest {
     @Autowired UsuarioRepository usuarios;
     @Autowired PasswordEncoder encoder;
     @Autowired IaCotasService iaCotas;
+    @Autowired IaPedagogicaController iaPedagogica;
     Long escolaA,escolaB,direcao,professor,aluno,professorExterno,turma;
     @BeforeEach
     void preparar() {
@@ -205,6 +206,23 @@ class TurmasEditaveisIntegracaoTest {
             ()->iaCotas.reservar(professor,Papel.PROFESSOR));
         org.junit.jupiter.api.Assertions.assertEquals(6,
             iaCotas.restantes(aluno,Papel.ALUNO));
+    }
+
+
+    @Test
+    void questaoEstruturadaDaIaSoPreencheEditorSeEstiverCompleta() {
+        String valido="""
+            {"titulo":"Raizes da equacao","pergunta":"Quais sao as raizes de x²-5x+6?",
+             "opcoes":["1 e 6","2 e 3","-2 e -3","0 e 5"],
+             "correta":1,"explicacao":"Fatorando: (x-2)(x-3)."}
+            """;
+        IaPedagogicaController.QuizGerado quiz=iaPedagogica.lerQuiz(valido);
+        org.junit.jupiter.api.Assertions.assertEquals(4,quiz.opcoes().size());
+        org.junit.jupiter.api.Assertions.assertEquals(1,quiz.correta());
+        String invalido=valido.replace("\"0 e 5\"","\"nada\"").replace("\"2 e 3\",","");
+        org.junit.jupiter.api.Assertions.assertThrows(
+            org.springframework.web.server.ResponseStatusException.class,
+            ()->iaPedagogica.lerQuiz(invalido));
     }
 
 }
