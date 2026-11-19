@@ -89,7 +89,7 @@ class TurmasEditaveisIntegracaoTest {
         mvc.perform(post(endpoint).with(user("aluno-edit@escola.test").roles("ALUNO"))
             .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(corpo))
             .andExpect(status().isForbidden());
-        String indevido=corpo.replace(professor.toString(),professorExterno.toString()).replace("07:00","08:00");
+        String indevido=corpo.replace(professor.toString(),professorExterno.toString()).replace("07:00","06:00");
         mvc.perform(post(endpoint).with(user("dir-edit@escola.test").roles("DIRECAO"))
             .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(indevido))
             .andExpect(status().isForbidden());
