@@ -30,7 +30,7 @@ const menu = [
   { id: 'inicio', nome: 'Início', Icone: Home },
   { id: 'materiais', nome: 'Materiais', Icone: BookOpen },
   { id: 'revisao', nome: 'Revisão', Icone: Brain },
-  { id: 'escola', nome: 'Explorar', Icone: Sparkles },
+  { id: 'escola', nome: 'Laboratório (demo)', Icone: Sparkles },
   { id: 'portal', nome: 'Minha turma', Icone: School },
   { id: 'progresso', nome: 'Progresso', Icone: Target },
 ] as const
@@ -181,7 +181,7 @@ function Inicio({ estado, sequencia, pendentesPlano, tarefasPlano, concluirTaref
           <p>Frequência, notas, recados dos professores e uma área pra dar ideias. Tudo demonstrativo.</p>
           <span className="escola-streak"><Flame size={17}/> {sequencia} {sequencia === 1 ? 'dia seguido estudando' : 'dias seguidos estudando'}</span>
         </div>
-        <button type="button" className="botao-principal" onClick={irEscola}>Conhecer a escola <ArrowRight size={18}/></button>
+        <button type="button" className="botao-principal" onClick={irEscola}>Ver demonstração <ArrowRight size={18}/></button>
       </section>
       <section className="arcade-chamada" aria-label="Jogo de pausa rápida">
         <span className="arcade-chamada-selo" aria-hidden="true">✦</span>
