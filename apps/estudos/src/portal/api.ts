@@ -8,6 +8,12 @@ export type UsuarioEscolar = {
   administrador: boolean
 }
 export type TurmaEscolar = {id:number;codigo:string;nome:string;anoLetivo:number}
+export type TurmaConfiguracao = TurmaEscolar & {descricao:string;cor:string}
+export type HorarioTurma = {id:number;turmaId:number;disciplina:string;diaSemana:number;inicio:string;fim:string;professorId:number|null;professorNome:string|null}
+export type MaterialTurma = {id:number;turmaId:number;professorId:number;disciplina:string;titulo:string;conteudo:string;publicado:boolean}
+export type MaterialFormulario = Pick<MaterialTurma,'disciplina'|'titulo'|'conteudo'|'publicado'>
+export type TipoRascunho = 'QUIZ'|'EXPLICACAO'|'PLANO_AULA'
+export type RespostaIa = {texto:string;status:'RASCUNHO';aviso:string}
 export type UsuarioResumido = {id:number;nome:string;email:string;papel:PapelEscolar}
 export type EscolaResumo = {id:number;codigo:string;nome:string}
 export type AtividadeEscolar = {
@@ -24,7 +30,7 @@ export type AulaEscolar = {id:number;turmaId:number;disciplina:string;data:strin
 export type FrequenciaEscolar = {aulasRegistradas:number;registrosDePresenca:number;presencas:number;faltas:number}
 export type RespostaAssistente = {resposta:string;tipo:'ESCOLAR'|'ORIENTACAO'|'INDISPONIVEL';fontes:string[]}
 export type AlunoResumo = {id:number;nome:string}
-type Metodo = 'GET' | 'POST' | 'DELETE'
+type Metodo = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
 export class ErroApi extends Error {
   readonly status:number
@@ -65,7 +71,10 @@ export async function requisitar<T>(
     if(resposta.status===401)throw new ErroApi('Faça login para continuar.',401)
     if(resposta.status===403)throw new ErroApi('Você não tem permissão para esta ação.',403)
     if(resposta.status===404)throw new Error('Informação não encontrada ou indisponível.')
-    if(resposta.status===409)throw new Error('Este registro já existe ou já foi respondido.')
+    if(resposta.status===409)throw new Error('Este registro conflita com dados existentes. Revise e tente novamente.')
+    if(resposta.status===429)throw new Error('Muitas solicitações de IA. Aguarde e tente novamente.')
+    if(resposta.status===503)throw new Error('IA generativa não configurada neste ambiente. As outras funções continuam disponíveis.')
+    if(resposta.status===502)throw new Error('Não foi possível consultar o modelo de IA agora.')
     if(resposta.status===400)throw new Error('Revise os dados e tente novamente.')
     throw new Error('Não foi possível concluir. Tente novamente.')
   }
@@ -74,6 +83,22 @@ export async function requisitar<T>(
 }
 export const apiEscolar={
   me:()=>requisitar<UsuarioEscolar>('GET','/api/me'),
+  configuracaoTurma:(id:number)=>requisitar<TurmaConfiguracao>('GET',`/api/portal/turmas/${id}/configuracao`),
+  atualizarTurma:(id:number,body:Omit<TurmaConfiguracao,'id'>)=>
+    requisitar<TurmaConfiguracao>('PUT',`/api/gestao/turmas/${id}`,body),
+  horariosTurma:(id:number)=>requisitar<HorarioTurma[]>('GET',`/api/portal/turmas/${id}/horarios`),
+  criarHorario:(id:number,body:{disciplina:string;diaSemana:number;inicio:string;fim:string;professorId:number|null})=>
+    requisitar<void>('POST',`/api/gestao/turmas/${id}/horarios`,body),
+  apagarHorario:(turmaId:number,horarioId:number)=>
+    requisitar<void>('DELETE',`/api/gestao/turmas/${turmaId}/horarios/${horarioId}`),
+  materiaisTurma:(id:number)=>requisitar<MaterialTurma[]>('GET',`/api/portal/turmas/${id}/materiais`),
+  criarMaterial:(turmaId:number,body:MaterialFormulario)=>
+    requisitar<MaterialTurma>('POST',`/api/professor/turmas/${turmaId}/materiais`,body),
+  editarMaterial:(id:number,body:MaterialFormulario)=>
+    requisitar<MaterialTurma>('PUT',`/api/professor/materiais/${id}`,body),
+  apagarMaterial:(id:number)=>requisitar<void>('DELETE',`/api/professor/materiais/${id}`),
+  gerarRascunho:(body:{turmaId:number;disciplina:string;tema:string;tipo:TipoRascunho;contexto:string})=>
+    requisitar<RespostaIa>('POST','/api/professor/ia/rascunho',body),
   login:(email:string,senha:string)=>requisitar<UsuarioEscolar>('POST','/api/login',{email,senha}),
   logout:()=>requisitar<void>('POST','/api/logout'),
   turmas:()=>requisitar<TurmaEscolar[]>('GET','/api/portal/turmas'),
