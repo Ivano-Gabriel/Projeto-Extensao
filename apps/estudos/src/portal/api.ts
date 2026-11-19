@@ -8,6 +8,8 @@ export type UsuarioEscolar = {
   administrador: boolean
 }
 export type TurmaEscolar = {id:number;codigo:string;nome:string;anoLetivo:number}
+export type MatriculaResumo = {alunoId:number;alunoNome:string;turmaId:number;turmaCodigo:string;turmaNome:string;anoLetivo:number}
+export type TransferenciaTurma = {id:number;origemTurmaId:number;destinoTurmaId:number;direcaoId:number;anoLetivo:number;data:string}
 export type TurmaConfiguracao = TurmaEscolar & {descricao:string;cor:string}
 export type HorarioTurma = {id:number;turmaId:number;disciplina:string;diaSemana:number;inicio:string;fim:string;professorId:number|null;professorNome:string|null}
 export type MaterialTurma = {id:number;turmaId:number;professorId:number;disciplina:string;titulo:string;conteudo:string;publicado:boolean}
@@ -118,6 +120,11 @@ export const apiEscolar={
   usuarios:()=>requisitar<UsuarioResumido[]>('GET','/api/gestao/usuarios'),
   criarUsuario:(body:{nome:string;email:string;senha:string;papel:'ALUNO'|'PROFESSOR'})=>
     requisitar<UsuarioResumido>('POST','/api/gestao/usuarios',body),
+  matriculasDaEscola:()=>requisitar<MatriculaResumo[]>('GET','/api/gestao/matriculas'),
+  transferirAluno:(origemTurmaId:number,alunoId:number,destinoTurmaId:number)=>
+    requisitar<void>('POST',`/api/gestao/turmas/${origemTurmaId}/transferencias`,{alunoId,destinoTurmaId}),
+  historicoTransferencias:(alunoId:number)=>
+    requisitar<TransferenciaTurma[]>('GET',`/api/gestao/alunos/${alunoId}/transferencias`),
   matricular:(turmaId:number,alunoId:number)=>
     requisitar<void>('POST',`/api/gestao/turmas/${turmaId}/matriculas`,{alunoId}),
   vincularProfessor:(turmaId:number,professorId:number,disciplina:string)=>
