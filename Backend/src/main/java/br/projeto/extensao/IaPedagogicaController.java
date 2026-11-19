@@ -26,9 +26,9 @@ import tools.jackson.databind.json.JsonMapper;
 public class IaPedagogicaController {
     public record Pedido(
         @NotNull Long turmaId,
-        @NotBlank @Pattern(regexp="[A-Z_]{3,60}") String disciplina,
+        @NotBlank @jakarta.validation.constraints.Pattern(regexp="[A-Z_]{3,60}") String disciplina,
         @NotBlank @Size(max=300) String tema,
-        @NotNull @Pattern(regexp="QUIZ|EXPLICACAO|PLANO_AULA") String tipo,
+        @NotNull @jakarta.validation.constraints.Pattern(regexp="QUIZ|EXPLICACAO|PLANO_AULA") String tipo,
         @NotNull @Size(max=1200) String contexto) {}
     public record QuizGerado(String titulo,String pergunta,List<String> opcoes,
                              int correta,String explicacao) {}
@@ -37,7 +37,7 @@ public class IaPedagogicaController {
     public record DisciplinaAluno(Long turmaId,String turmaNome,String disciplina) {}
     public record Duvida(
         @NotNull Long turmaId,
-        @NotBlank @Pattern(regexp="[A-Z_]{3,60}") String disciplina,
+        @NotBlank @jakarta.validation.constraints.Pattern(regexp="[A-Z_]{3,60}") String disciplina,
         @NotBlank @Size(min=3,max=500) String pergunta) {}
     public record Explicacao(String texto,String aviso,int restantesHoje) {}
 
