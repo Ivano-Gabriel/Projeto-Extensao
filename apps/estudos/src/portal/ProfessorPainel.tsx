@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ArrowRight, Bell, BookOpen, CalendarDays, CheckCircle2, ClipboardList, Sparkles, Users } from 'lucide-react'
 import { apiEscolar } from './api'
-import type { AlunoResumo, AtividadeEscolar, AulaEscolar, Aviso, DesempenhoAluno, TurmaEscolar } from './api'
+import type { AlunoResumo, AtividadeEscolar, AulaEscolar, Aviso, DesempenhoAluno, QuizGeradoIa, TurmaEscolar } from './api'
 import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
 import { CriarAviso, Mural } from './Avisos'
 import { acoesPorPerfil, opcoesProfessor } from './navegacao'
@@ -107,6 +107,15 @@ export default function ProfessorPainel(){
       setMensagem({ok:'Atividade salva. A edição só é permitida antes de receber respostas.'})
     }catch(e){setMensagem({erro:falha(e)})}
     finally{setEnviando(false)}
+  }
+  const prepararQuizIa=(quiz:QuizGeradoIa)=>{
+    setEditandoAtividade(null)
+    setTitulo(quiz.titulo);setPergunta(quiz.pergunta)
+    setOpcoes([...quiz.opcoes]);setCorreta(quiz.correta)
+    setExplicacao(quiz.explicacao);setTemaCatalogo('')
+    setAba('atividades')
+    setMensagem({ok:'Rascunho da IA carregado. Revise pergunta, alternativas, gabarito e explicação antes de publicar.'})
+    window.scrollTo({top:0,behavior:'smooth'})
   }
   const criarAula=async(e:FormEvent)=>{
     e.preventDefault();setMensagem({})
@@ -224,7 +233,7 @@ export default function ProfessorPainel(){
         </div>):<Vazio texto="Nenhuma atividade publicada."/>}
       </Cartao>
     </>}
-    {!carregando&&aba==='materiais'&&<SalaDocente turmaId={turma} disciplina={disciplina} disciplinas={disciplinas}/>}
+    {!carregando&&aba==='materiais'&&<SalaDocente turmaId={turma} disciplina={disciplina} disciplinas={disciplinas} aoPrepararQuiz={prepararQuizIa}/>}
     {!carregando&&aba==='mural'&&<>
       <Cartao titulo="Postar aviso">
         <CriarAviso key={turma} turmaInicial={turma} turmas={turmas} como="PROFESSOR" enviado={async()=>setAvisos(await apiEscolar.avisos())}/>

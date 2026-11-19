@@ -23,6 +23,8 @@ class TurmasEditaveisIntegracaoTest {
     @Autowired JdbcTemplate jdbc;
     @Autowired UsuarioRepository usuarios;
     @Autowired PasswordEncoder encoder;
+    @Autowired IaCotasService iaCotas;
+    @Autowired IaPedagogicaController iaPedagogica;
     Long escolaA,escolaB,direcao,professor,aluno,professorExterno,turma;
     @BeforeEach
     void preparar() {
@@ -129,4 +131,98 @@ class TurmasEditaveisIntegracaoTest {
             .contentType(MediaType.APPLICATION_JSON).content(pedido))
             .andExpect(status().isServiceUnavailable());
     }
+
+    @Test
+    void statusEListaDisciplinasRespeitamPermissoesSemExporConfiguracao() throws Exception {
+        mvc.perform(get("/api/portal/ia/status"))
+            .andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/portal/ia/status")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.habilitada").value(false))
+            .andExpect(jsonPath("$.restantesHoje").value(0));
+        mvc.perform(get("/api/portal/ia/disciplinas")
+            .with(user("aluno-edit@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].disciplina").value("MATEMATICA"))
+            .andExpect(jsonPath("$[1]").doesNotExist());
+        mvc.perform(get("/api/portal/ia/disciplinas")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isForbidden());
+        mvc.perform(get("/api/portal/ia/disciplinas")
+            .with(user("prof-edit-b@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void tutoriaAlunoSoAceitaTurmaMatriculadaECsrf() throws Exception {
+        String entrada="{\"turmaId\":"+turma+
+            ",\"disciplina\":\"MATEMATICA\",\"pergunta\":\"Explique a formula de Bhaskara\"}";
+        mvc.perform(post("/api/portal/ia/explicar")
+            .with(user("aluno-edit@escola.test").roles("ALUNO"))
+            .contentType(MediaType.APPLICATION_JSON).content(entrada))
+            .andExpect(status().isForbidden());
+        mvc.perform(post("/api/portal/ia/explicar")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(entrada))
+            .andExpect(status().isForbidden());
+        mvc.perform(post("/api/portal/ia/explicar")
+            .with(user("aluno-edit@escola.test").roles("ALUNO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(entrada))
+            .andExpect(status().isServiceUnavailable());
+        mvc.perform(post("/api/portal/ia/explicar")
+            .with(user("aluno-edit@escola.test").roles("ALUNO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(entrada.replace("MATEMATICA","QUIMICA")))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void bloqueiaDadosPessoaisAntesDeConsultarProvedor() throws Exception {
+        String dados="{\"turmaId\":"+turma+",\"disciplina\":\"MATEMATICA\","+
+            "\"tema\":\"Joao\",\"tipo\":\"QUIZ\",\"contexto\":\"email joao@escola.com\"}";
+        mvc.perform(post("/api/professor/ia/rascunho")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(dados))
+            .andExpect(status().isBadRequest());
+        String entrada="{\"turmaId\":"+turma+
+            ",\"disciplina\":\"MATEMATICA\",\"pergunta\":\"Meu CPF: 123.456.789-00\"}";
+        mvc.perform(post("/api/portal/ia/explicar")
+            .with(user("aluno-edit@escola.test").roles("ALUNO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(entrada))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void cotaDeIaPersisteERecusaDecimaTerceiraRequisicaoDoProfessor() throws Exception {
+        for(int n=0;n<12;n++){
+            org.junit.jupiter.api.Assertions.assertEquals(11-n,
+                iaCotas.reservar(professor,Papel.PROFESSOR));
+        }
+        org.junit.jupiter.api.Assertions.assertEquals(0,
+            iaCotas.restantes(professor,Papel.PROFESSOR));
+        org.junit.jupiter.api.Assertions.assertThrows(
+            org.springframework.web.server.ResponseStatusException.class,
+            ()->iaCotas.reservar(professor,Papel.PROFESSOR));
+        org.junit.jupiter.api.Assertions.assertEquals(6,
+            iaCotas.restantes(aluno,Papel.ALUNO));
+    }
+
+
+    @Test
+    void questaoEstruturadaDaIaSoPreencheEditorSeEstiverCompleta() {
+        String valido="""
+            {"titulo":"Raizes da equacao","pergunta":"Quais sao as raizes de x²-5x+6?",
+             "opcoes":["1 e 6","2 e 3","-2 e -3","0 e 5"],
+             "correta":1,"explicacao":"Fatorando: (x-2)(x-3)."}
+            """;
+        IaPedagogicaController.QuizGerado quiz=iaPedagogica.lerQuiz(valido);
+        org.junit.jupiter.api.Assertions.assertEquals(4,quiz.opcoes().size());
+        org.junit.jupiter.api.Assertions.assertEquals(1,quiz.correta());
+        String invalido=valido.replace("\"0 e 5\"","\"nada\"").replace("\"2 e 3\",","");
+        org.junit.jupiter.api.Assertions.assertThrows(
+            org.springframework.web.server.ResponseStatusException.class,
+            ()->iaPedagogica.lerQuiz(invalido));
+    }
+
 }

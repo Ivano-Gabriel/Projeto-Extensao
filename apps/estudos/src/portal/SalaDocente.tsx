@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { BookOpen, Bot, ClipboardCopy, Edit3, Save, Sparkles, Trash2 } from 'lucide-react'
 import { apiEscolar } from './api'
-import type { MaterialFormulario, MaterialTurma, RespostaIa, TipoRascunho } from './api'
+import type { MaterialFormulario, MaterialTurma, QuizGeradoIa, RespostaIa, StatusIa, TipoRascunho } from './api'
 import { falha } from './ComponentesPortal'
 
-type Props={turmaId:number;disciplina:string;disciplinas:readonly string[]}
+type Props={turmaId:number;disciplina:string;disciplinas:readonly string[];aoPrepararQuiz:(quiz:QuizGeradoIa)=>void}
 const vazio:MaterialFormulario={disciplina:'',titulo:'',conteudo:'',publicado:false}
-export default function SalaDocente({turmaId,disciplina,disciplinas}:Props){
+export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQuiz}:Props){
   const [materiais,setMateriais]=useState<MaterialTurma[]>([])
   const [usuarioId,setUsuarioId]=useState(0)
   const [form,setForm]=useState<MaterialFormulario>(vazio)
@@ -16,6 +16,7 @@ export default function SalaDocente({turmaId,disciplina,disciplinas}:Props){
   const [tipo,setTipo]=useState<TipoRascunho>('QUIZ')
   const [contexto,setContexto]=useState('')
   const [resposta,setResposta]=useState<RespostaIa|null>(null)
+  const [statusIa,setStatusIa]=useState<StatusIa|null>(null)
   const [ocupado,setOcupado]=useState(false)
   const [gerando,setGerando]=useState(false)
   const [erro,setErro]=useState('')
@@ -24,8 +25,8 @@ export default function SalaDocente({turmaId,disciplina,disciplinas}:Props){
     if(!turmaId)return
     let ativo=true
     setErro('');setForm({...vazio,disciplina});setEditando(null)
-    Promise.all([apiEscolar.materiaisTurma(turmaId),apiEscolar.me()])
-      .then(([m,eu])=>{if(ativo){setMateriais(m);setUsuarioId(eu.id)}})
+    Promise.all([apiEscolar.materiaisTurma(turmaId),apiEscolar.me(),apiEscolar.statusIa()])
+      .then(([m,eu,si])=>{if(ativo){setMateriais(m);setUsuarioId(eu.id);setStatusIa(si)}})
       .catch(e=>{if(ativo)setErro(falha(e))})
     return()=>{ativo=false}
   },[turmaId])
@@ -50,7 +51,11 @@ export default function SalaDocente({turmaId,disciplina,disciplinas}:Props){
   const gerar=async(e:FormEvent)=>{
     e.preventDefault();if(!turmaId||!disciplina)return
     setGerando(true);setErro('');setResposta(null)
-    try{setResposta(await apiEscolar.gerarRascunho({turmaId,disciplina,tema,tipo,contexto}))}
+    try{
+      const r=await apiEscolar.gerarRascunho({turmaId,disciplina,tema,tipo,contexto})
+      setResposta(r)
+      setStatusIa(prev=>prev?{...prev,restantesHoje:r.restantesHoje}:prev)
+    }
     catch(e){setErro(falha(e))}finally{setGerando(false)}
   }
   if(!turmaId)return <p className="ext-empty">A direção precisa vincular você a uma turma.</p>
@@ -88,7 +93,13 @@ export default function SalaDocente({turmaId,disciplina,disciplinas}:Props){
       </article>
       <article className="ext-surface ext-ia">
         <h3><Bot size={20}/> Assistente pedagógico IA</h3>
-        <p className="ext-ajuda">Rascunhos de exercícios, explicações e planos de aula. Requer chave e habilitação do provedor.</p>
+        <p className="ext-ajuda">Crie atividades, explicações e planos de aula para sua turma.
+          Revise antes de publicar: a IA não lança notas nem envia nada aos alunos sozinha.</p>
+        <p className="ext-ia-disponibilidade" role="status">
+          {statusIa===null?'Consultando a disponibilidade da IA...':
+            statusIa.habilitada?`IA ativa · ${statusIa.restantesHoje} gerações restantes hoje`:
+            'IA generativa ainda não ativada no ambiente. O editor manual continua funcionando.'}
+        </p>
         <form className="portal-form" onSubmit={e=>void gerar(e)}>
           <label htmlFor="ia-tipo">Tipo de rascunho</label>
           <select id="ia-tipo" value={tipo} onChange={e=>setTipo(e.target.value as TipoRascunho)}>
@@ -104,17 +115,28 @@ export default function SalaDocente({turmaId,disciplina,disciplinas}:Props){
             placeholder="Ex.: linguagem simples, duração de 45 minutos."
             onChange={e=>setContexto(e.target.value)}/>
           <p className="ext-aviso-ia">Não envie dados pessoais de alunos. Revise toda resposta antes de utilizar.</p>
-          <button type="submit" className="botao-principal" disabled={!disciplina||gerando}>
+          <button type="submit" className="botao-principal" disabled={!disciplina||gerando||!statusIa?.habilitada||statusIa.restantesHoje===0}>
             <Sparkles size={18}/>{gerando?'Gerando...':'Gerar rascunho com IA'}</button>
         </form>
         {resposta&&<div className="ext-resposta" aria-live="polite">
           <strong>Rascunho para revisão</strong>
-          <p>{resposta.texto}</p><small>{resposta.aviso}</small>
+          {resposta.quiz?<div className="ext-quiz-ia">
+            <h4>{resposta.quiz.titulo}</h4>
+            <p>{resposta.quiz.pergunta}</p>
+            <ol type="A">{resposta.quiz.opcoes.map((opcao,i)=>
+              <li key={i} className={i===resposta.quiz?.correta?'correta':''}>{opcao}</li>)}</ol>
+            <p><strong>Gabarito para o professor:</strong> {String.fromCharCode(65+resposta.quiz.correta)}</p>
+            <p><strong>Explicação:</strong> {resposta.quiz.explicacao}</p>
+          </div>:<p>{resposta.texto}</p>}
+          <small>{resposta.aviso}</small>
           <div className="ext-acoes">
+            {resposta.quiz?<button type="button" className="botao-principal"
+              onClick={()=>{aoPrepararQuiz(resposta.quiz!);setResposta(null)}}>
+              <Edit3 size={17}/> Revisar quiz no editor de atividades</button>:
             <button type="button" className="botao-secundario" onClick={()=>{
               setForm({...vazio,conteudo:resposta.texto.slice(0,4000),disciplina})
               setEditando(null);setSucesso('Rascunho levado ao editor. Revise e salve.')
-            }}><Edit3 size={17}/> Levar ao editor</button>
+            }}><Edit3 size={17}/> Levar ao editor de materiais</button>}
             <button type="button" className="botao-secundario" onClick={()=>void navigator.clipboard.writeText(resposta.texto)}>
               <ClipboardCopy size={17}/> Copiar</button>
           </div>

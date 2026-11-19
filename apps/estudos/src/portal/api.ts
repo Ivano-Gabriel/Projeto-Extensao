@@ -13,7 +13,11 @@ export type HorarioTurma = {id:number;turmaId:number;disciplina:string;diaSemana
 export type MaterialTurma = {id:number;turmaId:number;professorId:number;disciplina:string;titulo:string;conteudo:string;publicado:boolean}
 export type MaterialFormulario = Pick<MaterialTurma,'disciplina'|'titulo'|'conteudo'|'publicado'>
 export type TipoRascunho = 'QUIZ'|'EXPLICACAO'|'PLANO_AULA'
-export type RespostaIa = {texto:string;status:'RASCUNHO';aviso:string}
+export type QuizGeradoIa = {titulo:string;pergunta:string;opcoes:string[];correta:number;explicacao:string}
+export type RespostaIa = {texto:string;status:'RASCUNHO';aviso:string;quiz:QuizGeradoIa|null;restantesHoje:number}
+export type StatusIa = {habilitada:boolean;restantesHoje:number;mensagem:string}
+export type DisciplinaIaAluno = {turmaId:number;turmaNome:string;disciplina:string}
+export type ExplicacaoIa = {texto:string;aviso:string;restantesHoje:number}
 export type UsuarioResumido = {id:number;nome:string;email:string;papel:PapelEscolar}
 export type EscolaResumo = {id:number;codigo:string;nome:string}
 export type AtividadeEscolar = {
@@ -99,6 +103,10 @@ export const apiEscolar={
   editarMaterial:(id:number,body:MaterialFormulario)=>
     requisitar<MaterialTurma>('PUT',`/api/professor/materiais/${id}`,body),
   apagarMaterial:(id:number)=>requisitar<void>('DELETE',`/api/professor/materiais/${id}`),
+  statusIa:()=>requisitar<StatusIa>('GET','/api/portal/ia/status'),
+  disciplinasIaAluno:()=>requisitar<DisciplinaIaAluno[]>('GET','/api/portal/ia/disciplinas'),
+  explicarIa:(body:{turmaId:number;disciplina:string;pergunta:string})=>
+    requisitar<ExplicacaoIa>('POST','/api/portal/ia/explicar',body),
   gerarRascunho:(body:{turmaId:number;disciplina:string;tema:string;tipo:TipoRascunho;contexto:string})=>
     requisitar<RespostaIa>('POST','/api/professor/ia/rascunho',body),
   login:(email:string,senha:string)=>requisitar<UsuarioEscolar>('POST','/api/login',{email,senha}),
