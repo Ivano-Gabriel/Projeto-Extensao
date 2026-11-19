@@ -50,7 +50,7 @@ test('professor revisa quiz estruturado antes de publicar',()=>{
 })
 
 test('modos escolares e tutoria generativa sao distintos',()=>{
-  assert.match(assistente,/Minha escola/)
+  assert.match(assistente,/Assistente gratuito/)
   assert.match(assistente,/Entender matéria com IA/)
   assert.match(assistente,/<TutorPedagogico\/>/)
   assert.match(tutor,/status\?\.habilitada/)
