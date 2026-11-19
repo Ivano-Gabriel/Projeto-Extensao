@@ -239,9 +239,9 @@ function LerMaterial({ material, revisado, onVoltar, onAlternar, irRevisao }: {
           </div>
         </article>
         <aside className="coluna-estudo" aria-label="Ações do estudo">
-          <span className="sobretitulo">DEPOIS DE LER</span>
+          <span className="sobretitulo">CONCLUINDO O ESTUDO</span>
           <h2>Seu ritmo, seu progresso</h2>
-          <p>Marque quando terminar, depois testa oq aprendeu no quiz</p>
+          <p>Terminou? Registre e faça uma revisão.</p>
           <button type="button" className={`botao-principal ${revisado ? 'revisado-acao' : ''}`}
             aria-pressed={revisado} onClick={() => onAlternar(material.id)}>
             {revisado ? <CheckCircle2 size={18}/> : <Check size={18}/>}
@@ -325,8 +325,8 @@ function QuizPagina({ estado, indice, setIndice, responder, irMateriais, reinici
         </section>
         <aside className="quiz-ajuda">
           <span className="quiz-ajuda-icone"><Brain size={24}/></span>
-          <h3>Errar faz parte</h3>
-          <p>Essa revisão é pra praticar, não pra colar. Cada resposta vem com uma explicação pra você aprender de verdade</p>
+          <h3>Seu treino em números</h3>
+          <p>Cada questão tem explicação. Use os erros para escolher o que revisar.</p>
           <div className="quiz-estatistica"><strong>{resumo.respondidas}/{resumo.total}</strong><span>respondidas até agora</span></div>
         </aside>
       </div>
@@ -334,18 +334,16 @@ function QuizPagina({ estado, indice, setIndice, responder, irMateriais, reinici
   )
 }
 
-function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, limparProgresso, apagarTudo }: {
+function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, limparProgresso }: {
   pendentesPlano: number
   estado: EstadoEstudos
   irMateriais: () => void
   irRevisao: () => void
   limparProgresso: () => void
-  apagarTudo: () => boolean
   irPlano: () => void
 }) {
   const [confirmarLimpeza, setConfirmarLimpeza] = useState(false)
-  const [confirmarTudo, setConfirmarTudo] = useState(false)
-  const [statusPrivacidade, setStatusPrivacidade] = useState('')
+
   const resumo = resumoEstudos(materiais, estado.revisados, estado.respostas)
   const quiz = resumirRespostas(questoes, estado.respostas)
   return (
@@ -357,7 +355,7 @@ function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, li
           <span className="sobretitulo">MATERIAIS REVISADOS</span>
           <div className="progresso-numero"><strong>{resumo.percentual}%</strong><span>{resumo.revisados} de {resumo.materiais} materiais</span></div>
           <Barrinha valor={resumo.percentual} />
-          <p>Não precisa correr. Cada material revisado é um passo adiante</p>
+          <p>Seus avanços nos materiais de estudo da biblioteca.</p>
           <button type="button" className="botao-principal" onClick={irMateriais}>Continuar estudando <ArrowRight size={18}/></button>
         </section>
         <section className="progresso-quiz">
@@ -390,26 +388,9 @@ function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, li
         <p>{pendentesPlano ? `${pendentesPlano} ${pendentesPlano === 1 ? 'tarefa pendente' : 'tarefas pendentes'} para organizar.` : 'Monte um plano de estudos por matéria.'}</p>
         <button type="button" className="botao-principal" onClick={irPlano}>Abrir plano <ArrowRight size={17}/></button>
       </section>
-      <section className="privacidade-dispositivo" aria-label="Privacidade deste dispositivo">
-        <h2>Usando um computador compartilhado?</h2>
-        <p>Este aplicativo não tem contas. Seus exercícios, tarefas, mensagens de feedback e posts de exemplo ficam neste navegador e podem ser vistos por quem usar este aparelho.</p>
-        <p>Ao terminar, você pode apagar tudo do Estudos neste dispositivo. Isso não apaga outros projetos ou arquivos do computador.</p>
-        {confirmarTudo ? <div className="privacidade-confirmacao" role="group" aria-label="Confirmar exclusão total dos dados locais">
-          <strong>Apagar todas as informações locais do Estudos? Não tem como desfazer.</strong>
-          <button type="button" className="botao-perigo" onClick={() => {
-            const foiApagado=apagarTudo()
-            setStatusPrivacidade(foiApagado?'Dados locais do Estudos apagados.':'Não foi possível limpar o armazenamento. Tente novamente.')
-            setConfirmarTudo(false)
-          }}>Sim, apagar tudo</button>
-          <button type="button" className="botao-secundario" onClick={() => setConfirmarTudo(false)}>Cancelar</button>
-        </div> : <button type="button" className="botao-secundario" onClick={()=>{setConfirmarTudo(true);setStatusPrivacidade('')}}>
-          Apagar meus dados deste aparelho
-        </button>}
-        {statusPrivacidade && <p role="status" className="privacidade-status">{statusPrivacidade}</p>}
-      </section>
       <section className="limpar-progresso" aria-label="Reiniciar a demonstração">
         <h2>Quer começar do zero?</h2>
-        <p>Isso apaga só as marcações e respostas desta simulação neste navegador</p>
+        <p>Reinicie apenas as marcações de materiais e as respostas dos quizzes demonstrativos.</p>
         {confirmarLimpeza ? (
           <div className="confirmar-limpeza" role="group" aria-label="Confirmar limpeza do progresso">
             <strong>Apagar seu progresso de demonstração?</strong>
@@ -535,6 +516,10 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
             </button>
           ))}
         </div>
+        <div className="prime-navegacao-extras">
+          <button type="button" onClick={()=>navegar('plano')}><ListChecks size={20}/> Meu plano</button>
+          <button type="button" onClick={()=>navegar('jogo')}><Sparkles size={20}/> Missões do Futuro</button>
+        </div>
         <span className="navegacao-rodape">EXTENSÃO ESCOLAR</span>
       </nav>
       <div className="layout-corpo">
@@ -553,6 +538,10 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
                 {escola.tema==='escuro'?<Sun size={19}/>:<Moon size={19}/>}
                 {escola.tema==='escuro'?'Ativar modo claro':'Ativar modo escuro'}</button>
               <button type="button" onClick={()=>navegar('portal')}><School size={19}/> Minha turma</button>
+              <button type="button" onClick={()=>{
+                setConfigAberta(false)
+                if(window.confirm('Apagar seus exercícios, plano e demonstrações salvas neste dispositivo? Sua conta escolar permanece ativa.'))apagarTudo()
+              }}><RotateCcw size={19}/> Apagar dados locais de estudo</button>
               <button type="button" disabled={saindo} onClick={()=>void encerrarSessao()}>
                 <LogOut size={19}/> {saindo?'Saindo...':'Sair da conta'}</button>
             </div>}
@@ -585,7 +574,7 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
                 irPlano={() => navegar('plano')} irMateriais={() => navegar('materiais')}
                 irRevisao={() => navegar('revisao')}
                 limparProgresso={() => {setEstado({ revisados: [], respostas: [] }); setAviso('Demonstração reiniciada')}}
-                apagarTudo={apagarTudo} />}
+                />}
             </>
           )}
         </main>
