@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ArrowRight, Bell, CalendarDays, Link2, School, Trash2, UserPlus, Users } from 'lucide-react'
 import { apiEscolar } from './api'
-import type { Aviso, TurmaEscolar, UsuarioResumido, Vinculo } from './api'
+import type { Aviso, MatriculaResumo, TurmaEscolar, UsuarioResumido, Vinculo } from './api'
 import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
 import { CriarAviso, Mural } from './Avisos'
 import { acoesPorPerfil } from './navegacao'
@@ -12,6 +12,9 @@ const disciplinas=['MATEMATICA','PORTUGUES','FISICA','HISTORIA','BIOLOGIA','QUIM
 export default function DirecaoPainel(){
   const [aba,setAba]=useState('inicio')
   const [turmas,setTurmas]=useState<TurmaEscolar[]>([])
+  const [matriculas,setMatriculas]=useState<MatriculaResumo[]>([])
+  const [alunoMover,setAlunoMover]=useState(0)
+  const [destinoMover,setDestinoMover]=useState(0)
   const [usuarios,setUsuarios]=useState<UsuarioResumido[]>([])
   const [avisos,setAvisos]=useState<Aviso[]>([])
   const [turma,setTurma]=useState(0)
@@ -30,13 +33,13 @@ export default function DirecaoPainel(){
   const [disciplina,setDisciplina]=useState('MATEMATICA')
   const [confirmarRemocao,setConfirmarRemocao]=useState<string|null>(null)
   const atualizar=async()=>{
-    const [t,u,a]=await Promise.all([apiEscolar.turmas(),apiEscolar.usuarios(),apiEscolar.avisos()])
-    setTurmas(t);setUsuarios(u);setAvisos(a);setTurma(prev=>prev||t[0]?.id||0)
+    const [t,u,a,m]=await Promise.all([apiEscolar.turmas(),apiEscolar.usuarios(),apiEscolar.avisos(),apiEscolar.matriculasDaEscola()])
+    setTurmas(t);setUsuarios(u);setAvisos(a);setMatriculas(m);setTurma(prev=>prev||t[0]?.id||0)
   }
   useEffect(()=>{
     let ativo=true
-    Promise.all([apiEscolar.turmas(),apiEscolar.usuarios(),apiEscolar.avisos()])
-      .then(([t,u,a])=>{if(ativo){setTurmas(t);setUsuarios(u);setAvisos(a);setTurma(t[0]?.id||0)}})
+    Promise.all([apiEscolar.turmas(),apiEscolar.usuarios(),apiEscolar.avisos(),apiEscolar.matriculasDaEscola()])
+      .then(([t,u,a,m])=>{if(ativo){setTurmas(t);setUsuarios(u);setAvisos(a);setMatriculas(m);setTurma(t[0]?.id||0)}})
       .catch(e=>{if(ativo)setMensagem({erro:falha(e)})})
       .finally(()=>{if(ativo)setCarregando(false)})
     return()=>{ativo=false}
@@ -76,6 +79,18 @@ export default function DirecaoPainel(){
       else if(selecionada.papel==='ALUNO')
         await apiEscolar.matricular(turma,pessoa)
     },'Pessoa vinculada à turma.')
+  }
+  const matriculaAtiva=matriculas.find(m=>m.alunoId===alunoMover)
+  const opcoesDestino=turmas.filter(t=>t.id!==matriculaAtiva?.turmaId &&
+    t.anoLetivo===matriculaAtiva?.anoLetivo)
+  const transferir=async()=>{
+    if(!matriculaAtiva||!destinoMover||enviando)return
+    const alvo=opcoesDestino.find(t=>t.id===destinoMover)
+    if(!alvo)return
+    if(!window.confirm(`Transferir ${matriculaAtiva.alunoNome} da turma ${matriculaAtiva.turmaCodigo} para ${alvo.codigo}?\n\nAs respostas anteriores não serão apagadas, mas o aluno deixará de acessar as atividades da turma de origem.`))return
+    await executar(()=>apiEscolar.transferirAluno(matriculaAtiva.turmaId,matriculaAtiva.alunoId,destinoMover),
+      'Aluno transferido para a nova turma. A movimentação foi registrada no banco.')
+    setDestinoMover(0)
   }
   const remover=async(v:Vinculo)=>{
     await executar(()=>apiEscolar.desvincular(turma,v.professorId,v.disciplina),
@@ -181,6 +196,38 @@ export default function DirecaoPainel(){
           </>}
           <button type="button" className="botao-principal" disabled={!turma||!pessoa||enviando}
             onClick={()=>void vincular()}><Link2 size={18}/> Vincular à turma</button>
+        </div>
+      </Cartao>
+      <Cartao titulo="Realocar aluno de turma">
+        <p className="portal-aviso-discreto">Mudança real no banco: apenas entre turmas do mesmo ano letivo e da mesma escola. O histórico de respostas permanece preservado.</p>
+        {matriculas.length===0?<Vazio texto="Não há alunos matriculados para transferir."/>:
+          <div className="portal-form">
+            <label htmlFor="dir-aluno-mover">Aluno matriculado</label>
+            <select id="dir-aluno-mover" value={alunoMover}
+              onChange={e=>{setAlunoMover(Number(e.target.value));setDestinoMover(0)}}>
+              <option value={0}>Selecione um aluno</option>
+              {matriculas.map(m=><option key={m.alunoId+':'+m.anoLetivo} value={m.alunoId}>
+                {m.alunoNome} · {m.turmaCodigo} ({m.anoLetivo})</option>)}
+            </select>
+            {matriculaAtiva&&<>
+              <div className="ext-matricula-atual">
+                <strong>Turma atual: {matriculaAtiva.turmaCodigo}</strong>
+                <span>{matriculaAtiva.turmaNome} · {matriculaAtiva.anoLetivo}</span>
+              </div>
+              <label htmlFor="dir-destino-mover">Nova turma</label>
+              <select id="dir-destino-mover" value={destinoMover}
+                onChange={e=>setDestinoMover(Number(e.target.value))}>
+                <option value={0}>Escolha outra turma do mesmo ano</option>
+                {opcoesDestino.map(t=><option key={t.id} value={t.id}>{t.codigo} · {t.nome}</option>)}
+              </select>
+              <button type="button" className="botao-principal" disabled={!destinoMover||enviando}
+                onClick={()=>void transferir()}><Users size={18}/> Confirmar transferência</button>
+            </>}
+          </div>}
+        <div className="ext-matriculas-grid">
+          {matriculas.slice(0,30).map(m=><div key={m.alunoId+':'+m.anoLetivo}>
+            <strong>{m.alunoNome}</strong><span>{m.turmaCodigo} · {m.anoLetivo}</span>
+          </div>)}
         </div>
       </Cartao>
       <Cartao titulo="Vínculos docentes">
