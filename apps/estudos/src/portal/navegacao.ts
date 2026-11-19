@@ -5,6 +5,7 @@ const abas={
   ALUNO:[
     {id:'inicio',titulo:'Hoje',icone:'home'},
     {id:'atividades',titulo:'Atividades',icone:'book'},
+    {id:'materiais',titulo:'Materiais da turma',icone:'book'},
     {id:'avisos',titulo:'Avisos',icone:'bell'},
     {id:'assistente',titulo:'Assistente',icone:'sparkles'},
     {id:'progresso',titulo:'Meu progresso',icone:'chart'},
@@ -13,6 +14,7 @@ const abas={
     {id:'inicio',titulo:'Visão geral',icone:'home'},
     {id:'turmas',titulo:'Minhas turmas',icone:'users'},
     {id:'atividades',titulo:'Atividades',icone:'book'},
+    {id:'materiais',titulo:'Materiais e IA',icone:'sparkles'},
     {id:'mural',titulo:'Mural',icone:'bell'},
     {id:'resultados',titulo:'Resultados',icone:'chart'},
     {id:'presenca',titulo:'Aulas',icone:'calendar'},
