@@ -191,7 +191,7 @@ public class IaPedagogicaController {
                 "Falha na consulta ao provedor de IA. Nenhum conteúdo foi publicado.");
         }
     }
-    private QuizGerado lerQuiz(String resposta){
+    QuizGerado lerQuiz(String resposta){
         try{
             @SuppressWarnings("unchecked")
             Map<String,Object> p=json.readValue(resposta,Map.class);
