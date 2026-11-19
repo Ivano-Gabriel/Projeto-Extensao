@@ -7,7 +7,7 @@ export type MemoriaEstado = {
   acertos:number
   finalizado:boolean
 }
-const conteudos:Record<AreaMemoria, readonly [string,string,string][]> = {
+const conteudos:Record<AreaMemoria, readonly [string,string][]> = {
   matematica:[
     ['Porcentagem','Parte de 100'],
     ['Média','Soma dividida pela quantidade'],
