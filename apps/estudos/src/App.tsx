@@ -30,7 +30,8 @@ const menu = [
   { id: 'inicio', nome: 'Início', Icone: Home },
   { id: 'materiais', nome: 'Materiais', Icone: BookOpen },
   { id: 'revisao', nome: 'Revisão', Icone: Brain },
-  { id: 'escola', nome: 'Escola', Icone: School },
+  { id: 'escola', nome: 'Explorar', Icone: Sparkles },
+  { id: 'portal', nome: 'Minha turma', Icone: School },
   { id: 'progresso', nome: 'Progresso', Icone: Target },
 ] as const
 const cores: Record<Materia, string> = {
@@ -603,7 +604,7 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
             </button>
           ))}
         </div>
-        <span className="navegacao-rodape">PROJETO DE EXTENSÃO · PROTÓTIPO 3</span>
+        <span className="navegacao-rodape">EXTENSÃO ESCOLAR · VERSÃO DE TESTES</span>
       </nav>
       <div className="layout-corpo">
         <header className="cabecalho-app">
