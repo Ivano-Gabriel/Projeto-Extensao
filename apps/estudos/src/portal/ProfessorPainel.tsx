@@ -6,6 +6,7 @@ import type { AlunoResumo, AtividadeEscolar, AulaEscolar, Aviso, DesempenhoAluno
 import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
 import { CriarAviso, Mural } from './Avisos'
 import { acoesPorPerfil, opcoesProfessor } from './navegacao'
+import SalaDocente from './SalaDocente'
 import { materiais } from '../dados/materiais'
 import { questoes } from '../dados/questoes'
 
@@ -28,6 +29,7 @@ export default function ProfessorPainel(){
   const [mensagem,setMensagem]=useState<Feedback>({})
   const [carregando,setCarregando]=useState(true)
   const [enviando,setEnviando]=useState(false)
+  const [editandoAtividade,setEditandoAtividade]=useState<number|null>(null)
   const [titulo,setTitulo]=useState('')
   const [pergunta,setPergunta]=useState('')
   const [opcoes,setOpcoes]=useState(['','','',''])
@@ -72,15 +74,37 @@ export default function ProfessorPainel(){
     setOpcoes([...q.opcoes]);setCorreta(q.correta);setExplicacao(q.explicacao)
     setMensagem({ok:'Questão do catálogo preenchida. Revise antes de publicar.'})
   }
+  const prepararEdicao=async(id:number)=>{
+    setMensagem({})
+    try{
+      const dados=await apiEscolar.dadosEdicaoAtividade(id)
+      setTitulo(dados.titulo);setPergunta(dados.pergunta);setOpcoes(dados.opcoes)
+      setCorreta(dados.correta);setExplicacao(dados.explicacao);setEditandoAtividade(id)
+      setDisciplina(dados.disciplina);setAba('atividades')
+      setMensagem({ok:'Atividade carregada para edição. Questões com respostas registradas não podem ser alteradas.'})
+    }catch(e){setMensagem({erro:falha(e)})}
+  }
+  const apagarAtividade=async(id:number)=>{
+    if(!window.confirm('Excluir esta atividade? Não é permitido apagar questões já respondidas.'))return
+    setMensagem({})
+    try{
+      await apiEscolar.apagarAtividade(id)
+      setAtividades(await apiEscolar.atividades())
+      setMensagem({ok:'Atividade removida.'})
+    }catch(e){setMensagem({erro:falha(e)})}
+  }
   const publicar=async(e:FormEvent)=>{
     e.preventDefault()
     if(!turma||!disciplina)return
     setEnviando(true);setMensagem({})
     try{
-      await apiEscolar.publicar({turmaId:turma,disciplina,titulo,pergunta,opcoes,correta,explicacao})
+      const dados={turmaId:turma,disciplina,titulo,pergunta,opcoes,correta,explicacao}
+      if(editandoAtividade!==null)await apiEscolar.editarAtividade(editandoAtividade,dados)
+      else await apiEscolar.publicar(dados)
+      setEditandoAtividade(null)
       setTitulo('');setPergunta('');setOpcoes(['','','','']);setExplicacao('');setTemaCatalogo('')
       const a=await apiEscolar.atividades();setAtividades(a)
-      setMensagem({ok:'Atividade publicada na turma.'})
+      setMensagem({ok:'Atividade salva. A edição só é permitida antes de receber respostas.'})
     }catch(e){setMensagem({erro:falha(e)})}
     finally{setEnviando(false)}
   }
@@ -145,7 +169,7 @@ export default function ProfessorPainel(){
       </Cartao>
     </>}
     {!carregando&&aba==='atividades'&&<>
-      <Cartao titulo="Nova atividade">
+      <Cartao titulo={editandoAtividade===null?'Nova atividade':'Editar atividade'}>
         <div className="portal-gerador">
           <div className="portal-gerador-marca"><Sparkles size={21}/><strong>Atalho de conteúdo</strong></div>
           <p>Comece com uma questão revisada do catálogo.</p>
@@ -185,15 +209,22 @@ export default function ProfessorPainel(){
           <textarea id="ativ-explicacao" required maxLength={1000} rows={3} value={explicacao}
             onChange={e=>setExplicacao(e.target.value)}/>
           <button type="submit" className="botao-principal" disabled={!disciplina||enviando}>
-            <ClipboardList size={18}/>{enviando?'Publicando...':'Publicar atividade'}</button>
+            <ClipboardList size={18}/>{enviando?'Salvando...':editandoAtividade===null?'Publicar atividade':'Salvar alterações'}</button>
+          {editandoAtividade!==null&&<button className="botao-secundario" type="button"
+            onClick={()=>{setEditandoAtividade(null);setTitulo('');setPergunta('');setOpcoes(['','','','']);setExplicacao('')}}>Cancelar edição</button>}
         </form>
       </Cartao>
       <Cartao titulo="Atividades publicadas">
         {atividadesDaTurma.length?atividadesDaTurma.map(a=><div className="portal-linha" key={a.id}>
           <strong>{a.titulo}</strong><small>{a.disciplina} · {selecionada?.codigo}</small>
+          <div className="ext-acoes">
+            <button type="button" className="botao-secundario" onClick={()=>void prepararEdicao(a.id)}>Editar</button>
+            <button type="button" className="botao-secundario" onClick={()=>void apagarAtividade(a.id)}>Excluir</button>
+          </div>
         </div>):<Vazio texto="Nenhuma atividade publicada."/>}
       </Cartao>
     </>}
+    {!carregando&&aba==='materiais'&&<SalaDocente turmaId={turma} disciplina={disciplina} disciplinas={disciplinas}/>}
     {!carregando&&aba==='mural'&&<>
       <Cartao titulo="Postar aviso">
         <CriarAviso key={turma} turmaInicial={turma} turmas={turmas} como="PROFESSOR" enviado={async()=>setAvisos(await apiEscolar.avisos())}/>

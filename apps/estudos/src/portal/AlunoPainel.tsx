@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ArrowRight, BookOpen, CheckCircle2, Flame, ShieldCheck, Sparkles } from 'lucide-react'
 import { apiEscolar } from './api'
-import type { AtividadeEscolar, Aviso, FrequenciaEscolar, MeuDesempenho, RespostaSalva, TurmaEscolar } from './api'
+import type { AtividadeEscolar, Aviso, FrequenciaEscolar, HorarioTurma, MaterialTurma, MeuDesempenho, RespostaSalva, TurmaConfiguracao, TurmaEscolar } from './api'
 import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
 import { Mural } from './Avisos'
 import AssistenteEscolar from './AssistenteEscolar'
@@ -11,6 +11,9 @@ export default function AlunoPainel(){
   const [aba,setAba]=useState('inicio')
   const [turmas,setTurmas]=useState<TurmaEscolar[]>([])
   const [atividades,setAtividades]=useState<AtividadeEscolar[]>([])
+  const [materiais,setMateriais]=useState<MaterialTurma[]>([])
+  const [horarios,setHorarios]=useState<HorarioTurma[]>([])
+  const [configTurmas,setConfigTurmas]=useState<TurmaConfiguracao[]>([])
   const [avisos,setAvisos]=useState<Aviso[]>([])
   const [respostas,setRespostas]=useState<RespostaSalva[]>([])
   const [desempenho,setDesempenho]=useState<MeuDesempenho|null>(null)
@@ -38,6 +41,20 @@ export default function AlunoPainel(){
       .finally(()=>{if(ativo)setCarregando(false)})
     return()=>{ativo=false}
   },[])
+  useEffect(()=>{
+    if(!turmas.length){setMateriais([]);setHorarios([]);setConfigTurmas([]);return}
+    let ativo=true
+    Promise.all(turmas.map(t=>Promise.all([
+      apiEscolar.configuracaoTurma(t.id),apiEscolar.horariosTurma(t.id),
+      apiEscolar.materiaisTurma(t.id),
+    ]))).then(resultados=>{
+      if(!ativo)return
+      setConfigTurmas(resultados.map(r=>r[0]))
+      setHorarios(resultados.flatMap(r=>r[1]))
+      setMateriais(resultados.flatMap(r=>r[2]))
+    }).catch(e=>{if(ativo)setMensagem({erro:falha(e)})})
+    return()=>{ativo=false}
+  },[turmas])
   const enviar=async(id:number)=>{
     if(escolhas[id]===undefined||enviando!==null)return
     setEnviando(id);setMensagem({})
@@ -97,6 +114,26 @@ export default function AlunoPainel(){
         </article>
       })}</div>
     </Cartao>}
+    {!carregando&&aba==='materiais'&&<>
+      {configTurmas.map(t=><div key={t.id} className="ext-turma-cabecalho" style={{borderTopColor:t.cor}}>
+        <span className="ext-turma-emblema" style={{background:t.cor}}><BookOpen size={22}/></span>
+        <div><span className="sobretitulo">MINHA TURMA · {t.anoLetivo}</span><h2>{t.codigo} · {t.nome}</h2>
+          <p>{t.descricao||'A direção ainda não cadastrou uma apresentação desta turma.'}</p></div>
+      </div>)}
+      <Cartao titulo="Materiais publicados pelos professores">
+        {materiais.length===0?<Vazio texto="Nenhum material publicado por seus professores ainda."/>:
+          <div className="ext-registros">{materiais.map(m=><article className="ext-material-aluno" key={m.id}>
+            <small>{m.disciplina}</small><strong>{m.titulo}</strong><p>{m.conteudo}</p>
+          </article>)}</div>}
+      </Cartao>
+      <Cartao titulo="Horários da turma">
+        {horarios.length===0?<Vazio texto="A direção ainda não cadastrou os horários."/>:
+          <div className="ext-registros">{horarios.map(h=><div key={h.id} className="ext-registro">
+            <div><strong>{['','Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'][h.diaSemana]} · {h.inicio}–{h.fim}</strong>
+              <small>{h.disciplina} · {h.professorNome||'Professor a definir'}</small></div>
+          </div>)}</div>}
+      </Cartao>
+    </>}
     {!carregando&&aba==='avisos'&&<Cartao titulo="Mural da escola"><Mural avisos={avisos}/></Cartao>}
     {aba==='assistente'&&<AssistenteEscolar/>}
     {!carregando&&aba==='progresso'&&<>

@@ -6,6 +6,7 @@ import type { Aviso, TurmaEscolar, UsuarioResumido, Vinculo } from './api'
 import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
 import { CriarAviso, Mural } from './Avisos'
 import { acoesPorPerfil } from './navegacao'
+import GestaoTurma from './GestaoTurma'
 
 const disciplinas=['MATEMATICA','PORTUGUES','FISICA','HISTORIA','BIOLOGIA','QUIMICA','GEOGRAFIA','INGLES','SOCIOLOGIA','FILOSOFIA']
 export default function DirecaoPainel(){
@@ -93,7 +94,7 @@ export default function DirecaoPainel(){
       </div>
       <Cartao titulo="Organizar a escola">
         <div className="portal-acoes-rapidas">
-          <button type="button" className="botao-principal" onClick={()=>setAba('vinculos')}>
+          <button type="button" className="botao-principal" onClick={()=>setAba('turmas')}>
             <Link2 size={18}/> Organizar turmas <ArrowRight size={17}/></button>
           <button type="button" className="botao-secundario" onClick={()=>setAba('avisos')}>
             <Bell size={18}/> Publicar comunicado</button>
@@ -110,7 +111,7 @@ export default function DirecaoPainel(){
         {turmas.length?<div className="portal-lista-turmas">{turmas.map(t=><div key={t.id}>
           <span className="portal-avatar"><School size={19}/></span>
           <div><strong>{t.codigo} · {t.nome}</strong><small>{t.anoLetivo}</small></div>
-          <button type="button" className="portal-link" onClick={()=>{setTurma(t.id);setAba('vinculos')}}>Organizar <ArrowRight size={16}/></button>
+          <button type="button" className="portal-link" onClick={()=>{setTurma(t.id);setMensagem({ok:'Turma selecionada para personalização.'})}}>Personalizar <ArrowRight size={16}/></button>
         </div>)}</div>:<Vazio texto="Nenhuma turma cadastrada."/>}
       </Cartao>
       <Cartao titulo="Nova turma">
@@ -130,6 +131,7 @@ export default function DirecaoPainel(){
             <Users size={18}/> Criar turma</button>
         </form>
       </Cartao>
+      {turma>0&&<GestaoTurma key={turma} turmaId={turma} aoSalvar={atualizar}/>}
     </>}
     {!carregando&&aba==='pessoas'&&<>
       <Cartao titulo="Criar conta">

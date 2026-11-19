@@ -4,6 +4,7 @@ import { Eye, EyeOff, GraduationCap, LockKeyhole, ShieldCheck, Users } from 'luc
 import { apiEscolar } from './api'
 import type { UsuarioEscolar } from './api'
 import './portal.css'
+import './portal-premium.css'
 
 type Props = { entrar: (pessoa: UsuarioEscolar) => void }
 type Categoria = 'aluno' | 'funcionario'
@@ -32,7 +33,11 @@ export default function PortalLogin({entrar}:Props){
   }
   return <section className="portal-login" aria-labelledby="portal-titulo-login">
     <header className="portal-login-cabecalho">
-      <span className="portal-identidade"><LockKeyhole size={22}/></span>
+      <div className="livro-cena" aria-hidden="true">
+        <div className="livro-objeto"><span className="livro-metade livro-esquerda"/>
+          <span className="livro-metade livro-direita"/><span className="livro-pagina pagina-um"/>
+          <span className="livro-pagina pagina-dois"/><span className="livro-miolo"/></div>
+      </div>
       <span className="sobretitulo">ACESSO INSTITUCIONAL</span>
       <h2 id="portal-titulo-login">Entrar no Extensão</h2>
       <p>Selecione sua área de acesso.</p>

@@ -146,4 +146,65 @@ public class AtividadesController {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore())
             .body(new ResultadoResposta(dados.opcao()==questao.correta(),questao.explicacao()));
     }
+
+    private void autorizarEdicao(Long atividadeId,Usuario professor,Long turmaId,String disciplina) {
+        if(professor.getPapel()!=Papel.PROFESSOR)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        Long escolaId=escola(professor);
+        Integer autorizados=jdbc.queryForObject(
+            "SELECT COUNT(*) FROM atividades a JOIN vinculos_docentes v "+
+            "ON v.turma_id=a.turma_id AND v.professor_id=? AND v.disciplina=a.disciplina "+
+            "WHERE a.id=? AND a.escola_id=? AND a.professor_id=? "+
+            (turmaId!=null?"AND a.turma_id=? AND a.disciplina=?":""),
+            Integer.class,
+            turmaId!=null?new Object[]{professor.getId(),atividadeId,escolaId,professor.getId(),turmaId,disciplina}:
+                new Object[]{professor.getId(),atividadeId,escolaId,professor.getId()});
+        if(autorizados==0)throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+    private void semRespostas(Long atividadeId) {
+        Integer quantidade=jdbc.queryForObject(
+            "SELECT COUNT(*) FROM respostas_atividade r JOIN questoes_atividade q ON q.id=r.questao_id "+
+            "WHERE q.atividade_id=?",Integer.class,atividadeId);
+        if(quantidade>0)throw new ResponseStatusException(HttpStatus.CONFLICT,
+            "Atividade com respostas nao pode ser alterada; crie uma nova versao.");
+    }
+    @GetMapping("/professor/atividades/{atividadeId}/edicao")
+    public ResponseEntity<NovaAtividade> dadosParaEdicao(@PathVariable Long atividadeId,Authentication auth){
+        Usuario professor=usuario(auth);
+        autorizarEdicao(atividadeId,professor,null,null);
+        List<NovaAtividade> dados=jdbc.query(
+            "SELECT a.turma_id,a.disciplina,a.titulo,q.pergunta,q.opcao_a,q.opcao_b,q.opcao_c,q.opcao_d,q.correta,q.explicacao "+
+            "FROM atividades a JOIN questoes_atividade q ON q.atividade_id=a.id WHERE a.id=?",
+            (rs,i)->new NovaAtividade(rs.getLong("turma_id"),rs.getString("disciplina"),
+                rs.getString("titulo"),rs.getString("pergunta"),
+                List.of(rs.getString("opcao_a"),rs.getString("opcao_b"),rs.getString("opcao_c"),rs.getString("opcao_d")),
+                rs.getInt("correta"),rs.getString("explicacao")),atividadeId);
+        if(dados.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(dados.get(0));
+    }
+    @Transactional
+    @PutMapping("/professor/atividades/{atividadeId}")
+    public ResponseEntity<Void> editar(@PathVariable Long atividadeId,
+            @Valid @RequestBody NovaAtividade dados,Authentication auth){
+        Usuario professor=usuario(auth);
+        autorizarEdicao(atividadeId,professor,dados.turmaId(),dados.disciplina());
+        semRespostas(atividadeId);
+        jdbc.update("UPDATE atividades SET titulo=? WHERE id=?",dados.titulo().trim(),atividadeId);
+        jdbc.update("UPDATE questoes_atividade SET pergunta=?,opcao_a=?,opcao_b=?,opcao_c=?,opcao_d=?,correta=?,explicacao=? "+
+            "WHERE atividade_id=?",dados.pergunta().trim(),dados.opcoes().get(0).trim(),
+            dados.opcoes().get(1).trim(),dados.opcoes().get(2).trim(),dados.opcoes().get(3).trim(),
+            dados.correta(),dados.explicacao().trim(),atividadeId);
+        return ResponseEntity.noContent().build();
+    }
+    @Transactional
+    @DeleteMapping("/professor/atividades/{atividadeId}")
+    public ResponseEntity<Void> remover(@PathVariable Long atividadeId,Authentication auth){
+        Usuario professor=usuario(auth);
+        autorizarEdicao(atividadeId,professor,null,null);
+        semRespostas(atividadeId);
+        jdbc.update("DELETE FROM questoes_atividade WHERE atividade_id=?",atividadeId);
+        jdbc.update("DELETE FROM atividades WHERE id=?",atividadeId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

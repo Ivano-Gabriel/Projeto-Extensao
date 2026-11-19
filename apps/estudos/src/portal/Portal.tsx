@@ -9,6 +9,7 @@ import AdminPainel from './AdminPainel'
 import { falha } from './ComponentesPortal'
 import './portal.css'
 import './portal-academico.css'
+import './portal-premium.css'
 
 type Props={usuario:UsuarioEscolar;onSair:()=>Promise<void>;voltar?:()=>void}
 export default function Portal({usuario,onSair,voltar}:Props){
@@ -40,7 +41,7 @@ export default function Portal({usuario,onSair,voltar}:Props){
     {area==='ADMIN'?<AdminPainel/>:area==='DIRECAO'?<DirecaoPainel/>:
       area==='PROFESSOR'?<ProfessorPainel/>:<AlunoPainel/>}
     <footer className="portal-rodape"><GraduationCap size={16}/>
-      Sistema em homologação · Somente dados fictícios de teste
+      Homologação · registros persistidos de teste, não dados oficiais da escola
     </footer>
   </div>
 }

@@ -348,6 +348,11 @@ export default function Escola({estado,atualizar,abrirMaterial}:Props) {
   }
   return (
     <div className="pagina escola-app">
+      <aside className="escola-lembrete" role="note" style={{display:'grid',gap:'.35rem',padding:'1rem',border:'1px solid var(--line-strong)',borderRadius:'.8rem'}}>
+        <strong>LABORATÓRIO DEMONSTRATIVO — NÃO OFICIAL</strong>
+        <span>As notas, faltas, publicações e frequências desta tela são exemplos simulados.
+          Os dados persistidos da escola ficam exclusivamente em Minha turma.</span>
+      </aside>
       <header className="cabecalho-secao escola-cabecalho">
         <span className="sobretitulo">FEITO COM AS IDEIAS DOS ALUNOS</span>
         <h1>A escola, do seu jeito.</h1>
