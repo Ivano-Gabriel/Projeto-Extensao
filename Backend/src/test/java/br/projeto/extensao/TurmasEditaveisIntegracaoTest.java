@@ -231,7 +231,7 @@ class TurmasEditaveisIntegracaoTest {
             escolaA,"3B","Terceiro B");
         Long destino=jdbc.queryForObject("SELECT id FROM turmas WHERE escola_id=? AND codigo='3B'",
             Long.class,escolaA);
-        String corpo="{\\"alunoId\\":"+aluno+",\\"destinoTurmaId\\":"+destino+"}";
+        String corpo="{\"alunoId\":"+aluno+",\"destinoTurmaId\":"+destino+"}";
         String endpoint="/api/gestao/turmas/"+turma+"/transferencias";
         mvc.perform(post(endpoint).with(user("aluno-edit@escola.test").roles("ALUNO"))
             .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(corpo))
@@ -266,7 +266,7 @@ class TurmasEditaveisIntegracaoTest {
             Long.class,escolaB);
         String endpoint="/api/gestao/turmas/"+turma+"/transferencias";
         for(Long destino:new Long[]{outroAno,outraEscola}){
-            String corpo="{\\"alunoId\\":"+aluno+",\\"destinoTurmaId\\":"+destino+"}";
+            String corpo="{\"alunoId\":"+aluno+",\"destinoTurmaId\":"+destino+"}";
             mvc.perform(post(endpoint).with(user("dir-edit@escola.test").roles("DIRECAO"))
                 .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(corpo))
                 .andExpect(destino.equals(outroAno)?status().isConflict():status().isNotFound());
