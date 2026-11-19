@@ -92,6 +92,7 @@ export default function AlunoPainel(){
       </Cartao>
     </>}
     {!carregando&&aba==='atividades'&&<Cartao titulo="Atividades da turma">
+      <p className="portal-aviso-discreto">Aqui aparecem apenas atividades publicadas pelos professores vinculados à sua turma. São registradas no banco, não quizzes demonstrativos.</p>
       {atividades.length===0&&<Vazio texto="Nenhuma atividade publicada ainda."/>}
       <div className="portal-atividades">{atividades.map(a=>{
         const salva=respostas.find(r=>r.atividadeId===a.id)
