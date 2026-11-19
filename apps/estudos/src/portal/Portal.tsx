@@ -41,7 +41,7 @@ export default function Portal({usuario,onSair,voltar}:Props){
     {area==='ADMIN'?<AdminPainel/>:area==='DIRECAO'?<DirecaoPainel/>:
       area==='PROFESSOR'?<ProfessorPainel/>:<AlunoPainel/>}
     <footer className="portal-rodape"><GraduationCap size={16}/>
-      Sistema em homologação · Somente dados fictícios de teste
+      Homologação · registros persistidos de teste, não dados oficiais da escola
     </footer>
   </div>
 }
