@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowLeft, ArrowRight, BookOpen, BookOpenCheck, Brain, Check, CheckCircle2,
+  ArrowLeft, ArrowRight, BookOpen, BookOpenCheck, Brain, Calculator, Atom, Landmark, PenLine, Check, CheckCircle2,
   ChevronRight, Clock3, Home, Info, Settings2,
   Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X, School, Moon, Sun, LogOut,
 } from 'lucide-react'
@@ -71,14 +71,19 @@ function CabecalhoSecao({ etiqueta, titulo, descricao }: { etiqueta: string; tit
   )
 }
 
+const iconesMaterias:Record<Materia,typeof BookOpen>={
+  'Matemática':Calculator,'Português':PenLine,'Física':Atom,'História':Landmark,
+}
+
 function CartaoMaterial({ material, revisado, onAbrir }: {
   material: Material
   revisado: boolean
   onAbrir: (item: Material) => void
 }) {
+  const Icone=iconesMaterias[material.materia]
   return (
     <article className="cartao-material">
-      <span className={`icone-materia materia-${cores[material.materia]}`} aria-hidden="true"><BookOpen size={22} /></span>
+      <span className={`icone-materia materia-${cores[material.materia]}`} aria-hidden="true"><Icone size={25} /></span>
       <div className="cartao-conteudo">
         <div className="cartao-etiquetas">
           <span>{material.materia}</span><span>{material.etiqueta}</span>
