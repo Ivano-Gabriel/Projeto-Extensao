@@ -281,3 +281,82 @@ button:focus-visible,.prime-config button:focus-visible,.prime-mobile-nav button
   .prime-livro-capa,.prime-estrela,.prime-login-folha,.prime-livro-nucleo>i,
   .prime-menu-painel{animation:none!important;transition:none!important}
 }
+
+/* Acabamento de legibilidade e interacoes */
+@media(min-width:900px){
+  .prime-navegacao-extras{display:grid;gap:.4rem;margin-top:.65rem;padding-top:.8rem;border-top:1px solid #ffffff19}
+  .prime-navegacao-extras button{display:flex;align-items:center;gap:.8rem;min-height:3.3rem;padding:.75rem .8rem;border:0;border-radius:.8rem;background:transparent;color:#ccd9e9;font-size:.96rem;font-weight:800;text-align:left}
+  .prime-navegacao-extras button:hover{background:#ffffff18;color:#fff}
+}
+@media(max-width:899px){.prime-navegacao-extras{display:none}}
+.desafio-dia{margin:0;border-radius:1.1rem;box-shadow:0 7px 24px #172e4714}
+.desafio-dia-cabecalho{padding:1rem 1.15rem;background:linear-gradient(118deg,#153a63,#215889)}
+.desafio-dia-cabecalho h2{font-size:clamp(1.4rem,3.7vw,1.95rem)}
+.desafio-dia-cabecalho p{font-size:.96rem}
+.desafio-dia-selo{font-size:.81rem}
+.desafio-dia-data{font-size:.81rem}
+.desafio-dia-corpo{gap:.8rem}
+.desafio-dia-tema{font-size:.9rem}
+.desafio-dia-corpo h3{font-size:clamp(1.2rem,3.2vw,1.55rem)}
+.desafio-dia-opcoes button{font-size:1rem;min-height:3.75rem;border-radius:.85rem}
+.desafio-dia-opcoes button>span{flex-basis:2.1rem;height:2.1rem;font-size:1rem}
+.desafio-dia-material{font-size:.94rem;min-height:3.2rem}
+.desafio-dia-resposta p{font-size:.99rem}
+.escola-barra-superior .streak-aceso,.escola-barra-superior .streak-dormindo{padding:.3rem .8rem;min-height:3.2rem;border-radius:1rem;box-shadow:inset 0 0 0 1px #efc26955}
+.escola-barra-superior .streak-aceso{background:linear-gradient(135deg,#ffebba,#fff7dd)}
+.escola-barra-superior .streak-dormindo{background:linear-gradient(130deg,#e8effa,#f6f8fd)}
+.foguinho-cenario{position:relative;width:2.9rem;height:2.9rem;border-radius:1rem;background:radial-gradient(circle at 50% 75%,#ffdd6b55,transparent 70%)}
+.foguinho-cenario:before{content:"";position:absolute;inset:.38rem;border-radius:50%;border:1px solid #f7ad4444;pointer-events:none}
+.foguinho-cenario svg:first-child{width:2.25rem;height:2.25rem;fill:#ffd45f;stroke:#d56829;stroke-width:2;filter:drop-shadow(0 2px 4px #e8753488)}
+.escola-barra-superior .streak-aceso>strong,.escola-barra-superior .streak-dormindo>strong{font-size:1rem}
+.escola-proxima-presenca.prime-presenca-discreta{display:block;padding:0;overflow:hidden;background:var(--sheet);border-radius:1rem}
+.prime-presenca-discreta>summary{display:flex;align-items:center;justify-content:space-between;gap:.65rem;min-height:3.8rem;padding:.9rem 1.1rem;font-size:1rem;font-weight:850;cursor:pointer;list-style:none}
+.prime-presenca-discreta>summary::-webkit-details-marker{display:none}
+.prime-presenca-discreta>summary svg{flex:none;color:var(--blue-dark)}
+.prime-presenca-discreta[open]>summary{background:var(--blue-soft);border-bottom:1px solid var(--line)}
+.prime-presenca-discreta>p,.prime-presenca-discreta>.escola-opcoes,.prime-presenca-discreta>.escola-confirmacao{margin:.8rem 1rem}
+.prime-presenca-discreta .escola-opcoes button{font-size:.95rem;border-radius:.8rem}
+@media(max-width:639px){
+  .quiz-ajuda{display:none}
+  .quiz-acoes button{min-height:3.5rem}
+  .desafio-dia-cabecalho{padding:.95rem}
+  .desafio-dia-cabecalho p{font-size:.89rem}
+  .desafio-dia-corpo{padding:.9rem}
+  .desafio-dia-opcoes button{font-size:.97rem}
+  .prime-quiz-chamada{padding:1rem;grid-template-columns:auto minmax(0,1fr);gap:.6rem}
+  .prime-quiz-chamada .chamada-icone{width:2.7rem;height:2.7rem}
+  .prime-quiz-chamada .chamada-icone svg{width:22px}
+  .prime-quiz-chamada .botao-principal{grid-column:1/-1;width:100%}
+}
+html[data-tema="escuro"] .prime-header{background:var(--sheet);border-color:var(--line)}
+html[data-tema="escuro"] .prime-brand-texto strong{color:var(--ink)}
+html[data-tema="escuro"] .prime-brand-texto span{color:var(--muted)}
+html[data-tema="escuro"] .prime-config-botao{background:#24394f;border-color:#49617b;color:#fff}
+html[data-tema="escuro"] .prime-config-painel{background:#203148;border-color:#49617b;color:#fff}
+html[data-tema="escuro"] .prime-config-painel>button{color:#eef4ff}
+html[data-tema="escuro"] .prime-config-painel>button:hover{background:#334b67}
+html[data-tema="escuro"] .prime-atalhos button{background:#1a2c44;color:#f3f7fe;border-color:#435671}
+html[data-tema="escuro"] .prime-demo-nota{color:#c4cfe0}
+html[data-tema="escuro"] .prime-progress-home{background:linear-gradient(130deg,#1d334e,#18273c);border-color:#48617b}
+html[data-tema="escuro"] .prime-progress-numeros strong{color:#d6e9ff}
+html[data-tema="escuro"] .prime-progress-numeros span,html[data-tema="escuro"] .prime-progress-conteudo>p{color:#c5d4e6}
+html[data-tema="escuro"] .prime-progress-conteudo .botao-link{color:#cfe4ff}
+html[data-tema="escuro"] .painel-busca,html[data-tema="escuro"] .cartao-material,
+html[data-tema="escuro"] .quiz,html[data-tema="escuro"] .progresso-destaque,
+html[data-tema="escuro"] .materias-progresso{background:var(--sheet);color:var(--ink)}
+html[data-tema="escuro"] .cartao-material p,html[data-tema="escuro"] .cartao-prazo{color:var(--muted)}
+html[data-tema="escuro"] .alternativa{background:#1a2b40;color:#f1f6fc;border-color:#4a617d}
+html[data-tema="escuro"] .alternativa-letra{background:#334f73;color:#f1f6fc}
+html[data-tema="escuro"] .alternativa.correta{background:#244d3e;color:#e6fff6}
+html[data-tema="escuro"] .alternativa.selecionada{background:#263e5a}
+html[data-tema="escuro"] .prime-menu-painel{background:#1c2c43;border-color:#4a617a}
+html[data-tema="escuro"] .prime-menu-cabecalho strong{color:#f2f7ff}
+html[data-tema="escuro"] .prime-menu-cabecalho span{color:#bdd9f7}
+html[data-tema="escuro"] .prime-menu-grid button{background:#273a53;color:#eef4fb;border-color:#50647e}
+html[data-tema="escuro"] .prime-menu-grid button.ativo{background:#365a83}
+html[data-tema="escuro"] .prime-menu-cabecalho>button{background:#2f4968;color:#fff}
+html[data-tema="escuro"] .escola-barra-superior .streak-aceso,
+html[data-tema="escuro"] .escola-barra-superior .streak-dormindo{background:#3c3650;color:#fff}
+html[data-tema="escuro"] .foguinho-cenario:before{border-color:#eeaa5544}
+html[data-tema="escuro"] .prime-presenca-discreta[open]>summary{background:#263f59}
+html[data-tema="escuro"] .prime-presenca-discreta>summary{color:var(--ink)}
