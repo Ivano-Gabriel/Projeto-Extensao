@@ -118,11 +118,9 @@ function Frequencia({estado, atualizar}: Pick<Props,'estado' | 'atualizar'>) {
         </div>
       </section>
 
-      <section className="escola-bloco escola-proxima-presenca">
-        <div className="escola-bloco-titulo"><div>
-          <span className="sobretitulo">PLANEJAMENTO</span><h3>Você pretende ir à próxima aula?</h3>
-        </div></div>
-        <p>Próximo dia de semana: <strong>{dataBonita(proximo)}</strong>. Isso é só uma previsão pessoal; não registra presença ou justifica falta.</p>
+      <details className="escola-bloco escola-proxima-presenca prime-presenca-discreta">
+        <summary><span>Planejar presença na próxima aula</span><CalendarCheck size={20}/></summary>
+        <p>Próximo dia de semana: <strong>{dataBonita(proximo)}</strong>. Esta é apenas sua previsão individual, salva no navegador. Não registra presença oficial nem representa a contagem da turma.</p>
         <div className="escola-opcoes" role="group" aria-label="Sua previsão para o próximo dia de semana">
           {([{valor:'vou',nome:'Vou sim 🙌'},{valor:'talvez',nome:'Talvez 🤔'},{valor:'nao',nome:'Não vou'}] as const).map((opcao) =>
             <button key={opcao.valor} type="button" aria-pressed={previsao === opcao.valor}
@@ -132,7 +130,7 @@ function Frequencia({estado, atualizar}: Pick<Props,'estado' | 'atualizar'>) {
             </button>)}
         </div>
         {previsao && <p className="escola-confirmacao" role="status"><Check size={17}/> Previsão salva apenas neste navegador</p>}
-      </section>
+      </details>
     </div>
   )
 }
