@@ -52,3 +52,19 @@ test('progresso nao ensina incorretamente que contas nao existem',()=>{
   assert.match(app,/Apagar dados locais de estudo/)
   assert.match(app,/Reiniciar demonstração/)
 })
+
+
+test('menu central destaca os quatro destinos fora da barra inferior',()=>{
+  assert.match(app,/prime-menu-destaques/)
+  assert.match(app,/prime-menu-destaque/)
+  assert.match(app,/navegar\('plano'\)/)
+  assert.match(app,/navegar\('jogo'\)/)
+  assert.match(app,/prime-menu-secundarios/)
+  assert.match(css,/prime-menu-destaque/)
+})
+test('livro da entrada abre folhas a partir da mesma lombada, sem folhas deslocadas',()=>{
+  assert.match(login,/prime-book-spread/)
+  assert.match(login,/prime-book-page/)
+  assert.match(css,/primeBookPageTurn/)
+  assert.doesNotMatch(login,/prime-login-folha folha-a/)
+})
