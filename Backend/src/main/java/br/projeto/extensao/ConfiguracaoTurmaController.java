@@ -108,7 +108,7 @@ public class ConfiguracaoTurmaController {
         long professorId=rs.getLong("professor_id");
         return new Horario(rs.getLong("id"),rs.getLong("turma_id"),rs.getString("disciplina"),
             rs.getInt("dia_semana"),rs.getTime("inicio").toLocalTime().toString(),
-            rs.getTime("fim").toLocalTime().toString(),rs.wasNull()?null:professorId,
+            rs.getTime("fim").toLocalTime().toString(),professorId==0?null:professorId,
             rs.getString("professor_nome"));
     }
     @GetMapping("/portal/turmas/{turmaId}/horarios")
