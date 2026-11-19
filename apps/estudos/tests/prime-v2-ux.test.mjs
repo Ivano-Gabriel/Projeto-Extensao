@@ -71,7 +71,7 @@ test('livro da entrada abre folhas a partir da mesma lombada, sem folhas desloca
 
 
 test('livro didatico exibe conteudo proprio na frente e no verso das quatro folhas',()=>{
-  for(const marker of ['MATEMÁTICA','CIÊNCIAS','HISTÓRIA','LITERATURA',
+  for(const marker of ['MATEMÁTICA','CIÊNCIAS','HISTÓRIA','PORTUGUÊS',
     'prime-book-page-front','prime-book-page-back','prime-book-page-four']){
     assert.ok(login.includes(marker),'Faltou conteudo no livro: '+marker)
   }
