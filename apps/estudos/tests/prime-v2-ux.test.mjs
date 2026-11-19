@@ -68,3 +68,25 @@ test('livro da entrada abre folhas a partir da mesma lombada, sem folhas desloca
   assert.match(css,/primeBookPageTurn/)
   assert.doesNotMatch(login,/prime-login-folha folha-a/)
 })
+
+
+test('livro didatico exibe conteudo proprio na frente e no verso das quatro folhas',()=>{
+  for(const marker of ['MATEMÁTICA','CIÊNCIAS','HISTÓRIA','LITERATURA',
+    'prime-book-page-front','prime-book-page-back','prime-book-page-four']){
+    assert.ok(login.includes(marker),'Faltou conteudo no livro: '+marker)
+  }
+  assert.ok((login.match(/prime-book-page-front/g)||[]).length>=4)
+  assert.ok((login.match(/prime-book-page-back/g)||[]).length>=4)
+  assert.match(login,/aria-hidden="true"/)
+})
+
+test('animacao em diagonal percorre sequencialmente folhas e tem alternativa para reduced-motion',()=>{
+  for(const name of ['primeBookTurnOne','primeBookTurnTwo','primeBookTurnThree',
+    'primeBookTurnFour','primeBookFloat','primeBookPageTurn']){
+    assert.ok(css.includes(name),'Falta animacao '+name)
+  }
+  assert.match(css,/transform-origin:\s*left center/)
+  assert.match(css,/backface-visibility:\s*hidden/)
+  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/)
+  assert.match(css,/--book-scale/)
+})
