@@ -275,4 +275,30 @@ class TurmasEditaveisIntegracaoTest {
             jdbc.queryForObject("SELECT turma_id FROM matriculas WHERE aluno_id=?",Long.class,aluno));
     }
 
+
+    @Test
+    void assistenteGratuitoSabeSaudarDarDataEExplicarBhaskaraSemModelo() throws Exception {
+        String endereco="/api/portal/assistente";
+        mvc.perform(post(endereco).with(user("aluno-edit@escola.test").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"pergunta\":\"Bom dia!\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.resposta",org.hamcrest.Matchers.containsString("Bom dia")));
+        mvc.perform(post(endereco).with(user("aluno-edit@escola.test").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"pergunta\":\"Que dia é hoje?\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.resposta",org.hamcrest.Matchers.containsString("Hoje")));
+        mvc.perform(post(endereco).with(user("aluno-edit@escola.test").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"pergunta\":\"Que horas são agora?\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.resposta",org.hamcrest.Matchers.containsString("horário de Brasília")));
+        mvc.perform(post(endereco).with(user("aluno-edit@escola.test").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"pergunta\":\"Como funciona a fórmula de Bhaskara?\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.resposta",org.hamcrest.Matchers.containsString("Δ = b² - 4ac")));
+    }
+
 }
