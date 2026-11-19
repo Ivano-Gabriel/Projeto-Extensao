@@ -159,7 +159,9 @@ export default function ProfessorPainel(){
         <p>{selecionada?`Você está na turma ${selecionada.codigo}.`:'Você ainda não foi vinculado a uma turma.'}</p>
         <div className="portal-acoes-rapidas">
           <button type="button" className="botao-principal" disabled={!turma||!disciplina}
-            onClick={()=>setAba('atividades')}><BookOpen size={18}/> Criar atividade</button>
+            onClick={()=>setAba('atividades')}><BookOpen size={18}/> Publicar atividade real</button>
+          <button type="button" className="botao-secundario" disabled={!turma||!disciplina}
+            onClick={()=>setAba('materiais')}><Sparkles size={18}/> Materiais da turma e IA</button>
           <button type="button" className="botao-secundario" onClick={()=>setAba('mural')}>
             <Bell size={18}/> Avisar turma</button>
         </div>
@@ -178,7 +180,13 @@ export default function ProfessorPainel(){
       </Cartao>
     </>}
     {!carregando&&aba==='atividades'&&<>
-      <Cartao titulo={editandoAtividade===null?'Nova atividade':'Editar atividade'}>
+      <div className="ext-aviso-atividade-real" role="note">
+        <strong><BookOpen size={20}/> Você está criando uma atividade de verdade</strong>
+        <p>Escolha sua disciplina vinculada, escreva a questão, configure o gabarito e publique.
+          Ela será salva no banco e ficará visível aos alunos matriculados nesta turma.
+          Não é conteúdo do Laboratório (demo).</p>
+      </div>
+      <Cartao titulo={editandoAtividade===null?'Criar atividade da turma':'Editar atividade'}>
         <div className="portal-gerador">
           <div className="portal-gerador-marca"><Sparkles size={21}/><strong>Atalho de conteúdo</strong></div>
           <p>Comece com uma questão revisada do catálogo.</p>
@@ -223,7 +231,7 @@ export default function ProfessorPainel(){
             onClick={()=>{setEditandoAtividade(null);setTitulo('');setPergunta('');setOpcoes(['','','','']);setExplicacao('')}}>Cancelar edição</button>}
         </form>
       </Cartao>
-      <Cartao titulo="Atividades publicadas">
+      <Cartao titulo="Atividades publicadas no banco">
         {atividadesDaTurma.length?atividadesDaTurma.map(a=><div className="portal-linha" key={a.id}>
           <strong>{a.titulo}</strong><small>{a.disciplina} · {selecionada?.codigo}</small>
           <div className="ext-acoes">
