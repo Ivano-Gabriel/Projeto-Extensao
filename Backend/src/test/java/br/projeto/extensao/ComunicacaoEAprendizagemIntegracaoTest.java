@@ -198,4 +198,36 @@ class ComunicacaoEAprendizagemIntegracaoTest {
             .andExpect(jsonPath("$[0].respondidas").value(1))
             .andExpect(jsonPath("$[0].acertos").value(1));
     }
+
+    @Test void professorRegistraAulaFrequenciaEAlunoConsultaSomenteSeusDados()throws Exception{
+        mvc.perform(post("/api/professor/aulas").with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"turmaId\":"+turmaA+",\"disciplina\":\"MATEMATICA\",\"data\":\"2026-11-19\",\"ordem\":1,\"tema\":\"Revisão\"}"))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.disciplina").value("MATEMATICA"));
+        Long aula=jdbc.queryForObject("SELECT id FROM aulas_registradas WHERE turma_id=?",Long.class,turmaA);
+        mvc.perform(post("/api/professor/aulas/"+aula+"/presencas")
+            .with(user("prof-a@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content("{\"alunoId\":"+alunoA+",\"presente\":true}"))
+            .andExpect(status().isCreated());
+        mvc.perform(get("/api/portal/minha-frequencia")
+            .with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.aulasRegistradas").value(1))
+            .andExpect(jsonPath("$.presencas").value(1))
+            .andExpect(jsonPath("$.faltas").value(0));
+        mvc.perform(get("/api/portal/minha-frequencia")
+            .with(user("aluno-b@escola.test").roles("ALUNO")))
+            .andExpect(jsonPath("$.aulasRegistradas").value(0));
+    }
+    @Test void professorDeOutraEscolaNaoRegistraNemLePresenca()throws Exception{
+        mvc.perform(post("/api/professor/aulas").with(user("prof-b@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"turmaId\":"+turmaA+",\"disciplina\":\"MATEMATICA\",\"data\":\"2026-11-19\",\"ordem\":1,\"tema\":\"Outro\"}"))
+            .andExpect(status().isForbidden());
+        mvc.perform(get("/api/professor/turmas/"+turmaA+"/aulas")
+            .with(user("prof-b@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isNotFound());
+        mvc.perform(get("/api/professor/turmas/"+turmaA+"/aulas")
+            .with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(status().isForbidden());
+    }
 }
