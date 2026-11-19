@@ -154,4 +154,48 @@ class ComunicacaoEAprendizagemIntegracaoTest {
             .contentType(MediaType.APPLICATION_JSON).content("{\"pergunta\":\""+("x".repeat(501))+"\"}"))
             .andExpect(status().isBadRequest());
     }
+
+    @Test void direcaoListaEVinculaProfessoresSemDuplicidade()throws Exception{
+        mvc.perform(get("/api/gestao/turmas/"+turmaA+"/vinculos")
+            .with(user("dir-a@escola.test").roles("DIRECAO")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].disciplina").value("MATEMATICA"));
+        mvc.perform(get("/api/gestao/turmas/"+turmaB+"/vinculos")
+            .with(user("dir-a@escola.test").roles("DIRECAO")))
+            .andExpect(status().isNotFound());
+        mvc.perform(delete("/api/gestao/turmas/"+turmaA+"/professores/"+professorA+"/disciplinas/MATEMATICA")
+            .with(user("dir-a@escola.test").roles("DIRECAO")).with(csrf()))
+            .andExpect(status().isNoContent());
+        mvc.perform(get("/api/gestao/turmas/"+turmaA+"/vinculos")
+            .with(user("dir-a@escola.test").roles("DIRECAO")))
+            .andExpect(jsonPath("$").isEmpty());
+        mvc.perform(delete("/api/gestao/turmas/"+turmaA+"/professores/"+professorA+"/disciplinas/MATEMATICA")
+            .with(user("dir-a@escola.test").roles("DIRECAO")).with(csrf()))
+            .andExpect(status().isNotFound());
+    }
+    @Test void alunoRecuperaSuasRespostasEDocenteVeResultadosDeQuizzes()throws Exception{
+        mvc.perform(post("/api/professor/atividades")
+            .with(user("prof-a@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"turmaId\":"+turmaA+",\"disciplina\":\"MATEMATICA\",\"titulo\":\"Porcentagem\",\"pergunta\":\"Quanto vale 20% de 50?\",\"opcoes\":[\"5\",\"10\",\"20\",\"30\"],\"correta\":1,\"explicacao\":\"Vinte por cento é dez.\"}"))
+            .andExpect(status().isCreated());
+        Long id=jdbc.queryForObject("SELECT id FROM atividades WHERE titulo='Porcentagem'",Long.class);
+        mvc.perform(post("/api/portal/atividades/"+id+"/respostas")
+            .with(user("aluno-a@escola.test").roles("ALUNO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content("{\"opcao\":1}"))
+            .andExpect(status().isOk());
+        mvc.perform(get("/api/portal/minhas-respostas")
+            .with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].atividadeId").value(id))
+            .andExpect(jsonPath("$[0].acertou").value(true))
+            .andExpect(jsonPath("$[0].explicacao").value("Vinte por cento é dez."));
+        mvc.perform(get("/api/portal/minhas-respostas")
+            .with(user("aluno-b@escola.test").roles("ALUNO")))
+            .andExpect(jsonPath("$").isEmpty());
+        mvc.perform(get("/api/professor/turmas/"+turmaA+"/desempenho")
+            .with(user("prof-a@escola.test").roles("PROFESSOR")))
+            .andExpect(jsonPath("$[0].atividades").value(1))
+            .andExpect(jsonPath("$[0].respondidas").value(1))
+            .andExpect(jsonPath("$[0].acertos").value(1));
+    }
 }
