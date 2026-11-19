@@ -67,15 +67,18 @@ public class MateriaisTurmaController {
         String filtro=switch(user.getPapel()){
             case DIRECAO -> "";
             case PROFESSOR -> " AND EXISTS(SELECT 1 FROM vinculos_docentes v "+
-                "WHERE v.turma_id=m.turma_id AND v.professor_id=? AND v.disciplina=m.disciplina)";
+                "WHERE v.turma_id=m.turma_id AND v.professor_id=? AND v.disciplina=m.disciplina) "+
+                "AND (m.publicado=TRUE OR m.professor_id=?)";
             case ALUNO -> " AND m.publicado=TRUE AND EXISTS(SELECT 1 FROM matriculas mt "+
                 "WHERE mt.turma_id=m.turma_id AND mt.aluno_id=?)";
         };
         String sql="SELECT m.id,m.turma_id,m.professor_id,m.disciplina,m.titulo,m.conteudo,m.publicado "+
             "FROM materiais_turma m WHERE m.turma_id=?"+filtro+" ORDER BY m.atualizado_em DESC,m.id DESC";
-        List<Material> materiais=user.getPapel()==Papel.DIRECAO?
-            jdbc.query(sql,this::mapear,turmaId):
-            jdbc.query(sql,this::mapear,turmaId,user.getId());
+        List<Material> materiais=switch(user.getPapel()){
+            case DIRECAO -> jdbc.query(sql,this::mapear,turmaId);
+            case PROFESSOR -> jdbc.query(sql,this::mapear,turmaId,user.getId(),user.getId());
+            case ALUNO -> jdbc.query(sql,this::mapear,turmaId,user.getId());
+        };
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(materiais);
     }
     @Transactional
