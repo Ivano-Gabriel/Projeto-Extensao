@@ -9,6 +9,7 @@ import AdminPainel from './AdminPainel'
 import { falha } from './ComponentesPortal'
 import './portal.css'
 import './portal-academico.css'
+import './portal-premium.css'
 
 type Props={usuario:UsuarioEscolar;onSair:()=>Promise<void>;voltar?:()=>void}
 export default function Portal({usuario,onSair,voltar}:Props){
