@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeft, ArrowRight, BookOpen, BookOpenCheck, Brain, Check, CheckCircle2,
-  ChevronRight, Clock3, Home, Info,
-  Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X, School, Flame, Moon, Sun, LogOut,
+  ChevronRight, Clock3, Home, Info, Settings2,
+  Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X, School, Moon, Sun, LogOut,
 } from 'lucide-react'
 import { materiais, materias, type Material, type Materia } from './dados/materiais'
 import { questoes, type Questao } from './dados/questoes'
@@ -96,145 +96,72 @@ function CartaoMaterial({ material, revisado, onAbrir }: {
   )
 }
 
-function Inicio({ estado, sequencia, pendentesPlano, tarefasPlano, concluirTarefa, abrirMaterial, escolherMateria, irMateriais, irRevisao, irProgresso, irEscola, irPlano, irJogo, dataDesafio, respostaDesafio, responderDesafio }: {
-  dataDesafio: string
-  respostaDesafio?: RespostaDiaria
-  responderDesafio: (questaoId:string,opcao:number)=>void
-  tarefasPlano: readonly TarefaPlano[]
-  concluirTarefa: (id:string)=>void
-  pendentesPlano: number
-  sequencia: number
-  estado: EstadoEstudos
-  abrirMaterial: (material: Material) => void
-  escolherMateria: (materia: FiltroMateria) => void
-  irMateriais: () => void
-  irRevisao: () => void
-  irProgresso: () => void
-  irEscola: () => void
-  irPlano: () => void
-  irJogo: () => void
-}) {
-  const resumo = resumoEstudos(materiais, estado.revisados, estado.respostas)
-  const desempenho = resumirRespostas(questoes, estado.respostas)
-  const agenda = agendaDoDia(tarefasPlano)
-  const urgentes = [...agenda.atrasadas,...agenda.hoje].slice(0,3)
-  return (
-    <div className="pagina">
-      <section className="hero">
-        <div className="hero-texto">
-          <span className="hero-selo">PROPOSTA 03 · ESTUDOS</span>
-          <h1>Estudar fica mais leve quando tem um <mark>plano.</mark></h1>
-          <p>Resumos rápidos, materiais organizados e perguntas pra testar o que você aprendeu</p>
-          <button className="botao-principal" type="button" onClick={irMateriais}>
-            Escolher uma matéria <ArrowRight size={19} />
-          </button>
-          <small className="hero-rodape">Um passo de cada vez. Bora revisar?</small>
-        </div>
-        <div className="hero-arte" aria-hidden="true">
-          <div className="folha-estudo">
-            <span>REVISÃO DE HOJE</span>
-            <div className="folha-linha"><span className="quadrinho ok"><Check size={16}/></span> Escolher um assunto</div>
-            <div className="folha-linha"><span className="quadrinho" /> Entender o conteúdo</div>
-            <div className="folha-linha"><span className="quadrinho" /> Testar o que aprendi</div>
-            <i>feito com calma, sem correria ✳</i>
-          </div>
-        </div>
-      </section>
-
-      <div className="demo-nota" role="note"><Info size={19} />
-        <span><strong>Protótipo demonstrativo.</strong> Os resumos e as questões são exemplos, não materiais oficiais da escola</span>
-      </div>
-
-      <section className="agenda-hoje" aria-label="Suas tarefas de hoje">
-        <div className="agenda-hoje-topo">
-          <div><span className="sobretitulo">MEU DIA</span><h2>O que estudar hoje?</h2>
-            <p>{urgentes.length
-              ? `${agenda.atrasadas.length} atrasadas · ${agenda.hoje.length} para hoje`
-              : 'Tudo em dia! Escolha um assunto ou planeje uma revisão.'}</p></div>
-          <button type="button" className="botao-secundario" onClick={irPlano}>Abrir plano <ArrowRight size={17}/></button>
-        </div>
-        {urgentes.length ? <ul className="agenda-hoje-lista">{urgentes.map((tarefa)=>
-          <li key={tarefa.id}>
-            <div><strong>{tarefa.titulo}</strong><small>{tarefa.materia} · {tarefa.data < formatarDataLocal(new Date()) ? 'Data já passou' : 'Hoje'}</small></div>
-            <button type="button" onClick={()=>concluirTarefa(tarefa.id)}
-              aria-label={`Marcar como concluída: ${tarefa.titulo}`}><Check size={18}/> Feito</button>
-          </li>)}</ul> : <p className="agenda-hoje-vazia">Você ainda não tem tarefas para hoje. Um passo de cada vez.</p>}
-        {agenda.proximas.length>0 && <p className="agenda-hoje-proximas">
-          <Clock3 size={16}/> {agenda.proximas.length} {agenda.proximas.length===1?'tarefa planejada':'tarefas planejadas'} para os próximos 7 dias
-        </p>}
-      </section>
-      <DesafioDia data={dataDesafio} resposta={respostaDesafio} responder={responderDesafio}
-        abrirMaterial={(id)=>{const item=materiais.find((m)=>m.id===id);if(item)abrirMaterial(item)}}/>
-      <section className="plano-chamada-inicio" aria-label="Seu plano de estudos">
-        <div><span className="sobretitulo">ORGANIZE SEU ESTUDO</span>
-          <h2>Um plano pra revisar sem correria</h2>
-          <p>{pendentesPlano > 0 ? `Você tem ${pendentesPlano} ${pendentesPlano === 1 ? 'tarefa pendente' : 'tarefas pendentes'} no seu plano.` :
-            'Crie tarefas por matéria, escolha datas e acompanhe suas conquistas.'}</p></div>
-        <button type="button" className="botao-principal" onClick={irPlano}>
-          {pendentesPlano > 0 ? 'Abrir meu plano' : 'Criar meu plano'} <ArrowRight size={18}/>
+function Inicio({estado,dataDesafio,respostaDesafio,responderDesafio,abrirMaterial,irMateriais,irRevisao,irProgresso}:{
+  estado:EstadoEstudos
+  sequencia:number
+  pendentesPlano:number
+  tarefasPlano:readonly TarefaPlano[]
+  concluirTarefa:(id:string)=>void
+  abrirMaterial:(material:Material)=>void
+  escolherMateria:(materia:FiltroMateria)=>void
+  irMateriais:()=>void
+  irRevisao:()=>void
+  irProgresso:()=>void
+  irEscola:()=>void
+  irPlano:()=>void
+  irJogo:()=>void
+  dataDesafio:string
+  respostaDesafio?:RespostaDiaria
+  responderDesafio:(questaoId:string,opcao:number)=>void
+}){
+  const resumo=resumoEstudos(materiais,estado.revisados,estado.respostas)
+  const desempenho=resumirRespostas(questoes,estado.respostas)
+  return <div className="pagina prime-inicio">
+    <section className="prime-home-hero" aria-label="Bem-vindo aos estudos">
+      <div className="prime-hero-conteudo">
+        <span className="prime-eyebrow"><Sparkles size={16}/> SEU ESPAÇO DE ESTUDOS</span>
+        <h1>Aprenda algo <em>novo hoje.</em></h1>
+        <p>Escolha um assunto e comece. Sem enrolação.</p>
+        <button type="button" className="prime-hero-cta" onClick={irMateriais}>
+          Explorar materiais <ArrowRight size={20}/>
         </button>
-      </section>
-      <section className="escola-chamada-inicio" aria-label="Novidades propostas pelos alunos">
-        <div className="escola-chamada-icon"><School size={25}/></div>
-        <div><span className="sobretitulo">VOCÊS PEDIRAM, A GENTE OUVIU</span>
-          <h2>Agora tem um espaço pra vida escolar ✳</h2>
-          <p>Frequência, notas, recados dos professores e uma área pra dar ideias. Tudo demonstrativo.</p>
-          <span className="escola-streak"><Flame size={17}/> {sequencia} {sequencia === 1 ? 'dia seguido estudando' : 'dias seguidos estudando'}</span>
-        </div>
-        <button type="button" className="botao-principal" onClick={irEscola}>Ver demonstração <ArrowRight size={18}/></button>
-      </section>
-      <section className="arcade-chamada" aria-label="Jogo de pausa rápida">
-        <span className="arcade-chamada-selo" aria-hidden="true">✦</span>
-        <div><span className="sobretitulo">ESCOLHA SUA MISSÃO</span>
-          <h2>Missões do Futuro</h2>
-          <p>Três desafios curtos sobre tecnologia, negócios e investigação.</p></div>
-        <button type="button" className="botao-principal" onClick={irJogo}>Escolher missão <ArrowRight size={17}/></button>
-      </section>
-      <section className="inicio-resumo" aria-label="Seu progresso neste navegador">
-        <div className="resumo-destaque">
-          <span className="resumo-topo"><ListChecks size={19} /> SEUS ESTUDOS</span>
-          <div className="resumo-valor"><strong>{resumo.percentual}%</strong><span>dos materiais revisados</span></div>
-          <Barrinha valor={resumo.percentual} />
-          <button type="button" className="botao-link" onClick={irProgresso}>Ver meu progresso <ArrowRight size={17}/></button>
-        </div>
-        <div className="resumo-metrica"><span className="resumo-icone"><BookOpen size={23}/></span><strong>{resumo.revisados}/{resumo.materiais}</strong><small>Materiais revisados</small></div>
-        <div className="resumo-metrica"><span className="resumo-icone icone-amarelo"><Brain size={23}/></span><strong>{desempenho.acertos}/{desempenho.respondidas}</strong><small>Acertos no quiz</small></div>
-      </section>
-
-      <section className="secao" aria-labelledby="materias-titulo">
-        <div className="secao-titulo"><div><span>SEU PONTO DE PARTIDA</span><h2 id="materias-titulo">O que vamos estudar hoje?</h2></div></div>
-        <div className="grade-materias">
-          {materiasDisponiveis.map((materia, indice) => (
-            <button key={materia} className={`escolha-materia materia-bg-${cores[materia]}`}
-              type="button" onClick={() => escolherMateria(materia)}>
-              <span className="escolha-numero">0{indice + 1} / MATÉRIA</span>
-              <strong>{materia}</strong>
-              <span className="escolha-contagem">{materiais.filter((item) => item.materia === materia).length} materiais</span>
-              <ArrowRight size={23} aria-hidden="true" />
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="secao" aria-labelledby="materiais-sugeridos">
-        <div className="secao-titulo">
-          <div><span>PRA COMEÇAR AGORA</span><h2 id="materiais-sugeridos">Materiais pra você</h2></div>
-          <button type="button" className="botao-link" onClick={irMateriais}>Ver todos <ArrowRight size={16}/></button>
-        </div>
-        <div className="grade-materiais">
-          {materiais.slice(0, 4).map((material) =>
-            <CartaoMaterial key={material.id} material={material}
-              revisado={estado.revisados.includes(material.id)} onAbrir={abrirMaterial}/>)}
-        </div>
-      </section>
-
-      <section className="chamada-quiz">
-        <span className="chamada-icone"><Brain size={29} /></span>
-        <div><span>TESTE SEU CONHECIMENTO</span><h2>8 perguntas pra praticar</h2><p>Errou? Sem problema. A gente explica o raciocínio depois de cada resposta</p></div>
-        <button type="button" className="botao-principal" onClick={irRevisao}>Começar revisão <ArrowRight size={18}/></button>
-      </section>
+      </div>
+      <div className="prime-hero-ilustracao" aria-hidden="true">
+        <div className="prime-orbita orbita-um"/><div className="prime-orbita orbita-dois"/>
+        <div className="prime-livro-capa"><div className="prime-livro-lombo"/>
+          <div className="prime-livro-simbolo"><BookOpenCheck size={56}/></div>
+          <span>EXTENSÃO</span></div>
+        <span className="prime-estrela estrela-a">✦</span><span className="prime-estrela estrela-b">✦</span>
+      </div>
+    </section>
+    <div className="prime-atalhos" aria-label="Acesso rápido">
+      <button type="button" onClick={irMateriais}><BookOpen size={23}/><span>Materiais</span><ArrowRight size={18}/></button>
+      <button type="button" onClick={irRevisao}><Brain size={23}/><span>Revisar</span><ArrowRight size={18}/></button>
     </div>
-  )
+    <p className="prime-demo-nota"><Info size={15}/> Resumos e quizzes desta área são conteúdos demonstrativos, não notas da escola.</p>
+    <DesafioDia data={dataDesafio} resposta={respostaDesafio} responder={responderDesafio}
+      abrirMaterial={(id)=>{const item=materiais.find(m=>m.id===id);if(item)abrirMaterial(item)}}/>
+    <section className="prime-progress-home" aria-label="Seu progresso">
+      <div className="prime-progress-visual"><span className="prime-progress-brilho">✦</span>
+        <BookOpenCheck size={48}/></div>
+      <div className="prime-progress-conteudo">
+        <span className="sobretitulo">SEU PROGRESSO</span>
+        <div className="prime-progress-numeros"><strong>{resumo.percentual}%</strong>
+          <span>{resumo.revisados} de {resumo.materiais} materiais revisados</span></div>
+        <Barrinha valor={resumo.percentual}/>
+        <p>{desempenho.acertos} acertos em {desempenho.respondidas} questões</p>
+        <button type="button" className="botao-link" onClick={irProgresso}>
+          Ver detalhes <ArrowRight size={18}/></button>
+      </div>
+    </section>
+    <section className="chamada-quiz prime-quiz-chamada">
+      <span className="chamada-icone"><Brain size={29}/></span>
+      <div><span>TESTE SEU CONHECIMENTO</span><h2>8 perguntas pra praticar</h2>
+        <p>Responda, descubra o porquê e siga aprendendo.</p></div>
+      <button type="button" className="botao-principal" onClick={irRevisao}>
+        Começar revisão <ArrowRight size={18}/></button>
+    </section>
+  </div>
 }
 
 function MateriaisPagina({ estado, busca, setBusca, materia, setMateria, abrirMaterial }: {
@@ -506,6 +433,8 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
   const [plano, setPlano] = useState(() => carregarPlano(armazenamentoDaConta(armazenamento(),usuario.id)))
   const [aviso, setAviso] = useState('')
   const [saindo,setSaindo] = useState(false)
+  const [menuAberto,setMenuAberto] = useState(false)
+  const [configAberta,setConfigAberta] = useState(false)
   const materialAtual = materialAberto ? materiais.find((item) => item.id === materialAberto) : undefined
 
   useEffect(() => { salvarEstado(armazenamentoDaConta(armazenamento(),usuario.id), estado) }, [estado])
@@ -528,6 +457,8 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
   }, [tela, materialAtual, indiceQuiz])
 
   function navegar(destino: Tela) {
+    setMenuAberto(false)
+    setConfigAberta(false)
     setTela(destino)
     setMaterialAberto(null)
     setAviso('')
@@ -537,7 +468,7 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
       setIndiceQuiz(proxima === -1 ? questoes.length : proxima)
     }
   }
-  const abrirMaterial = (item: Material) => { setTela('materiais'); setMaterialAberto(item.id); setAviso('') }
+  const abrirMaterial = (item: Material) => { setMenuAberto(false); setConfigAberta(false); setTela('materiais'); setMaterialAberto(item.id); setAviso('') }
   const abrirPorId = (id: string) => {
     const material = materiais.find((item) => item.id === id)
     if (material) abrirMaterial(material)
@@ -604,26 +535,27 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
             </button>
           ))}
         </div>
-        <span className="navegacao-rodape">EXTENSÃO ESCOLAR · VERSÃO DE TESTES</span>
+        <span className="navegacao-rodape">EXTENSÃO ESCOLAR</span>
       </nav>
       <div className="layout-corpo">
-        <header className="cabecalho-app">
-          <div><span>PROJETO DE EXTENSÃO</span><strong>Ferramenta de estudos</strong></div>
-          <div className="escola-header-controles">
-            <button type="button" className="escola-tema" aria-label={escola.tema === 'escuro' ? 'Ativar modo claro' : 'Ativar modo noturno'}
-              aria-pressed={escola.tema === 'escuro'}
-              onClick={() => setEscola((atual) => ({...atual,tema:atual.tema === 'claro' ? 'escuro':'claro'}))}>
-              {escola.tema === 'escuro' ? <Sun size={20}/> : <Moon size={20}/>}
-            </button>
-            <button className="portal-atalho" type="button" onClick={() => navegar('portal')}
-              aria-current={tela==='portal'?'page':undefined}>
-              <School size={18}/> Minha turma
-            </button>
-            <button type="button" className="portal-atalho" disabled={saindo}
-              onClick={()=>{void encerrarSessao()}}>
-              <LogOut size={17}/>{saindo?'Saindo...':'Sair'}
-            </button>
-            <span className="demo-tag"><span className="demo-ponto"/> ESTUDOS DEMO</span>
+        <header className="cabecalho-app prime-header">
+          <div className="prime-brand"><span className="prime-brand-icone"><BookOpenCheck size={26}/></span>
+            <div className="prime-brand-texto"><strong>Extensão</strong><span>Meu espaço de estudos</span></div>
+          </div>
+          <div className="prime-config">
+            <button type="button" className="prime-config-botao" aria-label="Abrir configurações"
+              aria-expanded={configAberta} aria-controls="prime-config-painel"
+              onClick={()=>setConfigAberta(x=>!x)}><Settings2 size={23}/><span>Configurações</span></button>
+            {configAberta&&<div className="prime-config-painel" id="prime-config-painel">
+              <strong>Minha conta</strong>
+              <p>{usuario.nome}</p>
+              <button type="button" onClick={()=>setEscola(atual=>({...atual,tema:atual.tema==='claro'?'escuro':'claro'}))}>
+                {escola.tema==='escuro'?<Sun size={19}/>:<Moon size={19}/>}
+                {escola.tema==='escuro'?'Ativar modo claro':'Ativar modo escuro'}</button>
+              <button type="button" onClick={()=>navegar('portal')}><School size={19}/> Minha turma</button>
+              <button type="button" disabled={saindo} onClick={()=>void encerrarSessao()}>
+                <LogOut size={19}/> {saindo?'Saindo...':'Sair da conta'}</button>
+            </div>}
           </div>
         </header>
         <main className="conteudo-principal">
@@ -657,7 +589,39 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
             </>
           )}
         </main>
-        <footer className="rodape-app">Projeto de Extensão · Proposta 3 de 3 · Conteúdo demonstrativo para estudo</footer>
+        <footer className="rodape-app">Extensão · Biblioteca demonstrativa · Dados escolares oficiais apenas no portal</footer>
+      </div>
+      <div className="prime-mobile-nav">
+        {menuAberto&&<>
+          <button type="button" className="prime-menu-sombra" aria-label="Fechar menu" onClick={()=>setMenuAberto(false)}/>
+          <nav className="prime-menu-painel" aria-label="Todas as áreas de estudos" id="prime-menu-areas">
+            <div className="prime-menu-cabecalho"><div><span>ESCOLHA UM DESTINO</span><strong>Onde vamos agora?</strong></div>
+              <button type="button" aria-label="Fechar menu" onClick={()=>setMenuAberto(false)}><X size={22}/></button>
+            </div>
+            <div className="prime-menu-grid">
+              {menu.map(({id,nome,Icone})=><button key={id} type="button"
+                className={tela===id?'ativo':''} onClick={()=>navegar(id)}>
+                <Icone size={24}/><span>{nome}</span></button>)}
+              <button type="button" onClick={()=>navegar('plano')}><ListChecks size={24}/><span>Meu plano</span></button>
+              <button type="button" onClick={()=>navegar('jogo')}><Sparkles size={24}/><span>Missões do Futuro</span></button>
+            </div>
+          </nav>
+        </>}
+        <nav className="prime-bottom-nav" aria-label="Navegação rápida">
+          <button type="button" className={tela==='inicio'?'ativo':''} aria-current={tela==='inicio'?'page':undefined}
+            onClick={()=>navegar('inicio')}><Home size={23}/><span>Início</span></button>
+          <button type="button" className={tela==='materiais'?'ativo':''} aria-current={tela==='materiais'?'page':undefined}
+            onClick={()=>navegar('materiais')}><BookOpen size={23}/><span>Materiais</span></button>
+          <button type="button" className={'prime-menu-livro '+(menuAberto?'aberto':'')}
+            aria-label={menuAberto?'Fechar menu de áreas':'Abrir menu de áreas'} aria-expanded={menuAberto}
+            aria-controls="prime-menu-areas" onClick={()=>setMenuAberto(x=>!x)}>
+            <span className="prime-livro-nucleo"><BookOpenCheck size={30}/><i aria-hidden="true"/></span>
+          </button>
+          <button type="button" className={tela==='revisao'?'ativo':''} aria-current={tela==='revisao'?'page':undefined}
+            onClick={()=>navegar('revisao')}><Brain size={23}/><span>Revisão</span></button>
+          <button type="button" className={tela==='progresso'?'ativo':''} aria-current={tela==='progresso'?'page':undefined}
+            onClick={()=>navegar('progresso')}><Target size={23}/><span>Progresso</span></button>
+        </nav>
       </div>
       {aviso && <div className="aviso-flutuante" role="status">
         <span><Check size={18}/>{aviso}</span>
