@@ -29,8 +29,8 @@ class TurmasEditaveisIntegracaoTest {
         jdbc.update("DELETE FROM respostas_atividade");
         jdbc.update("DELETE FROM questoes_atividade");
         jdbc.update("DELETE FROM atividades");
-        jdbc.update("DELETE FROM presencas_provisorias");
-        jdbc.update("DELETE FROM aulas");
+        jdbc.update("DELETE FROM presencas_aula");
+        jdbc.update("DELETE FROM aulas_registradas");
         jdbc.update("DELETE FROM comunicados");
         jdbc.update("DELETE FROM vinculos_docentes");
         jdbc.update("DELETE FROM matriculas");
