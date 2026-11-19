@@ -20,6 +20,7 @@ export type AtividadeEscolar = {
   id:number;turmaId:number;disciplina:string;titulo:string;pergunta:string;opcoes:string[]
 }
 export type ResultadoAtividade = {acertou:boolean;explicacao:string}
+export type AtividadeFormulario = {turmaId:number;disciplina:string;titulo:string;pergunta:string;opcoes:string[];correta:number;explicacao:string}
 export type PublicoAviso = 'TODOS'|'ALUNOS'|'FUNCIONARIOS'
 export type Aviso = {id:number;turmaId:number|null;publico:PublicoAviso;titulo:string;texto:string;importante:boolean;criadoEm:string}
 export type Vinculo = {professorId:number;nome:string;disciplina:string}
@@ -79,6 +80,7 @@ export async function requisitar<T>(
     throw new Error('Não foi possível concluir. Tente novamente.')
   }
   if(resposta.status===204)return undefined as T
+  if(metodo!=='GET'&&!resposta.headers.get('content-type'))return undefined as T
   return jsonSeguro<T>(resposta)
 }
 export const apiEscolar={
@@ -112,6 +114,9 @@ export const apiEscolar={
     requisitar<void>('POST',`/api/gestao/turmas/${turmaId}/matriculas`,{alunoId}),
   vincularProfessor:(turmaId:number,professorId:number,disciplina:string)=>
     requisitar<void>('POST',`/api/gestao/turmas/${turmaId}/professores`,{professorId,disciplina}),
+  dadosEdicaoAtividade:(id:number)=>requisitar<AtividadeFormulario>('GET',`/api/professor/atividades/${id}/edicao`),
+  editarAtividade:(id:number,body:AtividadeFormulario)=>requisitar<void>('PUT',`/api/professor/atividades/${id}`,body),
+  apagarAtividade:(id:number)=>requisitar<void>('DELETE',`/api/professor/atividades/${id}`),
   publicar:(body:{turmaId:number;disciplina:string;titulo:string;pergunta:string;opcoes:string[];correta:number;explicacao:string})=>
     requisitar<AtividadeEscolar>('POST','/api/professor/atividades',body),
   responder:(id:number,opcao:number)=>
