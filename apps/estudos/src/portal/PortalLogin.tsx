@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Eye, EyeOff, GraduationCap, LockKeyhole, ShieldCheck, Users } from 'lucide-react'
+import { BookOpenCheck, Eye, EyeOff, GraduationCap, LockKeyhole, ShieldCheck, Users } from 'lucide-react'
 import { apiEscolar } from './api'
 import type { UsuarioEscolar } from './api'
 import './portal.css'
@@ -31,16 +31,19 @@ export default function PortalLogin({entrar}:Props){
       setEnviando(false)
     }
   }
-  return <section className="portal-login" aria-labelledby="portal-titulo-login">
+  return <section className="portal-login prime-login" aria-labelledby="portal-titulo-login">
+    <div className="prime-login-cena" aria-hidden="true">
+      <div className="prime-login-arte"><div className="prime-login-livro"><BookOpenCheck size={58}/></div>
+        <div className="prime-login-folha folha-a"/><div className="prime-login-folha folha-b"/>
+        <div className="prime-login-folha folha-c"/></div>
+      <strong>Uma nova forma de aprender.</strong>
+      <p>Suas aulas, descobertas e conquistas em um só lugar.</p>
+    </div>
+    <div className="prime-login-corpo">
     <header className="portal-login-cabecalho">
-      <div className="livro-cena" aria-hidden="true">
-        <div className="livro-objeto"><span className="livro-metade livro-esquerda"/>
-          <span className="livro-metade livro-direita"/><span className="livro-pagina pagina-um"/>
-          <span className="livro-pagina pagina-dois"/><span className="livro-miolo"/></div>
-      </div>
       <span className="sobretitulo">ACESSO INSTITUCIONAL</span>
-      <h2 id="portal-titulo-login">Entrar no Extensão</h2>
-      <p>Selecione sua área de acesso.</p>
+      <h2 id="portal-titulo-login">Bem-vindo ao Extensão</h2>
+      <p>Entre para continuar seus estudos.</p>
     </header>
     <div className="portal-perfis" role="group" aria-label="Área de acesso">
       <button type="button" aria-pressed={categoria==='aluno'}
@@ -74,5 +77,6 @@ export default function PortalLogin({entrar}:Props){
       {categoria==='aluno'?'Seu estudo e suas atividades.':'Professor, direção e administração.'}
       {' '}A escola confirma suas permissões após o login.
     </p>
+    </div>
   </section>
 }
