@@ -3,10 +3,12 @@ import type { FormEvent } from 'react'
 import { ArrowUp, BrainCircuit, MessageCircle, Sparkles } from 'lucide-react'
 import { apiEscolar, type RespostaAssistente } from './api'
 import { falha } from './ComponentesPortal'
+import TutorPedagogico from './TutorPedagogico'
 
 type Mensagem = {id:number;pergunta:string;resultado:RespostaAssistente}
 const exemplos=['Quais são minhas atividades?','Quem são meus professores?','Tenho algum aviso?','Como revisar melhor?']
 export default function AssistenteEscolar(){
+  const [modo,setModo]=useState<'escola'|'conteudo'>('escola')
   const [texto,setTexto]=useState('')
   const [historico,setHistorico]=useState<Mensagem[]>([])
   const [enviando,setEnviando]=useState(false)
@@ -23,7 +25,14 @@ export default function AssistenteEscolar(){
     }catch(e){setErro(falha(e))}
     finally{setEnviando(false)}
   }
-  return <section className="assistente-escolar" aria-labelledby="titulo-assistente">
+  return <div className="ext-assistente-integrado">
+    <nav className="ext-assistente-modos" aria-label="Tipo de assistente">
+      <button type="button" className={modo==='escola'?'ativo':''}
+        aria-pressed={modo==='escola'} onClick={()=>setModo('escola')}>Minha escola</button>
+      <button type="button" className={modo==='conteudo'?'ativo':''}
+        aria-pressed={modo==='conteudo'} onClick={()=>setModo('conteudo')}>Entender matéria com IA</button>
+    </nav>
+    {modo==='conteudo'?<TutorPedagogico/>:<section className="assistente-escolar" aria-labelledby="titulo-assistente">
     <div className="assistente-topo">
       <span className="assistente-avatar"><BrainCircuit size={25}/></span>
       <div><span className="sobretitulo">ASSISTENTE ESCOLAR · BETA</span>
@@ -40,7 +49,7 @@ export default function AssistenteEscolar(){
         <div className="assistente-resposta"><strong>Extensão</strong><p>{m.resultado.resposta}</p>
           {m.resultado.fontes.length>0&&<small>Base: {m.resultado.fontes.join(' · ')}</small>}</div>
       </div>)}
-      {enviando&&<p className="portal-vazio">Consultando os dados autorizados...</p>}
+      {enviando&&<p className="portal-vazio">Consultando informações autorizadas da sua escola...</p>}
     </div>
     <form className="assistente-form" onSubmit={e=>void perguntar(e)}>
       <label htmlFor="assistente-mensagem">Sua pergunta</label>
@@ -53,5 +62,6 @@ export default function AssistenteEscolar(){
     </form>
     {erro&&<p role="alert" className="portal-feedback falha">{erro}</p>}
     <p className="assistente-aviso">Consulta escolar guiada, sem IA generativa nesta versão. Não há notas ou faltas oficiais no banco. Não compartilhe dados pessoais.</p>
-  </section>
+  </section>}
+  </div>
 }
