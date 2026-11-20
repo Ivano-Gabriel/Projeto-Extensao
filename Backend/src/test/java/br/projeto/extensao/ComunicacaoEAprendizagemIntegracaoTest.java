@@ -246,20 +246,23 @@ class ComunicacaoEAprendizagemIntegracaoTest {
         mvc.perform(get("/api/portal/minha-frequencia")
             .with(user("aluno-b@escola.test").roles("ALUNO")))
             .andExpect(jsonPath("$.aulasRegistradas").value(0));
-    }
     @Test void professorReabreChamadaSalvaSemExporDadosDeOutrosPerfis()throws Exception{
+        String aulaJson="""
+            {"turmaId":%d,"disciplina":"MATEMATICA","data":"2026-11-20","ordem":2,"tema":"Aula de teste"}
+            """.formatted(turmaA);
         mvc.perform(post("/api/professor/aulas")
             .with(user("prof-a@escola.test").roles("PROFESSOR")).with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("{\\"turmaId\\":"+turmaA+",\\"disciplina\\":\\"MATEMATICA\\",\\"data\\":\\"2026-11-20\\",\\"ordem\\":2,\\"tema\\":\\"Aula de teste\\"}"))
+            .contentType(MediaType.APPLICATION_JSON).content(aulaJson))
             .andExpect(status().isCreated());
         Long aula=jdbc.queryForObject("SELECT id FROM aulas_registradas WHERE turma_id=?",Long.class,turmaA);
         String rota="/api/professor/aulas/"+aula+"/presencas";
         mvc.perform(get(rota).with(user("prof-a@escola.test").roles("PROFESSOR")))
             .andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
+        String presencaJson="""
+            {"alunoId":%d,"presente":false}
+            """.formatted(alunoA);
         mvc.perform(post(rota).with(user("prof-a@escola.test").roles("PROFESSOR")).with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("{\\"alunoId\\":"+alunoA+",\\"presente\\":false}"))
+            .contentType(MediaType.APPLICATION_JSON).content(presencaJson))
             .andExpect(status().isCreated());
         mvc.perform(get(rota).with(user("prof-a@escola.test").roles("PROFESSOR")))
             .andExpect(status().isOk())
