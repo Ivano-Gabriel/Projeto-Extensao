@@ -6,7 +6,7 @@ import { falha } from './ComponentesPortal'
 import TutorPedagogico from './TutorPedagogico'
 
 type Mensagem = {id:number;pergunta:string;resultado:RespostaAssistente}
-const exemplos=['Bom dia!','Que dia é hoje?','Que horas são agora?','Como funciona Bhaskara?','Quais são minhas atividades?','Tenho algum aviso?']
+const exemplos=['Como funciona Bhaskara?','O que é fotossíntese?','Como calcular porcentagem?','O que foi a Revolução Francesa?','Quais são minhas atividades?','Tenho algum aviso?']
 export default function AssistenteEscolar(){
   const [modo,setModo]=useState<'escola'|'conteudo'>('escola')
   const [texto,setTexto]=useState('')
@@ -37,7 +37,7 @@ export default function AssistenteEscolar(){
       <span className="assistente-avatar"><BrainCircuit size={25}/></span>
       <div><span className="sobretitulo">ASSISTENTE ESCOLAR · GRATUITO</span>
         <h2 id="titulo-assistente">Pergunte ao assistente</h2>
-        <p>Saudações, data, hora, Bhaskara e informações autorizadas da sua escola. Sem cobrar por pergunta.</p></div>
+        <p>Respostas gratuitas para perguntas básicas de matemática, português, ciências e história, além de informações da sua própria turma. Sem chave externa.</p></div>
     </div>
     {historico.length===0&&<div className="assistente-sugestoes">
       {exemplos.map(x=><button type="button" key={x} disabled={enviando}
@@ -61,7 +61,7 @@ export default function AssistenteEscolar(){
       </div>
     </form>
     {erro&&<p role="alert" className="portal-feedback falha">{erro}</p>}
-    <p className="assistente-aviso">Assistente gratuito com respostas predefinidas e consultas autorizadas. Não é IA generativa e não conhece notas ou faltas oficiais. Não compartilhe dados pessoais.</p>
+    <p className="assistente-aviso">Assistente gratuito com conteúdos didáticos revisados e consultas autorizadas. Não é IA generativa e não conhece notas ou faltas oficiais. Não compartilhe dados pessoais.</p>
   </section>}
   </div>
 }

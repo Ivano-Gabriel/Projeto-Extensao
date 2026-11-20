@@ -8,14 +8,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 class IaContratoTest {
     @Test
-    void parserReconheceContratoDoProvedorSemConsultaExterna(){
-        Map<String,Object> resposta=Map.of("status","completed","output",List.of(
-            Map.of("content",List.of(Map.of("type","output_text","text","Rascunho pedagógico.")))));
-        assertEquals("Rascunho pedagógico.",IaTextoResposta.ler(resposta));
+    void parserReconheceContratoDoGroqSemConsultaExterna(){
+        Map<String,Object> resposta=Map.of("choices",List.of(
+            Map.of("message",Map.of("content","Rascunho pedagógico."))));
+        assertEquals("Rascunho pedagógico.",GroqChat.texto(resposta));
         assertThrows(ResponseStatusException.class,
-            ()->IaTextoResposta.ler(Map.of("status","incomplete","output",List.of())));
+            ()->GroqChat.texto(Map.of("choices",List.of())));
         assertThrows(ResponseStatusException.class,
-            ()->IaTextoResposta.ler(Map.of("status","completed","output",List.of())));
+            ()->GroqChat.texto(Map.of("choices",List.of(Map.of("message",Map.of("content"," "))))));
     }
     @Test
     void politicaRecusaIdentificadoresPessoaisAntesDeQualquerEnvio(){
