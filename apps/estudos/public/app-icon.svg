@@ -1,7 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Livro do Projeto Extensão">
-<rect width="192" height="192" rx="44" fill="#17315A"/>
-<path d="M31 56q32-17 65 0 33-17 65 0v81q-32-17-65 0-33-17-65 0z" fill="#F8CB54" stroke="#FFE99D" stroke-width="5" stroke-linejoin="round"/>
-<path d="M96 56v81" stroke="#17315A" stroke-width="5"/>
-<path d="M44 77q21-10 40-2M44 92q21-8 40-1M108 75q19-8 40 2M108 93q19-8 40 1" stroke="#17315A" stroke-width="5" fill="none" stroke-linecap="round"/>
-<circle cx="150" cy="35" r="9" fill="#F8CB54"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="titulo">
+<title id="titulo">zELO+ — educação que conecta</title>
+<defs>
+<linearGradient id="fundo" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#194e9b"/><stop offset=".48" stop-color="#0b285d"/><stop offset="1" stop-color="#05153f"/></linearGradient>
+<linearGradient id="ouro" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#ffe999"/><stop offset=".5" stop-color="#ffd04a"/><stop offset="1" stop-color="#e7a01e"/></linearGradient>
+</defs>
+<rect width="512" height="512" rx="108" fill="url(#fundo)"/>
+<path d="M62 290Q143 250 256 289Q360 250 449 291L425 355Q333 324 256 380Q174 323 84 355Z" fill="url(#ouro)" stroke="#051c54" stroke-width="9" stroke-linejoin="round"/>
+<path d="M92 290Q174 265 256 322Q338 265 418 290L405 343Q328 307 256 365Q177 307 106 343Z" fill="#fff9e7" stroke="#0a2b67" stroke-width="7"/>
+<path d="M256 321V365" stroke="#0b285d" stroke-width="7"/>
+<circle cx="256" cy="165" r="24" fill="#fffdf2"/>
+<path d="M183 194Q256 278 330 194" fill="none" stroke="#fffdf2" stroke-width="24" stroke-linecap="round"/>
+<circle cx="159" cy="231" r="17" fill="url(#ouro)"/><path d="M117 252Q159 292 198 251" fill="none" stroke="#ffd04c" stroke-width="19" stroke-linecap="round"/>
+<circle cx="357" cy="231" r="17" fill="url(#ouro)"/><path d="M320 252Q358 291 395 251" fill="none" stroke="#ffd04c" stroke-width="19" stroke-linecap="round"/>
+<path d="M206 134L256 112L307 134L256 154Z" fill="url(#ouro)"/><path d="M294 136v25" fill="none" stroke="#ffd04c" stroke-width="6" stroke-linecap="round"/>
+<path d="M395 144h34M412 127v34" fill="none" stroke="url(#ouro)" stroke-width="17" stroke-linecap="round"/>
+<path d="M95 382Q245 429 424 337" stroke="url(#ouro)" stroke-width="10" fill="none" stroke-linecap="round"/>
+<text x="256" y="453" text-anchor="middle" font-family="Trebuchet MS,Arial,sans-serif" font-size="64" font-weight="900" font-style="italic" letter-spacing="-3" fill="#fffdf1">zELO<tspan fill="#ffd047">+</tspan></text>
 </svg>

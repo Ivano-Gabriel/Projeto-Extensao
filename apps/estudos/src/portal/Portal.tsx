@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ArrowLeft, GraduationCap, LogOut, School, ShieldCheck } from 'lucide-react'
 import type { UsuarioEscolar } from './api'
 import { areaDoUsuario } from './perfis'
+import ZeloMarca from '../marca/ZeloMarca'
 import AlunoPainel from './AlunoPainel'
 import ProfessorPainel from './ProfessorPainel'
 import DirecaoPainel from './DirecaoPainel'
@@ -28,7 +29,7 @@ export default function Portal({usuario,onSair,voltar}:Props){
       <ArrowLeft size={18}/> Voltar aos estudos
     </button>}
     <header className="portal-hero">
-      <span className="portal-hero-marca"><School size={21}/> EXTENSÃO ESCOLAR</span>
+      <span className="portal-hero-marca"><ZeloMarca variante="compacta" clara/> <span>PORTAL ESCOLAR</span></span>
       <h1>Olá, {usuario.nome.split(' ')[0]}!</h1>
       <div className="portal-acesso">
         <span><ShieldCheck size={17}/>{papel}</span>

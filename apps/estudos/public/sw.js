@@ -1,5 +1,5 @@
-const PREFIX = 'extensao-estudos-'
-const CACHE = PREFIX + 'v3'
+const PREFIX = 'zelo-app-'
+const CACHE = PREFIX + 'v4'
 
 async function guardarApp() {
   const cache = await caches.open(CACHE)
@@ -12,7 +12,7 @@ async function guardarApp() {
     .map((caminho)=>new URL(caminho,inicio))
     .filter((url)=>url.origin === self.location.origin && url.href.startsWith(inicio))
     .map((url)=>url.href)
-  await cache.addAll([inicio,htmlUrl,new URL('manifest.webmanifest',inicio).href,new URL('app-icon.svg',inicio).href,...ativos])
+  await cache.addAll([inicio,htmlUrl,new URL('manifest.webmanifest',inicio).href,new URL('app-icon.svg',inicio).href,new URL('zelo-icon-192.png',inicio).href,new URL('zelo-wordmark.svg',inicio).href,...ativos])
   return true
 }
 
@@ -25,7 +25,7 @@ self.addEventListener('install',(evento)=>{
 self.addEventListener('activate',(evento)=>{
   evento.waitUntil((async()=>{
     const nomes = await caches.keys()
-    await Promise.all(nomes.filter((nome)=>nome.startsWith(PREFIX)&&nome!==CACHE)
+    await Promise.all(nomes.filter((nome)=>(nome.startsWith(PREFIX)||nome.startsWith('extensao-estudos-'))&&nome!==CACHE)
       .map((nome)=>caches.delete(nome)))
     await self.clients.claim()
   })())

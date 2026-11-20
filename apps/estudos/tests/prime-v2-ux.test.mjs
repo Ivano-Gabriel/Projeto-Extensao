@@ -40,7 +40,7 @@ test('layout mobile elimina os filtros horizontais e acomoda cartoes em uma colu
 test('login ganhou cenario ilustrado e suporta movimento reduzido',()=>{
   assert.match(login,/prime-login-cena/)
   assert.match(login,/prime-book-page/)
-  assert.match(login,/Bem-vindo ao Extensão/)
+  assert.match(login,/Bem-vindo ao zELO\+/)
   assert.match(css,/prefers-reduced-motion:reduce/)
   assert.match(css,/\.entrada-extensao>\.portal-login\.prime-login\{display:grid/)
   assert.match(main,/prime-v2\.css/)

@@ -1,7 +1,7 @@
-# Extensão no localhost (Windows / PowerShell)
+# zELO+ no localhost (Windows / PowerShell)
 
 Guia para rodar **frontend e backend juntos** e testar com dados digitados pelos
-próprios colegas. O que o professor publicar no portal é salvo no banco
+próprios colegas. O que o professor publicar no portal zELO+ é salvo no banco
 escolhido: não é o catálogo de estudos demonstrativo.
 
 ## 1. Verificar ferramentas

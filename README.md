@@ -1,51 +1,66 @@
-# Projeto de Extensão — Plataforma Escolar 🎓
+# zELO+ — Plataforma Escolar (Projeto de Extensão)
 
-Projeto acadêmico desenvolvido em equipe para explorar soluções digitais que auxiliem o cotidiano de **alunos, professores e direção escolar**. Os protótipos foram apresentados aos estudantes para ouvir suas preferências.
+> **zELO+ é a identidade visual provisória da proposta escolhida no Projeto de Extensão.** Antes de registro e exploração comercial, verificar disponibilidade da marca, titularidade/autorizações da equipe e licenças dos componentes.
 
-## Propostas desenvolvidas
+Aplicativo responsivo/PWA com espaço de estudos para alunos e portal escolar para **aluno, professor, direção e administração de escolas**. O projeto foi desenvolvido academicamente a partir da comparação de **três protótipos** (agenda, biblioteca e estudos), aprofundando a solução de estudos escolhida.
 
-| Protótipo | Pasta | Objetivo |
-| --- | --- | --- |
-| **Agenda escolar** | `apps/web/` | Provas, trabalhos, avisos e área do aluno. |
-| **Biblioteca** | `apps/biblioteca/` | Busca, catálogo e empréstimos simulados. |
-| **Ferramenta de estudos** | `apps/estudos/` | Materiais, revisões, questões e acompanhamento de estudos. |
+## Demonstração e código
 
-✅ **A ferramenta de estudos foi a proposta escolhida pelos alunos.**
+- **Frontend homologação:** https://extensao-estudos.vercel.app
+- **Frontend:** `apps/estudos` — React + TypeScript + Vite + PWA
+- **Backend:** `Backend` — Java 21 + Spring Boot, API HTTP/JSON, sessões, CSRF
+- **Banco de homologação:** PostgreSQL, versionado com Flyway
+- **Fluxo de engenharia:** branches, pull requests, testes automatizados e homologação humana
+- **Outros protótipos:** `apps/web` e `apps/biblioteca`
 
-## Tecnologias
+## O que funciona (sob contas e dados fictícios)
 
-- **Frontend:** React, TypeScript e Vite.
-- **Backend:** Java 21, Spring Boot e Spring Security.
-- **Persistência:** PostgreSQL para a API; dados demonstrativos e armazenamento local nos protótipos.
-- **Organização:** GitHub, branches, pull requests e testes automatizados.
+| Perfil | Funções em homologação |
+| --- | --- |
+| Aluno | Login, turmas, materiais publicados, atividades da turma, respostas, explicações, avisos, desempenho de quizzes |
+| Professor | Turmas/disciplinas vinculadas, publicação de questões, materiais, comunicados, aulas e presença **provisória** |
+| Direção | Turmas, usuários, vínculos, matrículas, realocações e histórico, horários, avisos |
+| Administração | Cadastro de escolas e contas de direção |
+| Estudos | Biblioteca demonstrativa, revisão, desafio do dia, plano e missões |
+| Assistente | Respostas guiadas gratuitas; IA generativa preparada, **não habilitada por padrão** |
 
-## Rodar API e frontend juntos no localhost
+**Limite essencial:** os dados do Laboratório (demo) não são notas ou frequências oficiais. O portal guarda registros *persistidos de teste* sob autorização. Este software não está autorizado como diário escolar institucional e não deve receber dados reais de menores sem governança de privacidade e aprovação adequada.
 
-Para login, direção, professores, alunos, atividades persistidas e transferência entre turmas, siga o [guia completo para Windows/PowerShell](./COMO_RODAR_LOCAL.md).
+## Executar localmente
 
-## Executar um protótipo
+**Pré-requisitos:** Git, Node.js compatível com Vite 8, Java 21 e Maven.
 
-**Pré-requisito:** Node.js compatível com Vite 8.
+Consulte [COMO_RODAR_LOCAL.md](./COMO_RODAR_LOCAL.md). O guia cobre API local na porta `3001`, frontend na `5173`, usuário de homologação e criação de turmas/atividades pelas telas.
 
-```bash
+## Documentação do trabalho e profissionalização
+
+| Arquivo | Para quê serve |
+| --- | --- |
+| [Relatório acadêmico](docs/TRABALHO-ACADEMICO-ZELO.md) | Introdução, objetivos, metodologia, arquitetura, resultados e limitações |
+| [Roteiro de apresentação](docs/APRESENTACAO-ZELO.md) | Apresentação a duas vozes e demo do produto |
+| [Roteiro de homologação](docs/HOMOLOGACAO-ZELO.md) | 20 cenários, critérios, dispositivos e modelo de relato de bug |
+| [Massa de dados de teste](docs/DADOS-HOMOLOGACAO-ZELO.md) | Contas fictícias e atividades curadas para cadastro persistido |
+| [Plano de prontidão institucional](docs/PLANO-INSTITUCIONAL-ZELO.md) | Acessibilidade, LGPD, auditoria, disponibilidade e apresentação a órgãos |
+| [IA pedagógica](docs/IA-ESCOLAR-ATIVACAO.md) | Funcionamento, limites, custo, revisão docente e privacidade |
+
+## Testes
+
+```powershell
 cd apps/estudos
 npm ci
-npm run dev
-```
-
-Para abrir os outros protótipos, substitua `apps/estudos` por `apps/web` ou `apps/biblioteca` e execute os mesmos comandos.
-
-```bash
 npm test
 npm run build
 ```
 
-O backend tem instruções específicas em [`Backend/README.md`](./Backend/README.md).
+```powershell
+cd Backend
+mvn.cmd test
+```
 
-## Estado atual
+O resultado real de cada execução deve ser verificado nas ações do GitHub e registrado na evidência de homologação; **não presumir** que testes automatizados bastam para aprovação de UX ou segurança institucional.
 
-O backend possui uma base de autenticação e permissões, mas **a integração com os protótipos ainda está em desenvolvimento**. Notas, frequência e demais dados exibidos nas demonstrações **não são registros escolares oficiais**.
+## Organização do trabalho e créditos
 
-**Trabalho em equipe:** mudanças de código são organizadas em branches e pull requests para revisão. Não utilizar dados pessoais reais nas demonstrações.
+O desenvolvimento integra contribuições de estudantes. Antes da apresentação final, documentar as responsabilidades efetivas de cada integrante; não atribuir código, decisão ou resultados não comprovados. O nome zELO+ é provisório; marca, uso comercial e titularidade do código requerem análise e acordo apropriados.
 
-**Objetivo:** construir a solução com participação dos estudantes, priorizando usabilidade, acessibilidade e aprendizado prático.
+**Objetivo:** melhorar a experiência de estudo e a organização escolar com acompanhamento docente e segurança, mantendo transparência sobre o que ainda está em validação.

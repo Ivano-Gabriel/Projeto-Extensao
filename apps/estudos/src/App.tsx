@@ -17,6 +17,7 @@ import Plano from './plano/Plano'
 import Jogo from './jogo/Jogo'
 import Portal from './portal/Portal'
 import PortalLogin from './portal/PortalLogin'
+import ZeloMarca from './marca/ZeloMarca'
 import { apiEscolar, type UsuarioEscolar } from './portal/api'
 import { paginaDoUsuario, erroNaVerificacaoDeSessao } from './portal/sessao'
 import { armazenamentoDaConta } from './portal/armazenamento'
@@ -49,9 +50,9 @@ function armazenamento(): Storage | null {
 
 function Marca() {
   return (
-    <div className="marca" aria-label="Projeto de Extensão, ferramenta de estudos">
-      <span className="marca-simbolo" aria-hidden="true"><BookOpenCheck size={23} /></span>
-      <span><strong>Projeto de Extensão</strong><small>Ferramenta de estudos</small></span>
+    <div className="marca" aria-label="zELO+ — plataforma escolar">
+      <ZeloMarca variante="compacta"/>
+      <span className="marca-subtitulo">Aprender e conectar</span>
     </div>
   )
 }
@@ -135,7 +136,7 @@ function Inicio({estado,dataDesafio,respostaDesafio,responderDesafio,abrirMateri
         <div className="prime-orbita orbita-um"/><div className="prime-orbita orbita-dois"/>
         <div className="prime-livro-capa"><div className="prime-livro-lombo"/>
           <div className="prime-livro-simbolo"><BookOpenCheck size={56}/></div>
-          <span>EXTENSÃO</span></div>
+          <span>zELO+</span></div>
         <span className="prime-estrela estrela-a">✦</span><span className="prime-estrela estrela-b">✦</span>
       </div>
     </section>
@@ -438,7 +439,7 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
   }
 
   useEffect(() => {
-    document.title = `${materialAtual?.titulo ?? menu.find((item) => item.id === tela)?.nome ?? 'Estudos'} — Projeto de Extensão`
+    document.title = `${materialAtual?.titulo ?? menu.find((item) => item.id === tela)?.nome ?? 'Estudos'} — zELO+`
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [tela, materialAtual, indiceQuiz])
 
@@ -525,12 +526,12 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
           <button type="button" onClick={()=>navegar('plano')}><ListChecks size={20}/> Meu plano</button>
           <button type="button" onClick={()=>navegar('jogo')}><Sparkles size={20}/> Missões do Futuro</button>
         </div>
-        <span className="navegacao-rodape">EXTENSÃO ESCOLAR</span>
+        <span className="navegacao-rodape">zELO+ · APRENDER E CONECTAR</span>
       </nav>
       <div className="layout-corpo">
         <header className="cabecalho-app prime-header">
-          <div className="prime-brand"><span className="prime-brand-icone"><BookOpenCheck size={26}/></span>
-            <div className="prime-brand-texto"><strong>Extensão</strong><span>Meu espaço de estudos</span></div>
+          <div className="prime-brand"><ZeloMarca variante="compacta"/>
+            <span className="prime-brand-legenda">Meu espaço de estudos</span>
           </div>
           <div className="prime-config">
             <button type="button" className="prime-config-botao" aria-label="Abrir configurações"
@@ -583,7 +584,7 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
             </>
           )}
         </main>
-        <footer className="rodape-app">Extensão · Biblioteca demonstrativa · Dados escolares oficiais apenas no portal</footer>
+        <footer className="rodape-app">zELO+ · Biblioteca demonstrativa · Registros escolares somente no portal</footer>
       </div>
       <div className="prime-mobile-nav">
         {menuAberto&&<>
@@ -670,7 +671,7 @@ export default function App() {
     setFase('login')
   }
   if(fase==='verificando')return <main className="entrada-extensao">
-    <div className="entrada-marca"><School size={23}/><span>PROJETO EXTENSÃO</span></div>
+    <div className="entrada-marca"><ZeloMarca variante="compacta"/></div>
     <PortalLogin entrar={entrar}/>
     <p className="entrada-rodape" role="status">Verificando sessão existente. A primeira conexão pode demorar no servidor gratuito.</p>
   </main>
@@ -690,7 +691,7 @@ export default function App() {
     </div>
   }
   return <main className="entrada-extensao">
-    <div className="entrada-marca"><School size={23}/><span>PROJETO EXTENSÃO</span></div>
+    <div className="entrada-marca"><ZeloMarca variante="compacta"/></div>
     <PortalLogin entrar={entrar}/>
     <p className="entrada-rodape">Área escolar protegida · Alunos, professores e direção</p>
   </main>

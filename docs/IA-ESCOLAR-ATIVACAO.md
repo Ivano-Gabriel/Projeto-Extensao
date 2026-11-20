@@ -1,4 +1,4 @@
-# Extensão — ativação controlada da IA pedagógica
+# zELO+ — ativação controlada da IA pedagógica
 
 ## O que esta entrega oferece
 
