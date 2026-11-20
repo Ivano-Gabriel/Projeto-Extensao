@@ -165,4 +165,29 @@ class SegurancaIntegracaoTest {
                 .andExpect(jsonPath("$.senha").doesNotExist())
                 .andExpect(jsonPath("$.senhaHash").doesNotExist());
     }
+
+    @Test
+    void trocarSenhaExigeContaAutenticadaCsrfESenhaAtualERevogaLoginAntigo() throws Exception {
+        String endpoint="/api/me/senha";
+        String body="{\"senhaAtual\":\"TesteSeguro123!\",\"novaSenha\":\"NovaSenhaForte2026!xx\"}";
+        mvc.perform(post(endpoint).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isUnauthorized());
+        mvc.perform(post(endpoint).with(user("aluno.teste@escola.edu.br").roles("ALUNO"))
+            .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        mvc.perform(post(endpoint).with(user("aluno.teste@escola.edu.br").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content(body.replace("TesteSeguro123!", "SenhaErrada123!"))).andExpect(status().isForbidden());
+        mvc.perform(post(endpoint).with(user("aluno.teste@escola.edu.br").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isNoContent());
+        org.junit.jupiter.api.Assertions.assertTrue(encoder.matches("NovaSenhaForte2026!xx",
+            usuarios.findByEmail("aluno.teste@escola.edu.br").orElseThrow().getSenhaHash()));
+        mvc.perform(post("/api/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"email\":\"aluno.teste@escola.edu.br\",\"senha\":\"TesteSeguro123!\"}"))
+            .andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"email\":\"aluno.teste@escola.edu.br\",\"senha\":\"NovaSenhaForte2026!xx\"}"))
+            .andExpect(status().isOk());
+    }
+
 }
