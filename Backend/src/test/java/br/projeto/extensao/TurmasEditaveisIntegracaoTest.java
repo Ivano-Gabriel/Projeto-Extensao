@@ -427,7 +427,7 @@ class TurmasEditaveisIntegracaoTest {
         mvc.perform(get(historico).with(user("prof-edit@escola.test").roles("PROFESSOR")))
             .andExpect(status().isForbidden());
         mvc.perform(get(historico).with(user("dir-edit-b@escola.test").roles("DIRECAO")))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isForbidden());
 
         mvc.perform(get("/api/portal/turmas")
             .with(user("aluno-homologacao-2027@escola.test").roles("ALUNO")))
