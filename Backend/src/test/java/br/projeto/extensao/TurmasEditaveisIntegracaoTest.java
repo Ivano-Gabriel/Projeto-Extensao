@@ -301,4 +301,47 @@ class TurmasEditaveisIntegracaoTest {
             .andExpect(jsonPath("$.resposta",org.hamcrest.Matchers.containsString("Δ = b² - 4ac")));
     }
 
+
+    @Test
+    void desvincularProfessorLimpaResponsavelDoHorarioERegistraAuditoria() throws Exception {
+        jdbc.update("INSERT INTO horarios_turma(turma_id,disciplina,dia_semana,inicio,fim,professor_id) "+
+            "VALUES(?,'MATEMATICA',1,'07:00:00','07:50:00',?)",turma,professor);
+        String rota="/api/gestao/turmas/"+turma+"/professores/"+professor+"/disciplinas/MATEMATICA";
+        mvc.perform(delete(rota).with(user("aluno-edit@escola.test").roles("ALUNO")).with(csrf()))
+            .andExpect(status().isForbidden());
+        mvc.perform(delete(rota).with(user("dir-edit@escola.test").roles("DIRECAO")))
+            .andExpect(status().isForbidden());
+        mvc.perform(delete(rota).with(user("dir-edit@escola.test").roles("DIRECAO")).with(csrf()))
+            .andExpect(status().isNoContent());
+        org.junit.jupiter.api.Assertions.assertEquals(1,
+            jdbc.queryForObject("SELECT COUNT(*) FROM horarios_turma WHERE turma_id=? AND professor_id IS NULL",
+                Integer.class,turma));
+        mvc.perform(get("/api/portal/turmas").with(user("prof-edit@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
+        mvc.perform(get("/api/gestao/auditoria").with(user("dir-edit@escola.test").roles("DIRECAO")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].acao").value("VINCULO_REMOVIDO"));
+        mvc.perform(get("/api/gestao/auditoria").with(user("prof-edit@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isForbidden());
+        mvc.perform(get("/api/gestao/auditoria").with(user("prof-edit-b@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void transferenciaRegistraEventoSemExporHistoricoDeOutraEscola() throws Exception {
+        jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES (?,?,?,2026)",
+            escolaA,"3B","Terceiro B");
+        Long destino=jdbc.queryForObject("SELECT id FROM turmas WHERE escola_id=? AND codigo='3B'",
+            Long.class,escolaA);
+        mvc.perform(post("/api/gestao/turmas/"+turma+"/transferencias")
+            .with(user("dir-edit@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"alunoId\":"+aluno+",\"destinoTurmaId\":"+destino+"}"))
+            .andExpect(status().isNoContent());
+        mvc.perform(get("/api/gestao/auditoria").with(user("dir-edit@escola.test").roles("DIRECAO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].acao").value("ALUNO_TRANSFERIDO"))
+            .andExpect(jsonPath("$[0].escolaId").value(escolaA))
+            .andExpect(jsonPath("$[0].atorId").value(direcao));
+    }
+
 }
