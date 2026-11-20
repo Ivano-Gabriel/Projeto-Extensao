@@ -90,3 +90,17 @@ test('animacao em diagonal percorre sequencialmente folhas e tem alternativa par
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/)
   assert.match(css,/--book-scale/)
 })
+
+
+test('login mobile compacto economiza altura sem esconder formulario',()=>{
+  assert.match(app,/entrada-extensao entrada-login/)
+  assert.match(css,/\.entrada-login\s*\{/)
+  assert.match(css,/\.entrada-login\s*>\s*\.entrada-marca\s*\{\s*display:none/)
+  assert.match(css,/\.prime-login\s+\.portal-perfis button\s*\{/)
+  assert.match(css,/\.prime-login\s+\.portal-form input\s*\{/)
+  assert.match(css,/@media\s*\(max-width:\s*639px\)\s*and\s*\(max-height:\s*630px\)/)
+  assert.match(css,/\.prime-login-cena>\s*p\s*\{\s*display:none/)
+  assert.match(css,/overflow-y:\s*visible/)
+  assert.match(css,/min-height:\s*2\.75rem/)
+  assert.match(css,/\.prime-book-spread\{--book-scale/)
+});
