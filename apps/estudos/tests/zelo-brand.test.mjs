@@ -23,7 +23,8 @@ test('zELO+ identifica login, cabecalho escolar e portal sem remover o aviso de 
 test('identidade PWA usa a nova marca com assets separados por tamanho e atualiza cache',()=>{
   assert.equal(manifest.name,'zELO+ — Plataforma escolar')
   assert.equal(manifest.short_name,'zELO+')
-  assert.deepEqual(manifest.icons.filter(icon=>icon.type==='image/png').map(x=>x.sizes),['192x192','512x512'])
+  assert.deepEqual(manifest.icons.filter(icon=>icon.type==='image/png').map(x=>x.sizes),['192x192'])
+  assert.ok(manifest.icons.some(icon=>icon.type==='image/svg+xml'&&icon.sizes==='any'&&icon.purpose==='maskable'))
   assert.match(index,/<title>zELO\+/)
   assert.match(index,/zelo-icon-192\.png/)
   assert.match(worker,/zelo-icon-192\.png/)
