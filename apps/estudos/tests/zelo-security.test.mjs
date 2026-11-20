@@ -13,6 +13,6 @@ test('portal permite trocar a propria senha sem expor reset por email inexistent
 })
 test('direcao consulta trilha de auditoria com escopo escolar',()=>{
   const ui=ler('src/portal/DirecaoPainel.tsx')
-  assert.match(ui,/apiEscolar.auditoria/)
+  assert.match(ler('src/portal/AuditoriaEscola.tsx'),/apiEscolar.auditoria/)
   assert.match(ui,/AuditoriaEscola/)
 })
