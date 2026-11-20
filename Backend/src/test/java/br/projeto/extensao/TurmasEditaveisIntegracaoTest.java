@@ -344,4 +344,40 @@ class TurmasEditaveisIntegracaoTest {
             .andExpect(jsonPath("$[0].atorId").value(direcao));
     }
 
+
+    @Test
+    void jornadaCompletaDirecaoProfessorAlunoComTransferenciaPreservaRespostaHistorica() throws Exception {
+        String novaQuestao="{\"turmaId\":"+turma+",\"disciplina\":\"MATEMATICA\","+
+            "\"titulo\":\"Equacao do segundo grau\",\"pergunta\":\"Quais sao as raizes?\","+
+            "\"opcoes\":[\"1 e 6\",\"2 e 3\",\"4 e 5\",\"0 e 1\"],"+
+            "\"correta\":1,\"explicacao\":\"Fatoracao dos dois termos.\"}";
+        mvc.perform(post("/api/professor/atividades")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(novaQuestao))
+            .andExpect(status().isCreated());
+        long id=jdbc.queryForObject("SELECT id FROM atividades WHERE turma_id=?",Long.class,turma);
+        mvc.perform(get("/api/portal/atividades")
+            .with(user("aluno-edit@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(id));
+        mvc.perform(post("/api/portal/atividades/"+id+"/respostas")
+            .with(user("aluno-edit@escola.test").roles("ALUNO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content("{\"opcao\":1}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.acertou").value(true));
+
+        jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES (?,'3B','Terceiro B',2026)",escolaA);
+        long destino=jdbc.queryForObject("SELECT id FROM turmas WHERE codigo='3B' AND escola_id=?",Long.class,escolaA);
+        mvc.perform(post("/api/gestao/turmas/"+turma+"/transferencias")
+            .with(user("dir-edit@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"alunoId\":"+aluno+",\"destinoTurmaId\":"+destino+"}"))
+            .andExpect(status().isNoContent());
+        mvc.perform(get("/api/portal/atividades")
+            .with(user("aluno-edit@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
+        mvc.perform(get("/api/portal/minhas-respostas")
+            .with(user("aluno-edit@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].atividadeId").value(id))
+            .andExpect(jsonPath("$[0].acertou").value(true));
+    }
+
 }
