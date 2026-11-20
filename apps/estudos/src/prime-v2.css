@@ -404,10 +404,10 @@ html[data-tema="escuro"] .prime-presenca-discreta>summary{color:var(--ink)}
   backface-visibility:visible;
   will-change:transform;
 }
-.prime-book-page-one{z-index:8;animation:primeBookTurnOne 12.8s cubic-bezier(.42,0,.17,1) infinite}
-.prime-book-page-two{z-index:7;animation:primeBookTurnTwo 12.8s cubic-bezier(.42,0,.17,1) infinite}
-.prime-book-page-three{z-index:6;animation:primeBookTurnThree 12.8s cubic-bezier(.42,0,.17,1) infinite}
-.prime-book-page-four{z-index:5;animation:primeBookTurnFour 12.8s cubic-bezier(.42,0,.17,1) infinite}
+.prime-book-page-one{z-index:8;animation:primeBookTurnOne 12.8s cubic-bezier(.42,0,.17,1) infinite,primeBookStackOne 12.8s steps(1,end) infinite}
+.prime-book-page-two{z-index:7;animation:primeBookTurnTwo 12.8s cubic-bezier(.42,0,.17,1) infinite,primeBookStackTwo 12.8s steps(1,end) infinite}
+.prime-book-page-three{z-index:6;animation:primeBookTurnThree 12.8s cubic-bezier(.42,0,.17,1) infinite,primeBookStackThree 12.8s steps(1,end) infinite}
+.prime-book-page-four{z-index:5;animation:primeBookTurnFour 12.8s cubic-bezier(.42,0,.17,1) infinite,primeBookStackFour 12.8s steps(1,end) infinite}
 .prime-book-page-face{
   position:absolute;inset:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -460,8 +460,8 @@ html[data-tema="escuro"] .prime-presenca-discreta>summary{color:var(--ink)}
 .prime-book-spark-left{left:5%;top:22%}
 .prime-book-spark-right{right:4%;bottom:14%;font-size:1.95rem;animation-delay:1.3s}
 @keyframes primeBookFloat{
-  0%,100%{transform:translate3d(0,3px,0) rotate(-15deg) rotateY(-13deg) rotateX(9deg) scale(var(--book-scale))}
-  50%{transform:translate3d(0,-7px,0) rotate(-11deg) rotateY(-7deg) rotateX(13deg) scale(var(--book-scale))}
+  0%,100%{transform:translate3d(0,3px,0) rotate(-10deg) rotateY(-11deg) rotateX(9deg) scale(var(--book-scale))}
+  50%{transform:translate3d(0,-7px,0) rotate(-7deg) rotateY(-6deg) rotateX(13deg) scale(var(--book-scale))}
 }
 @keyframes primeBookTurnOne{
   0%,9%{transform:rotateY(-3deg)}
@@ -482,6 +482,27 @@ html[data-tema="escuro"] .prime-presenca-discreta>summary{color:var(--ink)}
   0%,54%{transform:rotateY(-3deg)}
   65%,83%{transform:rotateY(-170deg)}
   90%,100%{transform:rotateY(-3deg)}
+}
+/* Após cruzar a lombada, cada folha virada passa para a pilha da esquerda. */
+@keyframes primeBookStackOne{
+  0%,14%{z-index:8}
+  15%,86%{z-index:1}
+  87%,100%{z-index:8}
+}
+@keyframes primeBookStackTwo{
+  0%,29%{z-index:7}
+  30%,86%{z-index:2}
+  87%,100%{z-index:7}
+}
+@keyframes primeBookStackThree{
+  0%,44%{z-index:6}
+  45%,86%{z-index:3}
+  87%,100%{z-index:6}
+}
+@keyframes primeBookStackFour{
+  0%,59%{z-index:5}
+  60%,86%{z-index:4}
+  87%,100%{z-index:5}
 }
 @keyframes primeBookSparkle{
   0%,100%{opacity:.35;transform:scale(.8)}
