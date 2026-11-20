@@ -97,7 +97,7 @@ class ComunicacaoEAprendizagemIntegracaoTest {
     @Test void assistenteCalculaPorcentagemEmPerguntaDireta()throws Exception{
         mvc.perform(post("/api/portal/assistente")
             .with(user("aluno-a@escola.test").roles("ALUNO")).with(csrf())
-            .contentType(MediaType.APPLICATION_JSON).content("{\\"pergunta\\":\\"Quanto é 25% de 80?\\"}"))
+            .contentType(MediaType.APPLICATION_JSON).content("{\"pergunta\":\"Quanto é 25% de 80?\"}")
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.resposta").value(org.hamcrest.Matchers.containsString("= 20")));
     }
