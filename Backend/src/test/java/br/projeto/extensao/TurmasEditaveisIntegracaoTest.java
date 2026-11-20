@@ -384,6 +384,7 @@ class TurmasEditaveisIntegracaoTest {
     @Test
     void homologacao2027TransfereAlunoExclusivoPreservaRespostaEIsolaAnos() throws Exception {
         Long aluno2027=criar("aluno-homologacao-2027@escola.test",Papel.ALUNO,escolaA);
+        criar("dir-edit-b@escola.test",Papel.DIRECAO,escolaB);
         jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES (?,'7A','Setimo A',2027)",escolaA);
         jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES (?,'7B','Setimo B',2027)",escolaA);
         Long origem2027=jdbc.queryForObject("SELECT id FROM turmas WHERE escola_id=? AND codigo='7A'",Long.class,escolaA);
@@ -404,10 +405,10 @@ class TurmasEditaveisIntegracaoTest {
         Long atividade=jdbc.queryForObject("SELECT id FROM atividades WHERE turma_id=?",Long.class,origem2027);
         mvc.perform(post("/api/portal/atividades/"+atividade+"/respostas")
             .with(user("aluno-homologacao-2027@escola.test").roles("ALUNO")).with(csrf())
-            .contentType(MediaType.APPLICATION_JSON).content("{\\"opcao\\":1}"))
+            .contentType(MediaType.APPLICATION_JSON).content("{\"opcao\":1}"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.acertou").value(true));
 
-        String destino="{\\"alunoId\\":"+aluno2027+",\\"destinoTurmaId\\":"+destino2027+"}";
+        String destino="{\"alunoId\":"+aluno2027+",\"destinoTurmaId\":"+destino2027+"}";
         mvc.perform(post("/api/gestao/turmas/"+origem2027+"/transferencias")
             .with(user("dir-edit@escola.test").roles("DIRECAO")).with(csrf())
             .contentType(MediaType.APPLICATION_JSON).content(destino))
@@ -428,7 +429,7 @@ class TurmasEditaveisIntegracaoTest {
         mvc.perform(post("/api/gestao/turmas/"+destino2027+"/transferencias")
             .with(user("dir-edit@escola.test").roles("DIRECAO")).with(csrf())
             .contentType(MediaType.APPLICATION_JSON)
-            .content("{\\"alunoId\\":"+aluno2027+",\\"destinoTurmaId\\":"+turma+"}"))
+            .content("{\"alunoId\":"+aluno2027+",\"destinoTurmaId\":"+turma+"}"))
             .andExpect(status().isConflict());
         org.junit.jupiter.api.Assertions.assertEquals(destino2027,
             jdbc.queryForObject("SELECT turma_id FROM matriculas WHERE aluno_id=?",Long.class,aluno2027));
@@ -438,7 +439,7 @@ class TurmasEditaveisIntegracaoTest {
         mvc.perform(get("/api/gestao/auditoria").with(user("dir-edit@escola.test").roles("DIRECAO")))
             .andExpect(jsonPath("$[0].acao").value("ALUNO_TRANSFERIDO"));
         mvc.perform(get("/api/gestao/auditoria").with(user("dir-edit-b@escola.test").roles("DIRECAO")))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
     }
 
     @Test
