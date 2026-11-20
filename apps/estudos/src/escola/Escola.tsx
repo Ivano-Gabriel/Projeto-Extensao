@@ -2,15 +2,16 @@ import { useMemo, useState } from 'react'
 import type { Dispatch, SetStateAction, ReactNode } from 'react'
 import {
   ArrowRight, BookOpen, CalendarCheck, Check, CheckCheck, ClipboardCheck,
-  Clock3, Download, Flame, Droplets, Heart, Info, MessageSquareText, Newspaper,
+  Clock3, Download, Heart, Info, MessageSquareText, Newspaper,
   Send, ShieldAlert, SunMoon, TrendingUp, X,
 } from 'lucide-react'
 import { disciplinas, gerarFrequenciaDemo, notasDemo, publicacoes } from './dados'
 import { faltasAteMeta, filtroPeriodo, formatarDataLocal, mediaNotas,
-  proximoDiaLetivo, resumirFrequencia, diasConsecutivosEstudados, type Periodo } from './regras'
+  proximoDiaLetivo, resumirFrequencia, type Periodo } from './regras'
 import { type EstadoEscola, type MensagemFeedback } from './estado'
 import { baixarAplicativo } from './offline'
 import MuralDemo from './MuralDemo'
+import FoguinhoEvolucao from './FoguinhoEvolucao'
 import AtividadeQuiz from './AtividadeQuiz'
 import { questaoDoMaterial, registrarAtividade } from './atividade'
 import { adicionarPostDemo, removerPostDemo, type NovoPostDemo } from './mural'
@@ -331,7 +332,6 @@ function Feedback({estado,atualizar}:Pick<Props,'estado'|'atualizar'>) {
 export default function Escola({estado,atualizar,abrirMaterial}:Props) {
   const [aba,setAba] = useState<AbaEscola>('frequencia')
   const [offlineStatus,setOfflineStatus] = useState('')
-  const seq = diasConsecutivosEstudados(estado.diasEstudo)
   const baixarOffline = async () => {
     if (!import.meta.env.PROD || !('serviceWorker' in navigator)) {
       setOfflineStatus('O download offline funciona na versão compilada/publicada (build + preview), não no servidor de desenvolvimento.')
@@ -356,11 +356,8 @@ export default function Escola({estado,atualizar,abrirMaterial}:Props) {
         <h1>A escola, do seu jeito.</h1>
         <p>Frequência, notas, conteúdos e sugestões, tudo no mesmo cantinho do seu estudo</p>
       </header>
+      <FoguinhoEvolucao diasEstudo={estado.diasEstudo}/>
       <div className="escola-barra-superior">
-        <span className={seq===0?'streak-dormindo':'streak-aceso'} aria-label={seq===0?'Sequência de estudos para recomeçar':`${seq} dias seguidos de estudo`}>
-          <span className="foguinho-cenario">{seq>0?<Flame size={34}/>:<><Flame size={34}/><Droplets size={18} className="gota-agua"/></>}</span>
-          <strong>{seq>0?`${seq} ${seq===1?'dia':'dias'}`:'Recomece hoje'}</strong>
-        </span>
         <button type="button" onClick={baixarOffline}><Download size={18}/> Guardar para offline</button>
       </div>
       {offlineStatus && <div className="escola-lembrete" role="status"><Info size={18}/>{offlineStatus}
