@@ -72,6 +72,35 @@ class ComunicacaoEAprendizagemIntegracaoTest {
         mvc.perform(get("/api/portal/avisos").with(user("aluno-b@escola.test").roles("ALUNO")))
             .andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
     }
+    @Test void publicarComunicadoRegistraEventoAuditavelSemVazarOutraEscola()throws Exception{
+        mvc.perform(post("/api/gestao/avisos").with(user("dir-a@escola.test").roles("DIRECAO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(comunicado(null,"FUNCIONARIOS")))
+            .andExpect(status().isCreated());
+        long aviso=jdbc.queryForObject("SELECT id FROM comunicados WHERE escola_id=?",Long.class,escolaA);
+        mvc.perform(get("/api/gestao/auditoria").with(user("dir-a@escola.test").roles("DIRECAO")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].acao").value("COMUNICADO_PUBLICADO"))
+            .andExpect(jsonPath("$[0].entidade").value("COMUNICADO"))
+            .andExpect(jsonPath("$[0].entidadeId").value(aviso))
+            .andExpect(jsonPath("$[0].escolaId").value(escolaA))
+            .andExpect(jsonPath("$[0].texto").doesNotExist());
+        mvc.perform(get("/api/gestao/auditoria").with(user("dir-b@escola.test").roles("DIRECAO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
+
+        mvc.perform(post("/api/professor/avisos").with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(comunicado(turmaA,"ALUNOS")))
+            .andExpect(status().isCreated());
+        mvc.perform(get("/api/gestao/auditoria").with(user("dir-a@escola.test").roles("DIRECAO")))
+            .andExpect(jsonPath("$[0].acao").value("COMUNICADO_PUBLICADO"))
+            .andExpect(jsonPath("$[1].acao").value("COMUNICADO_PUBLICADO"));
+    }
+    @Test void assistenteCalculaPorcentagemEmPerguntaDireta()throws Exception{
+        mvc.perform(post("/api/portal/assistente")
+            .with(user("aluno-a@escola.test").roles("ALUNO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content("{\\"pergunta\\":\\"Quanto é 25% de 80?\\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.resposta").value(org.hamcrest.Matchers.containsString("= 20")));
+    }
     @Test void avisoDeFuncionarioNaoChegaAoAluno()throws Exception{
         mvc.perform(post("/api/gestao/avisos").with(user("dir-a@escola.test").roles("DIRECAO"))
             .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(comunicado(null,"FUNCIONARIOS")))
