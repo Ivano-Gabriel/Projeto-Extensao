@@ -127,8 +127,8 @@ test('a capa ganha altura, mas a tela usual respeita viewport e libera scroll co
 
 
 test('o texto do login fica visualmente abaixo do livro mobile, sem alterar formulario ou animacao',()=>{
-  assert.match(css,/\.entrada-login \.prime-login-cena \.prime-login-arte\{[\s\S]*?transform:translateY\(-12px\)/)
-  assert.match(css,/\.entrada-login \.prime-login-cena>strong\{[\s\S]*?margin-top:\.4rem/)
+  assert.match(css,/\.entrada-login \.prime-login-cena \.prime-login-arte\{[\s\S]*?transform:translateY\(-30px\)/)
+  assert.match(css,/\.entrada-login \.prime-login-cena>strong\{[\s\S]*?margin-top:\.7rem/)
   assert.match(css,/\.entrada-login \.prime-login-cena>p\{[\s\S]*?margin-top:\.1rem/)
   assert.match(css,/\.entrada-login>\.portal-login\.prime-login\{[\s\S]*?height:min\(774px,calc\(100svh - 1rem\)\)/)
 })
