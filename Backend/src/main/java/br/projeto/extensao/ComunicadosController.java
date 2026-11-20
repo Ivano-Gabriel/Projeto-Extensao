@@ -28,13 +28,20 @@ public class ComunicadosController {
         @NotBlank @Size(max=1500) String texto,
         boolean importante) {}
     public record ComunicadoResumo(Long id,Long turmaId,String publico,String titulo,
-                                    String texto,boolean importante,String criadoEm) {}
+                                    String texto,boolean importante,String criadoEm,
+                                    Long autorId,String autorNome,String autorPapel) {}
+    public record EditarComunicado(
+        @NotBlank @Size(max=120) String titulo,
+        @NotBlank @Size(max=1500) String texto,
+        boolean importante) {}
 
     private final JdbcTemplate jdbc;
     private final UsuarioRepository usuarios;
-    public ComunicadosController(JdbcTemplate jdbc,UsuarioRepository usuarios){
+    private final AuditoriaService auditoria;
+    public ComunicadosController(JdbcTemplate jdbc,UsuarioRepository usuarios,AuditoriaService auditoria){
         this.jdbc=jdbc;
         this.usuarios=usuarios;
+        this.auditoria=auditoria;
     }
     private Usuario usuario(Authentication auth){
         if(auth==null)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -53,12 +60,17 @@ public class ComunicadosController {
         if(existe==0)throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Turma indisponível.");
     }
     private List<ComunicadoResumo> consultar(String condicao,Object... parametros){
-        return jdbc.query("SELECT c.id,c.turma_id,c.publico,c.titulo,c.texto,c.importante,c.criado_em "+
-            "FROM comunicados c WHERE "+condicao+" ORDER BY c.importante DESC,c.criado_em DESC,c.id DESC LIMIT 50",
+        return jdbc.query("SELECT c.id,c.turma_id,c.publico,c.titulo,c.texto,c.importante,c.criado_em,"+
+            "u.id AS autor_id,u.nome AS autor_nome,u.papel AS autor_papel "+
+            "FROM comunicados c LEFT JOIN usuarios u ON u.id=c.autor_id AND u.escola_id=c.escola_id "+
+            "WHERE "+condicao+" ORDER BY c.criado_em DESC,c.id DESC LIMIT 50",
             (rs,i)->new ComunicadoResumo(rs.getLong("id"),
                 rs.getObject("turma_id")==null?null:rs.getLong("turma_id"),
                 rs.getString("publico"),rs.getString("titulo"),rs.getString("texto"),
-                rs.getBoolean("importante"),rs.getTimestamp("criado_em").toInstant().toString()),
+                rs.getBoolean("importante"),rs.getTimestamp("criado_em").toInstant().toString(),
+                rs.getObject("autor_id")==null?null:rs.getLong("autor_id"),
+                rs.getString("autor_nome")==null?"Equipe escolar":rs.getString("autor_nome"),
+                rs.getString("autor_papel")==null?"ESCOLA":rs.getString("autor_papel")),
             parametros);
     }
     @GetMapping("/portal/avisos")
@@ -124,4 +136,60 @@ public class ComunicadosController {
         if(vinculado==0)throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         return criar(dados,autor,escolaId);
     }
+
+    private ComunicadoResumo comunicado(Long id,Long escolaId){
+        return consultar("c.id=? AND c.escola_id=?",id,escolaId).stream().findFirst()
+            .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+    private void permitidoEditar(Long id,Usuario autor){
+        Long escolaId=escola(autor);
+        Integer permite=jdbc.queryForObject(
+            "SELECT COUNT(*) FROM comunicados c WHERE c.id=? AND c.escola_id=? "+
+            "AND c.autor_id=? AND c.publico='ALUNOS' AND c.turma_id IS NOT NULL "+
+            "AND EXISTS (SELECT 1 FROM vinculos_docentes v "+
+            "WHERE v.turma_id=c.turma_id AND v.professor_id=?)",
+            Integer.class,id,escolaId,autor.getId(),autor.getId());
+        if(permite==0)throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+    @Transactional
+    @PutMapping("/professor/avisos/{id}")
+    public ResponseEntity<ComunicadoResumo> editarProfessor(@PathVariable Long id,
+            @Valid @RequestBody EditarComunicado dados,Authentication auth){
+        Usuario autor=usuario(auth);
+        if(autor.getPapel()!=Papel.PROFESSOR)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        permitidoEditar(id,autor);
+        jdbc.update("UPDATE comunicados SET titulo=?,texto=?,importante=? "+
+                "WHERE id=? AND escola_id=? AND autor_id=?",
+            dados.titulo().trim(),dados.texto().trim(),dados.importante(),id,
+            escola(autor),autor.getId());
+        auditoria.registrar(escola(autor),autor.getId(),"COMUNICADO_EDITADO","COMUNICADO",id);
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(comunicado(id,escola(autor)));
+    }
+    @Transactional
+    @DeleteMapping("/professor/avisos/{id}")
+    public ResponseEntity<Void> removerProfessor(@PathVariable Long id,Authentication auth){
+        Usuario autor=usuario(auth);
+        if(autor.getPapel()!=Papel.PROFESSOR)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        permitidoEditar(id,autor);
+        int apagados=jdbc.update("DELETE FROM comunicados WHERE id=? AND escola_id=? AND autor_id=?",
+            id,escola(autor),autor.getId());
+        if(apagados!=1)throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        auditoria.registrar(escola(autor),autor.getId(),"COMUNICADO_REMOVIDO","COMUNICADO",id);
+        return ResponseEntity.noContent().build();
+    }
+    @Transactional
+    @DeleteMapping("/gestao/avisos/{id}")
+    public ResponseEntity<Void> moderarDirecao(@PathVariable Long id,Authentication auth){
+        Usuario autor=usuario(auth);
+        if(autor.getPapel()!=Papel.DIRECAO||autor.isAdministradorPlataforma())
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        Long escolaId=escola(autor);
+        int apagados=jdbc.update("DELETE FROM comunicados WHERE id=? AND escola_id=?",id,escolaId);
+        if(apagados!=1)throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        auditoria.registrar(escolaId,autor.getId(),"COMUNICADO_REMOVIDO","COMUNICADO",id);
+        return ResponseEntity.noContent().build();
+    }
+
 }
