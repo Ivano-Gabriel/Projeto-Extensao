@@ -5,14 +5,70 @@ import type { Aviso, PublicoAviso, TurmaEscolar } from './api'
 import { apiEscolar } from './api'
 import { Aviso as MensagemStatus, falha, Vazio, type Feedback } from './ComponentesPortal'
 
-export function Mural({avisos}:{avisos:readonly Aviso[]}){
-  if(avisos.length===0)return <Vazio texto="Nenhum comunicado por enquanto."/>
-  return <div className="portal-mural">{avisos.map(a=><article className={a.importante?'mural-card importante':'mural-card'} key={a.id}>
-    <span className="mural-meta">{a.importante?<AlertTriangle size={16}/>:<Bell size={16}/>}
-      {a.importante?'IMPORTANTE':'COMUNICADO'} · {a.turmaId? 'Turma #'+a.turmaId:'Escola'}</span>
-    <h3>{a.titulo}</h3><p>{a.texto}</p>
-    <small>{new Date(a.criadoEm).toLocaleDateString('pt-BR')}</small>
-  </article>)}</div>
+type PermissaoMural={usuarioId?:number;perfil?:'PROFESSOR'|'DIRECAO';atualizado?:()=>Promise<void>}
+export function Mural({avisos,usuarioId,perfil,atualizado}:{avisos:readonly Aviso[]}&PermissaoMural){
+  const [editando,setEditando]=useState<number|null>(null)
+  const [titulo,setTitulo]=useState('')
+  const [texto,setTexto]=useState('')
+  const [importante,setImportante]=useState(false)
+  const [ocupado,setOcupado]=useState(false)
+  const [erro,setErro]=useState('')
+  const iniciar=(aviso:Aviso)=>{
+    setEditando(aviso.id);setTitulo(aviso.titulo);setTexto(aviso.texto)
+    setImportante(aviso.importante);setErro('')
+  }
+  const editar=async(id:number)=>{
+    setOcupado(true);setErro('')
+    try{
+      await apiEscolar.editarAvisoProfessor(id,{titulo,texto,importante})
+      await atualizado?.();setEditando(null)
+    }catch(e){setErro(falha(e))}finally{setOcupado(false)}
+  }
+  const remover=async(a:Aviso)=>{
+    if(!window.confirm('Remover esta publicação da turma?'))return
+    setOcupado(true);setErro('')
+    try{
+      if(perfil==='DIRECAO')await apiEscolar.moderarAvisoDirecao(a.id)
+      else await apiEscolar.removerAvisoProfessor(a.id)
+      await atualizado?.()
+    }catch(e){setErro(falha(e))}finally{setOcupado(false)}
+  }
+  if(avisos.length===0)return <Vazio texto="Nenhuma publicação no feed ainda."/>
+  return <div className="portal-mural" aria-label="Feed de publicações escolares">
+    {erro&&<p className="portal-feedback falha" role="alert">{erro}</p>}
+    {avisos.map(a=>{
+      const podeEditar=perfil==='PROFESSOR'&&a.autorId===usuarioId
+      const podeRemover=perfil==='DIRECAO'||podeEditar
+      return <article className={a.importante?'mural-card importante':'mural-card'} key={a.id}>
+        <span className="mural-meta">{a.importante?<AlertTriangle size={16}/>:<Bell size={16}/>}
+          {a.autorPapel==='PROFESSOR'?'PROFESSOR':a.autorPapel==='DIRECAO'?'DIREÇÃO':'ESCOLA'} ·
+          {' '}{a.autorNome} · {a.turmaId?'Turma #'+a.turmaId:'Escola inteira'}</span>
+        {editando===a.id?<form className="portal-form" onSubmit={e=>{e.preventDefault();void editar(a.id)}}>
+          <label htmlFor={`feed-titulo-${a.id}`}>Título</label>
+          <input id={`feed-titulo-${a.id}`} required maxLength={120} value={titulo}
+            onChange={e=>setTitulo(e.target.value)}/>
+          <label htmlFor={`feed-texto-${a.id}`}>Publicação</label>
+          <textarea id={`feed-texto-${a.id}`} rows={4} required maxLength={1500} value={texto}
+            onChange={e=>setTexto(e.target.value)}/>
+          <label className="portal-check"><input type="checkbox" checked={importante}
+            onChange={e=>setImportante(e.target.checked)}/> Destacar como importante</label>
+          <div className="portal-acoes-rapidas">
+            <button className="botao-principal" type="submit" disabled={ocupado}>Salvar publicação</button>
+            <button className="botao-secundario" type="button" onClick={()=>setEditando(null)}>Cancelar</button>
+          </div>
+        </form>:<>
+          <h3>{a.titulo}</h3><p>{a.texto}</p>
+          <small>{new Date(a.criadoEm).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</small>
+        </>}
+        {podeRemover&&editando!==a.id&&<div className="portal-acoes-rapidas">
+          {podeEditar&&<button type="button" className="botao-secundario" disabled={ocupado}
+            onClick={()=>iniciar(a)}>Editar minha publicação</button>}
+          <button type="button" className="botao-secundario" disabled={ocupado}
+            onClick={()=>void remover(a)}>{perfil==='DIRECAO'?'Moderar publicação':'Remover'}</button>
+        </div>}
+      </article>
+    })}
+  </div>
 }
 export function CriarAviso({turmas,como,enviado,turmaInicial}:{turmas:readonly TurmaEscolar[];como:'DIRECAO'|'PROFESSOR';enviado:()=>Promise<void>;turmaInicial?:number}){
   const [turma,setTurma]=useState(como==='PROFESSOR'?String(turmaInicial||turmas[0]?.id||''):'')
