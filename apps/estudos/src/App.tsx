@@ -4,7 +4,7 @@ import {
   ChevronRight, Clock3, Home, Info, Settings2,
   Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X, School, Moon, Sun, LogOut,
 } from 'lucide-react'
-import { materiais, materias, type Material, type Materia } from './dados/materiais'
+import { materiais, type Material, type Materia } from './dados/materiais'
 import { questoes, type Questao } from './dados/questoes'
 import { alternarRevisado, buscarMateriais, resumoEstudos } from './logica/estudos'
 import { responderQuestao, resumirRespostas } from './logica/revisao'
