@@ -96,13 +96,16 @@ export default function AlunoPainel(){
       {atividades.length===0&&<Vazio texto="Nenhuma atividade publicada ainda."/>}
       <div className="portal-atividades">{atividades.map(a=>{
         const salva=respostas.find(r=>r.atividadeId===a.id)
+        const prazoEncerrado=!!a.prazoEntrega&&a.prazoEntrega<new Date().toISOString().slice(0,10)
         return <article key={a.id} className="portal-atividade">
-          <span className="sobretitulo">{a.disciplina}</span><h3>{a.titulo}</h3><p>{a.pergunta}</p>
+          <span className="sobretitulo">{a.disciplina}</span><h3>{a.titulo}</h3>
+          {a.prazoEntrega&&<p className="portal-aviso-discreto">{prazoEncerrado?'Prazo encerrado':'Prazo até '+new Date(a.prazoEntrega+'T12:00:00').toLocaleDateString('pt-BR')}</p>}
+          <p>{a.pergunta}</p>
           {salva?<div className="portal-resultado" role="status">
             <strong><CheckCircle2 size={17}/> {salva.acertou?'Acertou!':'Revise este conceito'}</strong>
             <p>{salva.explicacao}</p>
             <small>Resposta salva no servidor. Você pode rever esta explicação quando quiser.</small>
-          </div>:<>
+          </div>:prazoEncerrado?<p className="portal-feedback falha" role="status">Prazo encerrado. Não é possível enviar uma nova resposta.</p>:<>
             <div className="portal-alternativas" role="group" aria-label={`Respostas de ${a.titulo}`}>
               {a.opcoes.map((alt,i)=><button type="button" key={i}
                 className={escolhas[a.id]===i?'selecionada':''} aria-pressed={escolhas[a.id]===i}
