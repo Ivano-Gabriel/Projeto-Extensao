@@ -28,6 +28,7 @@ public class AulasController {
         @NotBlank @Size(max=160) String tema) {}
     public record AulaResumo(Long id,Long turmaId,String disciplina,String data,int ordem,String tema) {}
     public record NovaPresenca(@NotNull Long alunoId,@NotNull Boolean presente) {}
+    public record PresencaRegistrada(Long alunoId, boolean presente) {}
     public record MinhaFrequencia(int aulasRegistradas,int registrosDePresenca,int presencas,int faltas) {}
     private final JdbcTemplate jdbc;
     private final UsuarioRepository usuarios;
@@ -111,6 +112,24 @@ public class AulasController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         return ResponseEntity.ok().cacheControl(CacheControl.noStore())
             .body(listarAulas(turmaId,escolaId,user));
+    }
+    @GetMapping("/professor/aulas/{aulaId}/presencas")
+    public ResponseEntity<List<PresencaRegistrada>> presencasRegistradas(
+            @PathVariable Long aulaId,Authentication auth){
+        Usuario professor=atual(auth);
+        long escolaId=escola(professor);
+        if(professor.getPapel()!=Papel.PROFESSOR)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        Integer permitido=jdbc.queryForObject(
+            "SELECT COUNT(*) FROM aulas_registradas a JOIN vinculos_docentes v "+
+            "ON v.turma_id=a.turma_id AND v.disciplina=a.disciplina "+
+            "WHERE a.id=? AND a.escola_id=? AND v.professor_id=?",
+            Integer.class,aulaId,escolaId,professor.getId());
+        if(permitido==0)throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        List<PresencaRegistrada> registros=jdbc.query(
+            "SELECT aluno_id,presente FROM presencas_aula WHERE aula_id=? ORDER BY aluno_id",
+            (rs,i)->new PresencaRegistrada(rs.getLong("aluno_id"),rs.getBoolean("presente")),aulaId);
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(registros);
     }
     @Transactional
     @PostMapping("/professor/aulas/{aulaId}/presencas")
