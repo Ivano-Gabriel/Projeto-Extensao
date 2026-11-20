@@ -720,8 +720,12 @@ html[data-tema="escuro"] .zelo-marca-compacta>span>b{color:#ffd275}
     flex:none;width:16px;height:16px;
   }
   .entrada-login>.entrada-rodape[role="status"]{
-    padding:.35rem .4rem 0;
+    padding:.2rem .4rem 0;
     font-size:.75rem;
+    line-height:1.2;
+  }
+  .entrada-login:has(>.entrada-rodape[role="status"])>.portal-login.prime-login{
+    height:min(745px,calc(100svh - 2.9rem));
   }
   /* Em caso de erro, a mensagem deve poder expandir o formulário. */
   .entrada-login:has(.portal-feedback.falha){
