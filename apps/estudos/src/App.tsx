@@ -670,7 +670,7 @@ export default function App() {
     setUsuario(null)
     setFase('login')
   }
-  if(fase==='verificando')return <main className="entrada-extensao">
+  if(fase==='verificando')return <main className="entrada-extensao entrada-login">
     <div className="entrada-marca"><ZeloMarca variante="compacta"/></div>
     <PortalLogin entrar={entrar}/>
     <p className="entrada-rodape" role="status">Verificando sessão existente. A primeira conexão pode demorar no servidor gratuito.</p>
@@ -690,7 +690,7 @@ export default function App() {
       <Portal key={usuario.id} usuario={usuario} onSair={sair}/>
     </div>
   }
-  return <main className="entrada-extensao">
+  return <main className="entrada-extensao entrada-login">
     <div className="entrada-marca"><ZeloMarca variante="compacta"/></div>
     <PortalLogin entrar={entrar}/>
     <p className="entrada-rodape">Área escolar protegida · Alunos, professores e direção</p>
