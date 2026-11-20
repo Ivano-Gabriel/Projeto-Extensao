@@ -39,11 +39,11 @@ export default function TutorPedagogico(){
   }
   return <section className="ext-surface ext-ia" aria-labelledby="titulo-tutor">
     <h3 id="titulo-tutor"><Bot size={22}/> Entender um conteúdo</h3>
-    <p className="ext-ajuda">Um tutor por IA que explica conceitos passo a passo e propõe uma pergunta para você praticar. Não é um boletim nem substitui seu professor.</p>
+    <p className="ext-ajuda">Quando a escola habilitar a API gratuita GroqCloud, o tutor poderá explicar conceitos passo a passo e propor exercícios. Não é um boletim nem substitui seu professor.</p>
     {carregando?<p className="ext-empty">Carregando disponibilidade do tutor...</p>:<>
       <p className="ext-ia-disponibilidade" role="status">
         {status?.habilitada?'Tutor IA habilitado · '+status.restantesHoje+' perguntas restantes hoje':
-          'Tutor IA ainda não ativado pela escola neste ambiente.'}
+          'Tutor GroqCloud ainda não ativado. O assistente básico gratuito continua disponível na outra aba.'}
       </p>
       <form className="portal-form" onSubmit={e=>void enviar(e)}>
         <label htmlFor="tutor-disciplina">Disciplina e turma</label>
