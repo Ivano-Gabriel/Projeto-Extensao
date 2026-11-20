@@ -16,8 +16,9 @@ public class VinculosController {
     public record Vinculo(Long professorId,String nome,String disciplina) {}
     private final JdbcTemplate jdbc;
     private final UsuarioRepository usuarios;
-    public VinculosController(JdbcTemplate jdbc,UsuarioRepository usuarios){
-        this.jdbc=jdbc;this.usuarios=usuarios;
+    private final AuditoriaService auditoria;
+    public VinculosController(JdbcTemplate jdbc,UsuarioRepository usuarios,AuditoriaService auditoria){
+        this.jdbc=jdbc;this.usuarios=usuarios;this.auditoria=auditoria;
     }
     private Usuario direcao(Authentication auth){
         if(auth==null)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -54,6 +55,9 @@ public class VinculosController {
             "AND disciplina=? AND EXISTS(SELECT 1 FROM usuarios WHERE id=? AND escola_id=?)",
             turmaId,professorId,disciplina,professorId,user.getEscolaId());
         if(removidos==0)throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        jdbc.update("UPDATE horarios_turma SET professor_id=NULL WHERE turma_id=? AND professor_id=? "+
+            "AND disciplina=?",turmaId,professorId,disciplina);
+        auditoria.registrar(user.getEscolaId(),user.getId(),"VINCULO_REMOVIDO","TURMA",turmaId);
         return ResponseEntity.noContent().build();
     }
 }
