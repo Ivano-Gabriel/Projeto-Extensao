@@ -390,8 +390,7 @@ class TurmasEditaveisIntegracaoTest {
             mvc.perform(post("/api/portal/assistente")
                 .with(user("aluno-edit@escola.test").roles("ALUNO")).with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(new tools.jackson.databind.json.JsonMapper().writeValueAsString(
-                    java.util.Map.of("pergunta",pergunta))))
+                .content("{\\"pergunta\\":\\""+pergunta+"\\"}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.tipo").value("ORIENTACAO"))
                 .andExpect(jsonPath("$.resposta").isNotEmpty());
         }
