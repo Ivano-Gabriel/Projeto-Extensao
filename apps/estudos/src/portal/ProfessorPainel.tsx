@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ArrowRight, Bell, BookOpen, CalendarDays, CheckCircle2, ClipboardList, Sparkles, Users } from 'lucide-react'
+import { ArrowRight, Bell, BookOpen, CalendarDays, CheckCircle2, ClipboardList, Download, Sparkles, Users } from 'lucide-react'
 import { apiEscolar } from './api'
 import type { AlunoResumo, AtividadeEscolar, AulaEscolar, Aviso, DesempenhoAluno, QuizGeradoIa, TurmaEscolar } from './api'
 import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
 import { CriarAviso, Mural } from './Avisos'
 import { acoesPorPerfil, opcoesProfessor } from './navegacao'
 import SalaDocente from './SalaDocente'
+import { baixarRelatorio } from './RelatorioCsv'
 import { materiais } from '../dados/materiais'
 import { questoes } from '../dados/questoes'
 
@@ -35,6 +36,8 @@ export default function ProfessorPainel(){
   const [opcoes,setOpcoes]=useState(['','','',''])
   const [correta,setCorreta]=useState(0)
   const [explicacao,setExplicacao]=useState('')
+  const [prazoEntrega,setPrazoEntrega]=useState('')
+  const [exportando,setExportando]=useState(false)
   const [temaCatalogo,setTemaCatalogo]=useState('')
   const [dataAula,setDataAula]=useState(new Date().toLocaleDateString('en-CA'))
   const [ordem,setOrdem]=useState(1)
@@ -79,7 +82,7 @@ export default function ProfessorPainel(){
     try{
       const dados=await apiEscolar.dadosEdicaoAtividade(id)
       setTitulo(dados.titulo);setPergunta(dados.pergunta);setOpcoes(dados.opcoes)
-      setCorreta(dados.correta);setExplicacao(dados.explicacao);setEditandoAtividade(id)
+      setCorreta(dados.correta);setExplicacao(dados.explicacao);setPrazoEntrega(dados.prazoEntrega||'');setEditandoAtividade(id)
       setDisciplina(dados.disciplina);setAba('atividades')
       setMensagem({ok:'Atividade carregada para edição. Questões com respostas registradas não podem ser alteradas.'})
     }catch(e){setMensagem({erro:falha(e)})}
@@ -98,11 +101,11 @@ export default function ProfessorPainel(){
     if(!turma||!disciplina)return
     setEnviando(true);setMensagem({})
     try{
-      const dados={turmaId:turma,disciplina,titulo,pergunta,opcoes,correta,explicacao}
+      const dados={turmaId:turma,disciplina,titulo,pergunta,opcoes,correta,explicacao,prazoEntrega:prazoEntrega||null}
       if(editandoAtividade!==null)await apiEscolar.editarAtividade(editandoAtividade,dados)
       else await apiEscolar.publicar(dados)
       setEditandoAtividade(null)
-      setTitulo('');setPergunta('');setOpcoes(['','','','']);setExplicacao('');setTemaCatalogo('')
+      setTitulo('');setPergunta('');setOpcoes(['','','','']);setExplicacao('');setPrazoEntrega('');setTemaCatalogo('')
       const a=await apiEscolar.atividades();setAtividades(a)
       setMensagem({ok:'Atividade salva. A edição só é permitida antes de receber respostas.'})
     }catch(e){setMensagem({erro:falha(e)})}
@@ -112,7 +115,7 @@ export default function ProfessorPainel(){
     setEditandoAtividade(null)
     setTitulo(quiz.titulo);setPergunta(quiz.pergunta)
     setOpcoes([...quiz.opcoes]);setCorreta(quiz.correta)
-    setExplicacao(quiz.explicacao);setTemaCatalogo('')
+    setExplicacao(quiz.explicacao);setPrazoEntrega('');setTemaCatalogo('')
     setAba('atividades')
     setMensagem({ok:'Rascunho da IA carregado. Revise pergunta, alternativas, gabarito e explicação antes de publicar.'})
     window.scrollTo({top:0,behavior:'smooth'})
@@ -222,18 +225,22 @@ export default function ProfessorPainel(){
           <select id="ativ-correta" value={correta} onChange={e=>setCorreta(Number(e.target.value))}>
             {[0,1,2,3].map(i=><option key={i} value={i}>{String.fromCharCode(65+i)}</option>)}
           </select>
+          <label htmlFor="ativ-prazo">Prazo de entrega (opcional)</label>
+          <input id="ativ-prazo" type="date" value={prazoEntrega}
+            onChange={e=>setPrazoEntrega(e.target.value)}/>
+          <small>Após a data escolhida, novas respostas serão bloqueadas pelo servidor. Deixe vazio para não definir prazo.</small>
           <label htmlFor="ativ-explicacao">Explicação</label>
           <textarea id="ativ-explicacao" required maxLength={1000} rows={3} value={explicacao}
             onChange={e=>setExplicacao(e.target.value)}/>
           <button type="submit" className="botao-principal" disabled={!disciplina||enviando}>
             <ClipboardList size={18}/>{enviando?'Salvando...':editandoAtividade===null?'Publicar atividade':'Salvar alterações'}</button>
           {editandoAtividade!==null&&<button className="botao-secundario" type="button"
-            onClick={()=>{setEditandoAtividade(null);setTitulo('');setPergunta('');setOpcoes(['','','','']);setExplicacao('')}}>Cancelar edição</button>}
+            onClick={()=>{setEditandoAtividade(null);setTitulo('');setPergunta('');setOpcoes(['','','','']);setExplicacao('');setPrazoEntrega('')}}>Cancelar edição</button>}
         </form>
       </Cartao>
       <Cartao titulo="Atividades publicadas no banco">
         {atividadesDaTurma.length?atividadesDaTurma.map(a=><div className="portal-linha" key={a.id}>
-          <strong>{a.titulo}</strong><small>{a.disciplina} · {selecionada?.codigo}</small>
+          <strong>{a.titulo}</strong><small>{a.disciplina} · {selecionada?.codigo}{a.prazoEntrega?' · Entrega até '+new Date(a.prazoEntrega+'T12:00:00').toLocaleDateString('pt-BR'):''}</small>
           <div className="ext-acoes">
             <button type="button" className="botao-secundario" onClick={()=>void prepararEdicao(a.id)}>Editar</button>
             <button type="button" className="botao-secundario" onClick={()=>void apagarAtividade(a.id)}>Excluir</button>
@@ -250,6 +257,11 @@ export default function ProfessorPainel(){
     </>}
     {!carregando&&aba==='resultados'&&<Cartao titulo="Progresso da turma">
       <p>Desempenho em atividades, não notas oficiais.</p>
+      <button type="button" className="botao-secundario" disabled={!turma||exportando}
+        onClick={()=>{setExportando(true);void baixarRelatorio(turma)
+          .catch(e=>setMensagem({erro:falha(e)})).finally(()=>setExportando(false))}}>
+        <Download size={18}/>{exportando?'Exportando...':'Exportar desempenho CSV'}
+      </button>
       {desempenho.length===0?<Vazio texto="Ainda sem alunos na turma."/>:
         <div className="portal-tabela"><table>
           <thead><tr><th>Aluno</th><th>Feitas</th><th>Acertos</th></tr></thead>
