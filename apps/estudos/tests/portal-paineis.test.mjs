@@ -9,7 +9,7 @@ function resp(valor,status=200){
 }
 test('professor e direção têm navegacao propria; aluno nao enxerga gestao',()=>{
   assert.deepEqual(acoesPorPerfil('PROFESSOR').map(x=>x.id),['inicio','turmas','atividades','materiais','mural','resultados','presenca'])
-  assert.deepEqual(acoesPorPerfil('DIRECAO').map(x=>x.id),['inicio','turmas','pessoas','vinculos','avisos'])
+  assert.deepEqual(acoesPorPerfil('DIRECAO').map(x=>x.id),['inicio','turmas','pessoas','vinculos','auditoria','avisos'])
   assert.deepEqual(acoesPorPerfil('ALUNO').map(x=>x.id),['inicio','atividades','materiais','avisos','assistente','progresso'])
 })
 test('disciplina do professor depende de vinculo devolvido pela API',()=>{
