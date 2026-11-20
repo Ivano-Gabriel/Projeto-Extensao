@@ -21,6 +21,6 @@ test('direcao tem painel orientado a acompanhamento e pode moderar somente sua e
   const dir=ler('src/portal/DirecaoPainel.tsx')
   const api=ler('src/portal/api.ts')
   assert.match(dir,/Acompanhamento da escola/)
-  assert.match(dir,/moderarAvisoDirecao/)
+  assert.match(ler('src/portal/Avisos.tsx'),/moderarAvisoDirecao/)
   assert.match(api,/\/api\/gestao\/avisos/)
 })
