@@ -246,6 +246,7 @@ class ComunicacaoEAprendizagemIntegracaoTest {
         mvc.perform(get("/api/portal/minha-frequencia")
             .with(user("aluno-b@escola.test").roles("ALUNO")))
             .andExpect(jsonPath("$.aulasRegistradas").value(0));
+    }
     @Test void professorReabreChamadaSalvaSemExporDadosDeOutrosPerfis()throws Exception{
         String aulaJson="""
             {"turmaId":%d,"disciplina":"MATEMATICA","data":"2026-11-20","ordem":2,"tema":"Aula de teste"}
