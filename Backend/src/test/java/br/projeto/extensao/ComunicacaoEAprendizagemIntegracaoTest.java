@@ -250,4 +250,53 @@ class ComunicacaoEAprendizagemIntegracaoTest {
             CsvSeguro.celula("Nome com aspas \"A\""));
     }
 
+
+    @Test void feedExibeAutorECargoSemExporEmailECriadoEmOrdemRecente()throws Exception{
+        mvc.perform(post("/api/professor/avisos").with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(comunicado(turmaA,"ALUNOS")))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.autorNome").value("prof-a@escola.test"))
+            .andExpect(jsonPath("$.autorPapel").value("PROFESSOR"))
+            .andExpect(jsonPath("$.autorEmail").doesNotExist());
+        mvc.perform(get("/api/portal/avisos").with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].autorPapel").value("PROFESSOR"));
+    }
+    @Test void professorEditaSuaPublicacaoNaoAsDeOutrosEAlunoNaoPodeEditar()throws Exception{
+        mvc.perform(post("/api/professor/avisos").with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(comunicado(turmaA,"ALUNOS")))
+            .andExpect(status().isCreated());
+        long aviso=jdbc.queryForObject("SELECT id FROM comunicados",Long.class);
+        String rota="/api/professor/avisos/"+aviso;
+        String novo="{\"titulo\":\"Revisao do professor\",\"texto\":\"Preparem um resumo de matematica.\",\"importante\":false}";
+        mvc.perform(put(rota).with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .contentType(MediaType.APPLICATION_JSON).content(novo)).andExpect(status().isForbidden());
+        mvc.perform(put(rota).with(user("aluno-a@escola.test").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(novo)).andExpect(status().isForbidden());
+        mvc.perform(put(rota).with(user("prof-b@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(novo)).andExpect(status().isNotFound());
+        mvc.perform(put(rota).with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(novo))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.titulo").value("Revisao do professor"));
+        mvc.perform(get("/api/portal/avisos").with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(jsonPath("$[0].titulo").value("Revisao do professor"));
+    }
+    @Test void somenteAutorOuDirecaoDaEscolaRemovePostEHaAuditoria()throws Exception{
+        mvc.perform(post("/api/professor/avisos").with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(comunicado(turmaA,"ALUNOS")))
+            .andExpect(status().isCreated());
+        long aviso=jdbc.queryForObject("SELECT id FROM comunicados",Long.class);
+        mvc.perform(delete("/api/professor/avisos/"+aviso)
+            .with(user("prof-b@escola.test").roles("PROFESSOR")).with(csrf()))
+            .andExpect(status().isNotFound());
+        mvc.perform(delete("/api/gestao/avisos/"+aviso)
+            .with(user("dir-b@escola.test").roles("DIRECAO")).with(csrf()))
+            .andExpect(status().isNotFound());
+        mvc.perform(delete("/api/gestao/avisos/"+aviso)
+            .with(user("dir-a@escola.test").roles("DIRECAO")).with(csrf()))
+            .andExpect(status().isNoContent());
+        mvc.perform(get("/api/portal/avisos").with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(jsonPath("$").isEmpty());
+        mvc.perform(get("/api/gestao/auditoria").with(user("dir-a@escola.test").roles("DIRECAO")))
+            .andExpect(jsonPath("$[0].acao").value("COMUNICADO_REMOVIDO"));
+    }
+
 }
