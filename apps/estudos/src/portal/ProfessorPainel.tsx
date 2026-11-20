@@ -16,7 +16,7 @@ const assuntoDe=(materia:string)=>({
   'Física':'FISICA','História':'HISTORIA'
 } as Record<string,string>)[materia]
 
-export default function ProfessorPainel(){
+export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
   const [aba,setAba]=useState('inicio')
   const [turmas,setTurmas]=useState<TurmaEscolar[]>([])
   const [turma,setTurma]=useState(0)
@@ -139,6 +139,9 @@ export default function ProfessorPainel(){
   }
   const selecionada=turmas.find(t=>t.id===turma)
   const atividadesDaTurma=atividades.filter(a=>a.turmaId===turma)
+  const avisosDaTurma=avisos.filter(a=>a.turmaId===turma||a.turmaId===null)
+  const respondidasDaTurma=desempenho.reduce((total,a)=>total+a.respondidas,0)
+  const recarregarFeed=async()=>setAvisos(await apiEscolar.avisos())
   const temas=materiais.filter(m=>assuntoDe(m.materia)===disciplina)
   return <div className="portal-paineis portal-mobile">
     <Abas abas={acoesPorPerfil('PROFESSOR')} atual={aba} mudar={setAba}/>
@@ -169,7 +172,23 @@ export default function ProfessorPainel(){
             <Bell size={18}/> Avisar turma</button>
         </div>
       </Cartao>
-      <Cartao titulo="Últimos comunicados"><Mural avisos={avisos.slice(0,3)}/></Cartao>
+      <Cartao titulo="Feed de turma · publicações recentes">
+        <p>Seu perfil docente publica orientações e conteúdos somente nas turmas vinculadas.
+          Os alunos veem o mesmo feed na conta deles.</p>
+        <Mural avisos={avisosDaTurma.slice(0,4)} usuarioId={usuarioId}
+          perfil="PROFESSOR" atualizado={recarregarFeed}/>
+        <button type="button" className="botao-secundario" onClick={()=>setAba('mural')}>
+          <Bell size={18}/> Escrever no feed da turma
+        </button>
+      </Cartao>
+      <Cartao titulo="Acompanhar aprendizagem">
+        <p>Na turma {selecionada?.codigo||'não definida'}, há {atividadesDaTurma.length} atividades
+          publicadas e {respondidasDaTurma} respostas registradas em quizzes.</p>
+        <div className="portal-acoes-rapidas">
+          <button type="button" className="botao-secundario" onClick={()=>setAba('resultados')}>Ver desempenho dos quizzes</button>
+          <button type="button" className="botao-secundario" onClick={()=>setAba('presenca')}>Registrar aula provisória</button>
+        </div>
+      </Cartao>
     </>}
     {!carregando&&aba==='turmas'&&<>
       <Cartao titulo="Minhas turmas">
@@ -253,7 +272,10 @@ export default function ProfessorPainel(){
       <Cartao titulo="Postar aviso">
         <CriarAviso key={turma} turmaInicial={turma} turmas={turmas} como="PROFESSOR" enviado={async()=>setAvisos(await apiEscolar.avisos())}/>
       </Cartao>
-      <Cartao titulo="Mural"><Mural avisos={avisos}/></Cartao>
+      <Cartao titulo="Feed de turma">
+        <p>Publicações reais com autor e data; você pode editar ou remover apenas suas próprias publicações.</p>
+        <Mural avisos={avisosDaTurma} usuarioId={usuarioId} perfil="PROFESSOR" atualizado={recarregarFeed}/>
+      </Cartao>
     </>}
     {!carregando&&aba==='resultados'&&<Cartao titulo="Progresso da turma">
       <p>Desempenho em atividades, não notas oficiais.</p>
