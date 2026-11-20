@@ -24,6 +24,7 @@ const abas={
     {id:'turmas',titulo:'Turmas',icone:'users'},
     {id:'pessoas',titulo:'Pessoas',icone:'user'},
     {id:'vinculos',titulo:'Vínculos',icone:'link'},
+    {id:'auditoria',titulo:'Histórico',icone:'shield'},
     {id:'avisos',titulo:'Comunicados',icone:'bell'},
   ]
 } as const satisfies Record<PapelEscolar,readonly AbaPortal[]>
