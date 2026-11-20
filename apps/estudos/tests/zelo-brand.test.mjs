@@ -6,10 +6,11 @@ const read=(file)=>readFileSync(new URL('../'+file,import.meta.url),'utf8')
 const app=read('src/App.tsx')
 const login=read('src/portal/PortalLogin.tsx')
 const portal=read('src/portal/Portal.tsx')
-const index=read('../index.html')
+const index=read('index.html')
 const manifest=JSON.parse(read('public/manifest.webmanifest'))
 const worker=read('public/sw.js')
 const brand=read('src/marca/ZeloMarca.tsx')
+const icon=readFileSync(new URL('../public/zelo-icon-192.png',import.meta.url))
 
 test('zELO+ identifica login, cabecalho escolar e portal sem remover o aviso de demo',()=>{
   assert.match(login,/zELO\+/)
@@ -40,9 +41,9 @@ test('logo responsiva preserva nome acessivel e arquivo grafico da marca',()=>{
 })
 
 test('relatorios e roteiros distinguem dados reais, demo e requisitos pendentes',()=>{
-  const relatorio=read('../docs/TRABALHO-ACADEMICO-ZELO.md')
-  const homologacao=read('../docs/HOMOLOGACAO-ZELO.md')
-  const plano=read('../docs/PLANO-INSTITUCIONAL-ZELO.md')
+  const relatorio=read('../../docs/TRABALHO-ACADEMICO-ZELO.md')
+  const homologacao=read('../../docs/HOMOLOGACAO-ZELO.md')
+  const plano=read('../../docs/PLANO-INSTITUCIONAL-ZELO.md')
   for(const word of ['Objetivos','Metodologia','Arquitetura','Resultados','Limitações'])
     assert.ok(relatorio.includes(word),'Falta seção: '+word)
   for(const word of ['Direção','Professor','Aluno','CSRF','matrícula','evidência'])
