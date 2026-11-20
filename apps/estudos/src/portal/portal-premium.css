@@ -111,3 +111,13 @@
 .ext-aviso-atividade-real strong svg{flex:none;color:#2765a6}
 .ext-aviso-atividade-real p{margin:0;font-size:.95rem;max-width:86ch}
 @media(max-width:560px){.ext-matriculas-grid{grid-template-columns:1fr}.ext-aviso-atividade-real p{font-size:.92rem}}
+
+/* Segurança e auditoria institucional — responsivo */
+.portal-hero .portal-acesso{flex-wrap:wrap;gap:.45rem}
+.ext-seguranca-conta{margin:1rem auto;max-width:700px}
+.ext-seguranca-conta h2,.ext-auditoria-lista h2{display:flex;align-items:center;gap:.5rem}
+.ext-seguranca-conta .portal-form{max-width:560px}
+.ext-auditoria-lista{display:grid;gap:.5rem;list-style:decimal;max-height:400px;overflow-y:auto;padding-left:1.4rem}
+.ext-auditoria-lista li{padding:.6rem .25rem;border-bottom:1px solid var(--line);font-size:.94rem;overflow-wrap:anywhere}
+.ext-auditoria-lista li span{color:var(--muted)}
+.ext-auditoria-lista li small{display:block;color:var(--muted);margin-top:.25rem}
