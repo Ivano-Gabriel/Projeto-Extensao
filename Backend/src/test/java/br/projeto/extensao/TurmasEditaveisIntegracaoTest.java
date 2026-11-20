@@ -380,4 +380,25 @@ class TurmasEditaveisIntegracaoTest {
             .andExpect(jsonPath("$[0].acertou").value(true));
     }
 
+
+    @Test
+    void assistenteExplicaMateriasBasicasGratuitamenteSemApiExterna() throws Exception {
+        for(String pergunta:new String[]{
+            "O que é fotossíntese?","Como calcular porcentagem?",
+            "O que foi a Revolução Francesa?","Qual a diferença entre DNA e RNA?"
+        }){
+            mvc.perform(post("/api/portal/assistente")
+                .with(user("aluno-edit@escola.test").roles("ALUNO")).with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new tools.jackson.databind.json.JsonMapper().writeValueAsString(
+                    java.util.Map.of("pergunta",pergunta))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.tipo").value("ORIENTACAO"))
+                .andExpect(jsonPath("$.resposta").isNotEmpty());
+        }
+        mvc.perform(post("/api/portal/assistente")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content("{\"pergunta\":\"fotossintese\"}"))
+            .andExpect(status().isForbidden());
+    }
+
 }
