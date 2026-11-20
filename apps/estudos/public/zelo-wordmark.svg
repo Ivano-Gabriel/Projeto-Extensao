@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 190" role="img" aria-labelledby="zelo-marca-titulo">
+<title id="zelo-marca-titulo">zELO+</title>
+<defs>
+  <linearGradient id="ouro" x1="0" y1="0" x2="0.8" y2="1"><stop stop-color="#fff0a9"/><stop offset=".55" stop-color="#f7c945"/><stop offset="1" stop-color="#d99916"/></linearGradient>
+  <linearGradient id="azul" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#174b89"/><stop offset="1" stop-color="#0a214a"/></linearGradient>
+</defs>
+<g transform="translate(9,17)">
+  <path d="M6 100Q42 73 79 98Q115 73 155 100L147 139Q117 127 79 151Q42 127 11 139Z" fill="url(#ouro)" stroke="#0b2555" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M18 103Q51 89 79 116Q106 89 143 103L137 129Q104 119 79 145Q53 119 22 129Z" fill="#fffdf0" stroke="#0d2f64" stroke-width="5"/>
+  <path d="M79 114V145" stroke="#0d2f64" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="79" cy="57" r="12" fill="#fffdf2" stroke="#0b2555" stroke-width="4"/>
+  <path d="M48 73Q78 106 110 73" stroke="#fffdf2" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <circle cx="42" cy="80" r="9" fill="url(#ouro)"/><path d="M23 94Q42 113 59 93" stroke="#f7c945" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <circle cx="119" cy="80" r="9" fill="url(#ouro)"/><path d="M101 93Q120 112 138 92" stroke="#f7c945" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M45 47L79 33L115 47L79 61Z" fill="url(#ouro)" stroke="#0b2555" stroke-width="4"/><path d="M105 51V67" stroke="#0b2555" stroke-width="3"/>
+  <path d="M13 153Q94 171 157 109" stroke="url(#ouro)" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M139 38h12M145 32v12" stroke="#ecb937" stroke-width="8" stroke-linecap="round"/>
+</g>
+<text x="182" y="129" font-family="'Arial Rounded MT Bold','Trebuchet MS',Arial,sans-serif" font-size="113" font-style="italic" font-weight="900" letter-spacing="-6" fill="#fffdf3" stroke="#0b2555" stroke-width="9" stroke-linejoin="round" paint-order="stroke">zELO</text>
+<text x="518" y="123" font-family="'Arial Rounded MT Bold','Trebuchet MS',Arial,sans-serif" font-size="109" font-weight="900" fill="url(#ouro)" stroke="#0b2555" stroke-width="8" stroke-linejoin="round" paint-order="stroke">+</text>
+<path d="M198 151Q383 171 550 145" fill="none" stroke="url(#ouro)" stroke-width="8" stroke-linecap="round"/>
+</svg>
