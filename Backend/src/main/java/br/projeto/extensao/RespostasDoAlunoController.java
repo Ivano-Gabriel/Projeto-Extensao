@@ -29,7 +29,6 @@ public class RespostasDoAlunoController {
             "SELECT a.id AS atividade_id,r.opcao,q.correta,q.explicacao FROM respostas_atividade r "+
             "JOIN questoes_atividade q ON q.id=r.questao_id "+
             "JOIN atividades a ON a.id=q.atividade_id "+
-            "JOIN matriculas m ON m.turma_id=a.turma_id AND m.aluno_id=r.aluno_id "+
             "WHERE r.aluno_id=? AND a.escola_id=? "+
             "ORDER BY r.respondido_em DESC,a.id DESC LIMIT 200",
             (rs,i)->new RespostaSalva(rs.getLong("atividade_id"),rs.getInt("opcao"),
