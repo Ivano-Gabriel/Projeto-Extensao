@@ -61,6 +61,10 @@ public class Usuario {
     public String getNome() { return nome; }
     public String getEmail() { return email; }
     public String getSenhaHash() { return senhaHash; }
+    public void atualizarSenhaHash(String senhaHash) {
+        if(senhaHash==null||senhaHash.isBlank())throw new IllegalArgumentException("Senha invalida.");
+        this.senhaHash=senhaHash;
+    }
     public Papel getPapel() { return papel; }
     public String getUltimaAba() { return ultimaAba; }
     public String getUltimoDia() { return ultimoDia; }
