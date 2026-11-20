@@ -45,8 +45,8 @@ export default function Portal({usuario,onSair,voltar}:Props){
     </header>
     {erro&&<p role="alert" className="portal-feedback falha">{erro}</p>}
     {seguranca&&<SegurancaConta/>}
-    {area==='ADMIN'?<AdminPainel/>:area==='DIRECAO'?<DirecaoPainel/>:
-      area==='PROFESSOR'?<ProfessorPainel/>:<AlunoPainel/>}
+    {area==='ADMIN'?<AdminPainel/>:area==='DIRECAO'?<DirecaoPainel usuarioId={usuario.id}/>:
+      area==='PROFESSOR'?<ProfessorPainel usuarioId={usuario.id}/>:<AlunoPainel/>}
     <footer className="portal-rodape"><GraduationCap size={16}/>
       Homologação · registros persistidos de teste, não dados oficiais da escola
     </footer>
