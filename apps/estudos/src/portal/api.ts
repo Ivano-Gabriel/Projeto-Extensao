@@ -30,6 +30,7 @@ export type AtividadeFormulario = {turmaId:number;disciplina:string;titulo:strin
 export type PublicoAviso = 'TODOS'|'ALUNOS'|'FUNCIONARIOS'
 export type Aviso = {id:number;turmaId:number|null;publico:PublicoAviso;titulo:string;texto:string;importante:boolean;criadoEm:string}
 export type Vinculo = {professorId:number;nome:string;disciplina:string}
+export type EventoAuditoria = {id:number;escolaId:number;atorId:number;acao:string;entidade:string;entidadeId:number;data:string}
 export type DesempenhoAluno = {alunoId:number;alunoNome:string;atividades:number;respondidas:number;acertos:number}
 export type MeuDesempenho = {atividades:number;respondidas:number;acertos:number}
 export type RespostaSalva = {atividadeId:number;opcao:number;acertou:boolean;explicacao:string}
@@ -113,6 +114,9 @@ export const apiEscolar={
     requisitar<RespostaIa>('POST','/api/professor/ia/rascunho',body),
   login:(email:string,senha:string)=>requisitar<UsuarioEscolar>('POST','/api/login',{email,senha}),
   logout:()=>requisitar<void>('POST','/api/logout'),
+  trocarSenha:(senhaAtual:string,novaSenha:string)=>
+    requisitar<void>('POST','/api/me/senha',{senhaAtual,novaSenha}),
+  auditoria:()=>requisitar<EventoAuditoria[]>('GET','/api/gestao/auditoria'),
   turmas:()=>requisitar<TurmaEscolar[]>('GET','/api/portal/turmas'),
   atividades:()=>requisitar<AtividadeEscolar[]>('GET','/api/portal/atividades'),
   criarTurma:(body:{codigo:string;nome:string;anoLetivo:number})=>

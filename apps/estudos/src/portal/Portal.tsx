@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { ArrowLeft, GraduationCap, LogOut, School, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, GraduationCap, KeyRound, LogOut, School, ShieldCheck } from 'lucide-react'
 import type { UsuarioEscolar } from './api'
 import { areaDoUsuario } from './perfis'
 import ZeloMarca from '../marca/ZeloMarca'
+import SegurancaConta from './SegurancaConta'
 import AlunoPainel from './AlunoPainel'
 import ProfessorPainel from './ProfessorPainel'
 import DirecaoPainel from './DirecaoPainel'
@@ -16,6 +17,7 @@ type Props={usuario:UsuarioEscolar;onSair:()=>Promise<void>;voltar?:()=>void}
 export default function Portal({usuario,onSair,voltar}:Props){
   const [erro,setErro]=useState('')
   const [saindo,setSaindo]=useState(false)
+  const [seguranca,setSeguranca]=useState(false)
   const area=areaDoUsuario(usuario)
   const papel=area==='ADMIN'?'ADMINISTRADOR':area==='DIRECAO'?'DIREÇÃO':
     area==='PROFESSOR'?'PROFESSOR':'ALUNO'
@@ -33,12 +35,16 @@ export default function Portal({usuario,onSair,voltar}:Props){
       <h1>Olá, {usuario.nome.split(' ')[0]}!</h1>
       <div className="portal-acesso">
         <span><ShieldCheck size={17}/>{papel}</span>
+        <button type="button" aria-expanded={seguranca} onClick={()=>setSeguranca(x=>!x)}>
+          <KeyRound size={17}/>{seguranca?'Fechar segurança':'Minha segurança'}
+        </button>
         <button type="button" onClick={()=>void sair()} disabled={saindo}>
           <LogOut size={17}/>{saindo?'Saindo...':'Sair'}
         </button>
       </div>
     </header>
     {erro&&<p role="alert" className="portal-feedback falha">{erro}</p>}
+    {seguranca&&<SegurancaConta/>}
     {area==='ADMIN'?<AdminPainel/>:area==='DIRECAO'?<DirecaoPainel/>:
       area==='PROFESSOR'?<ProfessorPainel/>:<AlunoPainel/>}
     <footer className="portal-rodape"><GraduationCap size={16}/>

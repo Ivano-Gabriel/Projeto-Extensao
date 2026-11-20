@@ -14,6 +14,8 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -33,6 +35,8 @@ public class AuthController {
     public record LoginRequest(
         @NotBlank @Email @Size(max = 254) String email,
         @NotBlank @Size(min = 1, max = 200) String senha) {}
+    public record TrocaSenha(@NotBlank String senhaAtual,
+        @NotBlank @Size(min=12,max=200) String novaSenha) {}
     public record EstadoRequest(@NotBlank String aba, @NotBlank String dia) {}
     public record EstadoResposta(String aba, String dia) {}
     public record MeResposta(Long id, String nome, String email, Papel papel,
@@ -53,14 +57,18 @@ public class AuthController {
     private final SecurityContextRepository contexto;
     private final CsrfTokenRepository csrf;
     private final LoginRateLimiter limite;
+    private final PasswordEncoder encoder;
+    private final JdbcTemplate jdbc;
 
     public AuthController(UsuarioRepository usuarios, AuthenticationManager manager, SecurityContextRepository contexto,
-                          CsrfTokenRepository csrf, LoginRateLimiter limite) {
+                          CsrfTokenRepository csrf, LoginRateLimiter limite, PasswordEncoder encoder, JdbcTemplate jdbc) {
         this.usuarios = usuarios;
         this.manager = manager;
         this.contexto = contexto;
         this.csrf = csrf;
         this.limite = limite;
+        this.encoder = encoder;
+        this.jdbc = jdbc;
     }
 
     @GetMapping("/csrf")
@@ -113,6 +121,23 @@ public class AuthController {
         Usuario usuario = usuarioAutenticado(autenticacao);
         usuario.salvarEstado(estado.aba(), estado.dia());
         return ResponseEntity.noContent().build();
+    }
+
+    @Transactional
+    @PostMapping("/me/senha")
+    public ResponseEntity<Void> trocarSenha(@Valid @RequestBody TrocaSenha dados,
+            Authentication autenticacao,HttpServletRequest request,HttpServletResponse response) {
+        Usuario usuario=usuarioAutenticado(autenticacao);
+        if(!encoder.matches(dados.senhaAtual(),usuario.getSenhaHash()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Credenciais invalidas.");
+        if(dados.novaSenha().equals(dados.senhaAtual()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Escolha uma nova senha diferente.");
+        usuario.atualizarSenhaHash(encoder.encode(dados.novaSenha()));
+        usuarios.saveAndFlush(usuario);
+        jdbc.update("DELETE FROM SPRING_SESSION WHERE PRINCIPAL_NAME=?",usuario.getEmail());
+        new SecurityContextLogoutHandler().logout(request,response,autenticacao);
+        csrf.saveToken(null,request,response);
+        return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
     }
 
     @PostMapping("/logout")

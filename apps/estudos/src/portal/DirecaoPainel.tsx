@@ -7,6 +7,7 @@ import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedbac
 import { CriarAviso, Mural } from './Avisos'
 import { acoesPorPerfil } from './navegacao'
 import GestaoTurma from './GestaoTurma'
+import AuditoriaEscola from './AuditoriaEscola'
 
 const disciplinas=['MATEMATICA','PORTUGUES','FISICA','HISTORIA','BIOLOGIA','QUIMICA','GEOGRAFIA','INGLES','SOCIOLOGIA','FILOSOFIA']
 export default function DirecaoPainel(){
@@ -244,6 +245,7 @@ export default function DirecaoPainel(){
         <p className="portal-aviso-discreto">Vínculos repetidos não são duplicados. Use Remover para corrigir uma atribuição.</p>
       </Cartao>
     </>}
+    {!carregando&&aba==='auditoria'&&<AuditoriaEscola/>}
     {!carregando&&aba==='avisos'&&<>
       <Cartao titulo="Novo comunicado">
         <CriarAviso turmas={turmas} como="DIRECAO" enviado={async()=>setAvisos(await apiEscolar.avisos())}/>
