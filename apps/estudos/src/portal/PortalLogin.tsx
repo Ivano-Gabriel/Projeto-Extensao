@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { BookOpenCheck, Eye, EyeOff, GraduationCap, LockKeyhole, ShieldCheck, Users } from 'lucide-react'
+import { Atom, BookOpenCheck, BookText, Brain, Code2, Eye, EyeOff, FlaskConical, Globe2, GraduationCap, Landmark, LockKeyhole, ShieldCheck, Sigma, Users } from 'lucide-react'
 import { apiEscolar } from './api'
 import type { UsuarioEscolar } from './api'
 import './portal.css'
@@ -35,13 +35,67 @@ export default function PortalLogin({entrar}:Props){
     <div className="prime-login-cena" aria-hidden="true">
       <div className="prime-login-arte">
         <div className="prime-book-spread">
-          <div className="prime-book-cover prime-book-left"/>
-          <div className="prime-book-cover prime-book-right"/>
-          <div className="prime-book-page prime-book-page-one"/>
-          <div className="prime-book-page prime-book-page-two"/>
-          <div className="prime-book-page prime-book-page-three"/>
+          <div className="prime-book-cover prime-book-left">
+            <span className="prime-book-caption">MEU CADERNO</span>
+            <BookOpenCheck size={32}/>
+            <strong>Descobertas</strong>
+            <small>Aprender transforma.</small>
+          </div>
+          <div className="prime-book-cover prime-book-right">
+            <span className="prime-book-caption">SEU FUTURO</span>
+            <GraduationCap size={35}/>
+            <strong>Vamos além!</strong>
+            <small>Um passo por dia.</small>
+          </div>
+          <div className="prime-book-page prime-book-page-four">
+            <span className="prime-book-page-face prime-book-page-front">
+              <span className="prime-book-caption">FILOSOFIA</span>
+              <Brain size={26}/><strong>Por quê?</strong><small>Ideias mudam tudo.</small>
+              <span className="prime-book-page-index">07</span>
+            </span>
+            <span className="prime-book-page-face prime-book-page-back">
+              <span className="prime-book-caption">TECNOLOGIA</span>
+              <Code2 size={27}/><strong>{'</>'}</strong><small>Criar o amanhã.</small>
+              <span className="prime-book-page-index">08</span>
+            </span>
+          </div>
+          <div className="prime-book-page prime-book-page-three">
+            <span className="prime-book-page-face prime-book-page-front">
+              <span className="prime-book-caption">PORTUGUÊS</span>
+              <BookText size={25}/><strong>Ler</strong><small>Abre mil mundos.</small>
+              <span className="prime-book-page-index">05</span>
+            </span>
+            <span className="prime-book-page-face prime-book-page-back">
+              <span className="prime-book-caption">QUÍMICA</span>
+              <FlaskConical size={25}/><strong>H₂O</strong><small>Água da vida.</small>
+              <span className="prime-book-page-index">06</span>
+            </span>
+          </div>
+          <div className="prime-book-page prime-book-page-two">
+            <span className="prime-book-page-face prime-book-page-front">
+              <span className="prime-book-caption">HISTÓRIA</span>
+              <Landmark size={25}/><strong>1822</strong><small>Conhecer o passado.</small>
+              <span className="prime-book-page-index">03</span>
+            </span>
+            <span className="prime-book-page-face prime-book-page-back">
+              <span className="prime-book-caption">GEOGRAFIA</span>
+              <Globe2 size={25}/><strong>Nosso mundo</strong><small>Explore o planeta.</small>
+              <span className="prime-book-page-index">04</span>
+            </span>
+          </div>
+          <div className="prime-book-page prime-book-page-one">
+            <span className="prime-book-page-face prime-book-page-front">
+              <span className="prime-book-caption">MATEMÁTICA</span>
+              <Sigma size={25}/><strong>Δ = b² − 4ac</strong><small>Descubra as raízes.</small>
+              <span className="prime-book-page-index">01</span>
+            </span>
+            <span className="prime-book-page-face prime-book-page-back">
+              <span className="prime-book-caption">CIÊNCIAS</span>
+              <Atom size={25}/><strong>E = mc²</strong><small>Conheça o universo.</small>
+              <span className="prime-book-page-index">02</span>
+            </span>
+          </div>
           <div className="prime-book-spine"/>
-          <div className="prime-book-emblem"><BookOpenCheck size={37}/></div>
         </div>
         <span className="prime-book-spark prime-book-spark-left">✦</span>
         <span className="prime-book-spark prime-book-spark-right">✦</span>
