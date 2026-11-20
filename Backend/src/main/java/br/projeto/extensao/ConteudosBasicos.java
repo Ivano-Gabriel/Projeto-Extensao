@@ -1,12 +1,31 @@
 package br.projeto.extensao;
 
+import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class ConteudosBasicos {
+    private static final Pattern CALCULO_PERCENTUAL=Pattern.compile(
+        "(?<![\\d.,])([0-9]{1,6}(?:[.,][0-9]{1,2})?)\\s*%\\s+de\\s+([0-9]{1,9}(?:[.,][0-9]{1,2})?)(?![\\d.,%])");
+
     private ConteudosBasicos() {}
+
+    private static String exibir(BigDecimal numero) {
+        return numero.stripTrailingZeros().toPlainString().replace('.', ',');
+    }
 
     public static Optional<String> responder(String pergunta) {
         String texto=pergunta==null?"":pergunta;
+        Matcher calculo=CALCULO_PERCENTUAL.matcher(texto);
+        if(calculo.find()){
+            BigDecimal taxa=new BigDecimal(calculo.group(1).replace(',', '.'));
+            BigDecimal base=new BigDecimal(calculo.group(2).replace(',', '.'));
+            BigDecimal resultado=taxa.multiply(base).movePointLeft(2);
+            return Optional.of(exibir(taxa)+"% de "+exibir(base)+" = ("+exibir(taxa)+
+                " ÷ 100) × "+exibir(base)+" = "+exibir(resultado)+
+                ". Para calcular porcentagens, divida a taxa por 100 e multiplique pelo valor.");
+        }
         if(texto.contains("fotossintese"))
             return Optional.of("Fotossíntese é o processo em que plantas e algas usam a luz, água e gás carbônico para produzir compostos orgânicos e liberar oxigênio. A clorofila ajuda a capturar a luz. Para praticar: por que uma planta precisa de iluminação adequada?");
         if(texto.contains("porcentagem")||texto.contains("por cento"))
