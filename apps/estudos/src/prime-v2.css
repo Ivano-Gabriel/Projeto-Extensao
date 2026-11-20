@@ -586,15 +586,18 @@ html[data-tema="escuro"] .prime-brand .zelo-marca-compacta>span{color:#e6f1ff}
 html[data-tema="escuro"] .zelo-marca-compacta>span>b{color:#ffd275}
 
 
-/* Login mobile de uma tela: ajuste por altura util, sem cortar elementos de entrada.
-   Se a tela/teclado for pequena demais, permite rolar em vez de esconder controles. */
+/* Login mobile Prime V2.3: respiro visual recuperado sem rolagem desnecessária.
+   A capa e o formulário dividem a altura útil; telas muito baixas mantêm scroll. */
+.prime-login-cena > .zelo-login-cena-marca{display:none}
 @media(max-width:639px){
   .entrada-login{
+    box-sizing:border-box;
     min-height:100svh;
-    height:auto;
+    height:100svh;
     justify-content:center;
+    align-items:center;
     gap:0;
-    padding:max(.4rem,env(safe-area-inset-top)) .5rem max(.4rem,env(safe-area-inset-bottom));
+    padding:max(.5rem,env(safe-area-inset-top)) .6rem max(.5rem,env(safe-area-inset-bottom));
     overflow-x:clip;
     overflow-y:visible;
   }
@@ -603,139 +606,180 @@ html[data-tema="escuro"] .zelo-marca-compacta>span>b{color:#ffd275}
   .entrada-login>.portal-login.prime-login{
     display:grid;
     grid-template-columns:minmax(0,1fr);
-    gap:0;
+    grid-template-rows:clamp(210px,33%,255px) minmax(0,1fr);
+    height:min(774px,calc(100svh - 1rem));
+    min-height:0;
     max-width:460px;
+    width:100%;
     margin:0 auto;
-    border-radius:1.05rem;
+    padding:0;
+    border-radius:1.15rem;
     overflow:hidden;
   }
   .entrada-login .prime-login-cena{
+    box-sizing:border-box;
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto minmax(0,1fr) auto auto;
+    align-items:center;
+    align-content:stretch;
+    justify-items:center;
     min-height:0;
-    height:auto;
-    padding:.5rem .7rem .4rem;
-    gap:.15rem;
+    height:100%;
+    padding:.65rem .85rem .58rem;
+    gap:.1rem;
+    overflow:hidden;
+  }
+  .entrada-login .prime-login-cena > .zelo-login-cena-marca{
+    display:block;
+    width:min(177px,65vw);
+    height:54px;
+    max-height:54px;
+    object-fit:contain;
+    margin:0;
+    justify-self:center;
   }
   .entrada-login .prime-login-cena .prime-login-arte{
-    width:min(202px,100%);
-    height:clamp(95px,13svh,120px);
+    width:min(280px,100%);
+    height:clamp(103px,15svh,143px);
     min-height:0;
     margin:0 auto;
     transform:none;
     overflow:visible;
   }
-  .entrada-login .prime-login-cena .prime-book-spread{--book-scale:.61}
+  .entrada-login .prime-login-cena .prime-book-spread{--book-scale:.83}
   .entrada-login .prime-login-cena>strong{
-    font-size:1.12rem;
-    line-height:1.16;
-    max-width:100%;
     margin:0;
+    max-width:100%;
+    font-size:1.15rem;
+    line-height:1.15;
+    text-align:center;
   }
   .entrada-login .prime-login-cena>p{
     margin:0;
-    font-size:.74rem;
-    line-height:1.2;
     max-width:100%;
+    font-size:.76rem;
+    line-height:1.25;
+    text-align:center;
   }
   .entrada-login .prime-login-corpo{
-    gap:.43rem;
-    padding:.6rem .85rem .75rem;
-    align-content:start;
+    box-sizing:border-box;
+    display:grid;
+    height:100%;
+    min-height:0;
+    align-content:center;
+    gap:.65rem;
+    padding:.85rem 1rem 1rem;
   }
-  .entrada-login .prime-login .portal-login-cabecalho{gap:.15rem}
-  .entrada-login .prime-login .zelo-login-lockup{
-    width:min(173px,57vw);
-    margin:0;
-  }
+  .entrada-login .prime-login .portal-login-cabecalho{gap:.22rem}
+  .entrada-login .prime-login .portal-login-cabecalho > .zelo-login-lockup{display:none}
   .entrada-login .prime-login .portal-login-cabecalho .sobretitulo,
   .entrada-login .prime-login .portal-login-cabecalho>p{display:none}
   .entrada-login .prime-login .portal-login-cabecalho h2{
-    font-size:clamp(1.24rem,5.3vw,1.43rem);
-    line-height:1.12;
+    font-size:clamp(1.32rem,5.4vw,1.52rem);
+    line-height:1.18;
     margin:0;
   }
-  .entrada-login .prime-login .portal-perfis{gap:.45rem}
+  .entrada-login .prime-login .portal-perfis{gap:.55rem}
   .entrada-login .prime-login .portal-perfis button{
     flex-direction:row;
     gap:.4rem;
-    min-height:3.25rem;
-    padding:.35rem .35rem;
-    font-size:.83rem;
-    line-height:1.2;
-    border-radius:.7rem;
+    min-height:3.35rem;
+    padding:.45rem .35rem;
+    border-radius:.8rem;
+    font-size:.9rem;
+    line-height:1.25;
   }
   .entrada-login .prime-login .portal-perfis button svg{
-    width:19px;height:19px;flex:none;
+    width:21px;height:21px;flex:none;
   }
-  .entrada-login .prime-login .portal-form{gap:.3rem}
+  .entrada-login .prime-login .portal-form{gap:.42rem}
   .entrada-login .prime-login .portal-form label{
-    font-size:.8rem;
-    line-height:1.1;
+    font-size:.85rem;
+    line-height:1.15;
   }
   .entrada-login .prime-login .portal-form input{
-    min-height:2.75rem;
-    padding:.48rem .7rem;
+    min-height:3rem;
+    padding:.6rem .75rem;
     font-size:1rem;
-    line-height:1.2;
+    line-height:1.25;
   }
   .entrada-login .prime-login .portal-senha-campo,
-  .entrada-login .prime-login .portal-senha-visivel{min-height:2.75rem}
+  .entrada-login .prime-login .portal-senha-visivel{min-height:3rem}
   .entrada-login .prime-login .portal-form .botao-principal{
-    min-height:2.9rem;
-    margin-top:.15rem;
-    font-size:.98rem;
+    min-height:3.2rem;
+    margin-top:.2rem;
+    font-size:1rem;
   }
   .entrada-login .prime-login .portal-login-seguranca{
-    line-height:1.24;
-    font-size:.72rem;
     margin:0;
+    font-size:.76rem;
+    line-height:1.4;
   }
   .entrada-login .prime-login .portal-login-seguranca svg{
-    width:15px;height:15px;
+    flex:none;width:16px;height:16px;
   }
   .entrada-login>.entrada-rodape[role="status"]{
-    padding:.3rem .4rem 0;
+    padding:.35rem .4rem 0;
     font-size:.75rem;
   }
+  /* Em caso de erro, a mensagem deve poder expandir o formulário. */
+  .entrada-login:has(.portal-feedback.falha){
+    height:auto;
+    min-height:100svh;
+    overflow-y:auto;
+  }
+  .entrada-login:has(.portal-feedback.falha)>.portal-login.prime-login{
+    height:auto;
+    grid-template-rows:minmax(210px,auto) auto;
+  }
+  .entrada-login:has(.portal-feedback.falha) .prime-login-corpo{height:auto}
 }
-/* Celulares mais baixos: livro e frase em linha, mantendo a animação 3D. */
-@media(max-width:639px) and (max-height:630px){
-  .entrada-login .prime-login-cena{
-    display:grid;
-    grid-template-columns:minmax(100px,42%) minmax(0,1fr);
-    grid-template-rows:1fr;
-    align-items:center;
-    justify-items:center;
-    gap:.45rem;
-    padding:.35rem .55rem;
-    min-height:0;
-  }
-  .entrada-login .prime-login-cena .prime-login-arte{
-    width:116px;height:94px;grid-column:1;grid-row:1;
-  }
-  .entrada-login .prime-login-cena .prime-book-spread{--book-scale:.47}
-  .entrada-login .prime-login-cena>strong{
-    grid-column:2;grid-row:1;
-    align-self:center;
-    font-size:1rem;
-    line-height:1.16;
-    text-align:left;
-  }
+/* Alturas entre 651 e 740px: preservar o livro com redução proporcional. */
+@media(max-width:639px) and (max-height:740px){
+  .entrada-login .prime-login-cena > .zelo-login-cena-marca{width:148px;height:43px}
+  .entrada-login .prime-login-cena .prime-login-arte{height:100px}
+  .entrada-login .prime-login-cena .prime-book-spread{--book-scale:.66}
+  .entrada-login .prime-login-cena>strong{font-size:1.05rem}
+  .entrada-login .prime-login-cena>p{font-size:.7rem}
+  .entrada-login .prime-login-corpo{gap:.5rem;padding:.6rem .85rem .7rem}
+  .entrada-login .prime-login .portal-form{gap:.32rem}
+  .entrada-login .prime-login .portal-perfis button{min-height:3.1rem}
+  .entrada-login .prime-login .portal-form .botao-principal{min-height:3rem}
+}
+/* Teclado, paisagem ou altura realmente pequena: rolagem apenas quando necessária. */
+@media(max-width:639px) and (max-height:650px){
+  .entrada-login{height:auto;min-height:100svh;overflow-y:auto}
+  .entrada-login>.portal-login.prime-login{height:auto;grid-template-rows:auto auto}
+  .entrada-login .prime-login-cena{min-height:0;height:auto;padding:.4rem .7rem .35rem}
+  .entrada-login .prime-login-cena .prime-login-arte{height:95px}
+  .entrada-login .prime-login-cena .prime-book-spread{--book-scale:.58}
   .entrada-login .prime-login-cena>p{display:none}
-  .entrada-login .prime-login-corpo{
-    padding:.48rem .75rem .55rem;
-    gap:.35rem;
-  }
-  .entrada-login .prime-login .zelo-login-lockup{width:156px}
-  .entrada-login .prime-login .portal-perfis button{min-height:3rem}
-  .entrada-login .prime-login .portal-form{gap:.25rem}
-  .entrada-login .prime-login .portal-form .botao-principal{min-height:2.75rem}
+  .entrada-login .prime-login-corpo{height:auto}
+  .entrada-login .prime-login .portal-form input{min-height:2.75rem}
 }
-/* Teclado, rotação ou viewport extremamente baixa: nunca bloquear acesso ao formulário. */
 @media(max-width:639px) and (max-height:510px){
   .entrada-login{justify-content:flex-start}
-  .entrada-login .prime-login-cena{padding:.15rem .45rem}
-  .entrada-login .prime-login-cena .prime-login-arte{height:67px;width:100px}
-  .entrada-login .prime-login-cena .prime-book-spread{--book-scale:.34}
+  .entrada-login .prime-login-cena{
+    display:grid;
+    grid-template-columns:120px minmax(0,1fr);
+    grid-template-rows:auto auto;
+    gap:.2rem .35rem;
+    padding:.3rem .55rem;
+  }
+  .entrada-login .prime-login-cena > .zelo-login-cena-marca{
+    grid-column:1/-1;
+    width:115px;
+    height:34px;
+  }
+  .entrada-login .prime-login-cena .prime-login-arte{
+    grid-column:1;grid-row:2;width:113px;height:74px;
+  }
+  .entrada-login .prime-login-cena .prime-book-spread{--book-scale:.43}
+  .entrada-login .prime-login-cena>strong{
+    grid-column:2;grid-row:2;
+    font-size:.98rem;text-align:left;
+  }
   .entrada-login .prime-login .portal-login-seguranca{display:none}
-  .entrada-login .prime-login-corpo{gap:.2rem}
+  .entrada-login .prime-login-corpo{gap:.3rem}
 }
