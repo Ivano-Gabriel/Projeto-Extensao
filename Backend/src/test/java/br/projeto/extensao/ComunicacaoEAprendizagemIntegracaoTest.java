@@ -230,4 +230,24 @@ class ComunicacaoEAprendizagemIntegracaoTest {
             .with(user("aluno-a@escola.test").roles("ALUNO")))
             .andExpect(status().isForbidden());
     }
+
+    @Test
+    void exportarDesempenhoCsvProtegeTurmaEPlanilhaContraInjecao() throws Exception {
+        mvc.perform(get("/api/professor/turmas/"+turmaA+"/desempenho.csv")
+            .with(user("prof-a@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isOk())
+            .andExpect(header().string("Content-Type",org.hamcrest.Matchers.containsString("text/csv")))
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("Aluno;Atividades;Respondidas;Acertos")));
+        mvc.perform(get("/api/professor/turmas/"+turmaB+"/desempenho.csv")
+            .with(user("prof-a@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isNotFound());
+        mvc.perform(get("/api/professor/turmas/"+turmaA+"/desempenho.csv")
+            .with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(status().isForbidden());
+        org.junit.jupiter.api.Assertions.assertEquals("\"'=SOMA(1;1)\"",
+            CsvSeguro.celula("=SOMA(1;1)"));
+        org.junit.jupiter.api.Assertions.assertEquals("\"Nome com aspas \"\"A\"\"\"",
+            CsvSeguro.celula("Nome com aspas \"A\""));
+    }
+
 }
