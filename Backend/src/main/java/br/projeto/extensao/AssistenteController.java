@@ -73,8 +73,9 @@ public class AssistenteController {
                 "ORIENTACAO","Calendário do servidor; fuso horário de Brasília");
         }else if(fala(pergunta,"bom dia","boa tarde","boa noite","ola","oi assistente")){
             resposta=retornar("Bom dia! Que bom ter você por aqui. "+
-                "Posso consultar suas atividades e avisos, explicar Bhaskara ou informar a data "+
-                "e a hora de Brasília. Sou um assistente gratuito com respostas programadas.",
+                "Posso consultar suas atividades e avisos, explicar Bhaskara, fotossíntese, "+
+                "porcentagens e história, ou informar a data e hora de Brasília. "+
+                "Sou um assistente gratuito com respostas programadas.",
                 "ORIENTACAO","Saudação predefinida; não é IA generativa");
         }else if(fala(pergunta,"nota","media","boletim","aprovacao")){
             resposta=retornar("Suas notas oficiais não estão cadastradas no Extensão. "+
@@ -131,6 +132,9 @@ public class AssistenteController {
                 "Sua conta ainda não está matriculada em uma turma. Peça ajuda à direção.":
                 "Sua turma: "+String.join("; ",turmas)+".",
                 "ESCOLAR","Matrícula autorizada");
+        }else if(ConteudosBasicos.responder(pergunta).isPresent()){
+            resposta=retornar(ConteudosBasicos.responder(pergunta).orElseThrow(),
+                "ORIENTACAO","Conteúdo didático predefinido; sem serviço externo");
         }else if(fala(pergunta,"revis","memori","decor","aprend","estud","resum","fixar")){
             resposta=retornar("Uma estratégia: leia um resumo curto, feche o material e "+
                 "tente explicar com suas palavras. Depois responda um quiz sem consultar. "+
@@ -139,7 +143,8 @@ public class AssistenteController {
         }else{
             resposta=retornar("Posso ajudar com suas turmas, professores, atividades, avisos e "+
                 "organização de estudos. Pergunte, por exemplo: 'Quais são minhas atividades?'. "+
-                "Para dúvidas sobre conteúdos, abra um material e faça um quiz. "+
+                "Também explico porcentagem, frações, fotossíntese e Revolução Francesa. "+
+                "Para dúvidas novas, consulte um material ou use o tutor por IA habilitado. "+
                 "Ainda não sou um chat de IA generativa.",
                 "ORIENTACAO","Funções atuais do Extensão");
         }
