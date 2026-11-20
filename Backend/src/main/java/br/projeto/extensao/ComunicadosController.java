@@ -109,6 +109,7 @@ public class ComunicadosController {
             return stmt;
         },holder);
         Long id=holder.getKey().longValue();
+        auditoria.registrar(escolaId,autor.getId(),"COMUNICADO_PUBLICADO","COMUNICADO",id);
         ComunicadoResumo criado=consultar("c.id=? AND c.escola_id=?",id,escolaId).get(0);
         return ResponseEntity.created(URI.create("/api/portal/avisos/"+id)).body(criado);
     }
