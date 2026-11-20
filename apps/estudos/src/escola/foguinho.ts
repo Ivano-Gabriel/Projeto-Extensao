@@ -1,4 +1,4 @@
-import {diasConsecutivosEstudados,formatarDataLocal} from './regras'
+import {diasConsecutivosEstudados,formatarDataLocal} from './regras.ts'
 
 export type DiaFoguinho={data:string;dia:number;diaSemana:string;estudado:boolean;hoje:boolean}
 export type ResumoFoguinho={
