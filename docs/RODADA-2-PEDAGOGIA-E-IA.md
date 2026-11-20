@@ -8,7 +8,7 @@ Data: 20/11/2026. Esta rodada **não equivale à aprovação do Estado** e não 
 - **Exportar desempenho CSV** com aluno, total de atividades, respondidas e acertos. A rota reutiliza o mesmo controle de autorização do relatório da turma. CSV neutraliza células com fórmulas para reduzir risco em softwares de planilha. O arquivo representa **resultado de quiz**, nunca nota oficial.
 - **Auditoria ampliada** para publicação, edição e remoção de atividades; dados pessoais não são enviados para a trilha de ações.
 - **IA com contrato testável localmente:** extraída política básica de identificação pessoal e parser de resposta do provedor, com testes determinísticos usando respostas sintéticas, sem chave ou cobrança. O provedor real **continua inativo** até aprovação, custo e segurança definidos.
-- **Manutenção do código:** utilitários separados para IA e CSV. Corrigido import duplicado encontrado em App.tsx. Não mexer no CSS do livro já aprovado.
+- **Manutenção do código:** utilitários separados para IA e CSV. Mantidos imports distintos `materiais` (conteúdo) e `materias` (disciplinas), com teste de build. Não mexer no CSS do livro já aprovado.
 
 ## O que continua pendente / não inventar
 
