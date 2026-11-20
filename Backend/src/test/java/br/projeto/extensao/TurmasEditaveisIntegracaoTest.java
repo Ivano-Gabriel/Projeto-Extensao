@@ -28,6 +28,8 @@ class TurmasEditaveisIntegracaoTest {
     Long escolaA,escolaB,direcao,professor,aluno,professorExterno,turma;
     @BeforeEach
     void preparar() {
+        jdbc.update("DELETE FROM auditoria_escolar");
+        jdbc.update("DELETE FROM transferencias_turma");
         jdbc.update("DELETE FROM respostas_atividade");
         jdbc.update("DELETE FROM questoes_atividade");
         jdbc.update("DELETE FROM atividades");
@@ -380,6 +382,89 @@ class TurmasEditaveisIntegracaoTest {
             .andExpect(jsonPath("$[0].acertou").value(true));
     }
 
+
+    @Test
+    void homologacao2027TransfereAlunoExclusivoPreservaRespostaEIsolaAnos() throws Exception {
+        Long aluno2027=criar("aluno-homologacao-2027@escola.test",Papel.ALUNO,escolaA);
+        criar("dir-edit-b@escola.test",Papel.DIRECAO,escolaB);
+        jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES (?,'7A','Setimo A',2027)",escolaA);
+        jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES (?,'7B','Setimo B',2027)",escolaA);
+        Long origem2027=jdbc.queryForObject("SELECT id FROM turmas WHERE escola_id=? AND codigo='7A'",Long.class,escolaA);
+        Long destino2027=jdbc.queryForObject("SELECT id FROM turmas WHERE escola_id=? AND codigo='7B'",Long.class,escolaA);
+        jdbc.update("INSERT INTO matriculas(turma_id,aluno_id,ano_letivo) VALUES(?,?,2027)",origem2027,aluno2027);
+        jdbc.update("INSERT INTO vinculos_docentes(turma_id,professor_id,disciplina) VALUES(?,?,?)",
+            origem2027,professor,"MATEMATICA");
+
+        String quiz="""
+            {"turmaId":%d,"disciplina":"MATEMATICA","titulo":"Quiz homologacao 2027",
+            "pergunta":"Quanto vale 25 por cento de 80?","opcoes":["10","20","30","40"],
+            "correta":1,"explicacao":"25 por cento de 80 equivale a 20."}
+            """.formatted(origem2027);
+        mvc.perform(post("/api/professor/atividades")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(quiz))
+            .andExpect(status().isCreated());
+        Long atividade=jdbc.queryForObject("SELECT id FROM atividades WHERE turma_id=?",Long.class,origem2027);
+        mvc.perform(post("/api/portal/atividades/"+atividade+"/respostas")
+            .with(user("aluno-homologacao-2027@escola.test").roles("ALUNO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content("{\"opcao\":1}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.acertou").value(true));
+
+        String destino="{\"alunoId\":"+aluno2027+",\"destinoTurmaId\":"+destino2027+"}";
+        mvc.perform(post("/api/gestao/turmas/"+origem2027+"/transferencias")
+            .with(user("dir-edit@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(destino))
+            .andExpect(status().isNoContent());
+        String historico="/api/gestao/alunos/"+aluno2027+"/transferencias";
+        mvc.perform(get(historico).with(user("dir-edit@escola.test").roles("DIRECAO")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].origemTurmaId").value(origem2027))
+            .andExpect(jsonPath("$[0].destinoTurmaId").value(destino2027))
+            .andExpect(jsonPath("$[0].anoLetivo").value(2027))
+            .andExpect(jsonPath("$[1]").doesNotExist());
+        mvc.perform(get(historico).with(user("aluno-homologacao-2027@escola.test").roles("ALUNO")))
+            .andExpect(status().isForbidden());
+        mvc.perform(get(historico).with(user("prof-edit@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isForbidden());
+        mvc.perform(get(historico).with(user("dir-edit-b@escola.test").roles("DIRECAO")))
+            .andExpect(status().isForbidden());
+
+        mvc.perform(get("/api/portal/turmas")
+            .with(user("aluno-homologacao-2027@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].codigo").value("7B"))
+            .andExpect(jsonPath("$[1]").doesNotExist());
+        mvc.perform(get("/api/portal/atividades")
+            .with(user("aluno-homologacao-2027@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
+        mvc.perform(get("/api/portal/minhas-respostas")
+            .with(user("aluno-homologacao-2027@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].atividadeId").value(atividade))
+            .andExpect(jsonPath("$[0].acertou").value(true));
+        mvc.perform(get("/api/portal/turmas").with(user("aluno-edit@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].codigo").value("3A"));
+        mvc.perform(post("/api/gestao/turmas/"+destino2027+"/transferencias")
+            .with(user("dir-edit@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"alunoId\":"+aluno2027+",\"destinoTurmaId\":"+turma+"}"))
+            .andExpect(status().isConflict());
+        jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES (?,'7C','Setimo C',2027)",escolaB);
+        Long turmaExterna2027=jdbc.queryForObject(
+            "SELECT id FROM turmas WHERE escola_id=? AND codigo='7C'",Long.class,escolaB);
+        mvc.perform(post("/api/gestao/turmas/"+destino2027+"/transferencias")
+            .with(user("dir-edit@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"alunoId\":"+aluno2027+",\"destinoTurmaId\":"+turmaExterna2027+"}"))
+            .andExpect(status().isNotFound());
+        org.junit.jupiter.api.Assertions.assertEquals(destino2027,
+            jdbc.queryForObject("SELECT turma_id FROM matriculas WHERE aluno_id=?",Long.class,aluno2027));
+        org.junit.jupiter.api.Assertions.assertEquals(1,
+            jdbc.queryForObject("SELECT COUNT(*) FROM transferencias_turma WHERE aluno_id=? AND origem_turma_id=? AND destino_turma_id=?",
+                Integer.class,aluno2027,origem2027,destino2027));
+        mvc.perform(get("/api/gestao/auditoria").with(user("dir-edit@escola.test").roles("DIRECAO")))
+            .andExpect(jsonPath("$[0].acao").value("ALUNO_TRANSFERIDO"));
+        mvc.perform(get("/api/gestao/auditoria").with(user("dir-edit-b@escola.test").roles("DIRECAO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
+    }
 
     @Test
     void assistenteExplicaMateriasBasicasGratuitamenteSemApiExterna() throws Exception {
