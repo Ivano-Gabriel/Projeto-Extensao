@@ -35,6 +35,7 @@ export type DesempenhoAluno = {alunoId:number;alunoNome:string;atividades:number
 export type MeuDesempenho = {atividades:number;respondidas:number;acertos:number}
 export type RespostaSalva = {atividadeId:number;opcao:number;acertou:boolean;explicacao:string}
 export type AulaEscolar = {id:number;turmaId:number;disciplina:string;data:string;ordem:number;tema:string}
+export type PresencaSalva = {alunoId:number;presente:boolean}
 export type FrequenciaEscolar = {aulasRegistradas:number;registrosDePresenca:number;presencas:number;faltas:number}
 export type RespostaAssistente = {resposta:string;tipo:'ESCOLAR'|'ORIENTACAO'|'INDISPONIVEL';fontes:string[]}
 export type AlunoResumo = {id:number;nome:string}
@@ -166,6 +167,7 @@ export const apiEscolar={
   aulas:(turmaId:number)=>requisitar<AulaEscolar[]>('GET',`/api/professor/turmas/${turmaId}/aulas`),
   criarAula:(body:{turmaId:number;disciplina:string;data:string;ordem:number;tema:string})=>
     requisitar<AulaEscolar>('POST','/api/professor/aulas',body),
+  presencasAula:(aulaId:number)=>requisitar<PresencaSalva[]>('GET',`/api/professor/aulas/${aulaId}/presencas`),
   registrarPresenca:(aulaId:number,body:{alunoId:number;presente:boolean})=>
     requisitar<void>('POST',`/api/professor/aulas/${aulaId}/presencas`,body),
   assistente:(pergunta:string)=>requisitar<RespostaAssistente>('POST','/api/portal/assistente',{pergunta}),
