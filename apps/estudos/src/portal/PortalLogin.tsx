@@ -34,6 +34,7 @@ export default function PortalLogin({entrar}:Props){
   }
   return <section className="portal-login prime-login" aria-labelledby="portal-titulo-login">
     <div className="prime-login-cena" aria-hidden="true">
+      <ZeloMarca className="zelo-login-cena-marca"/>
       <div className="prime-login-arte">
         <div className="prime-book-spread">
           <div className="prime-book-cover prime-book-left">

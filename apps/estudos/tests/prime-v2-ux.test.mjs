@@ -98,9 +98,29 @@ test('login mobile compacto economiza altura sem esconder formulario',()=>{
   assert.match(css,/\.entrada-login\s*>\s*\.entrada-marca\s*\{\s*display:none/)
   assert.match(css,/\.prime-login\s+\.portal-perfis button\s*\{/)
   assert.match(css,/\.prime-login\s+\.portal-form input\s*\{/)
-  assert.match(css,/@media\s*\(max-width:\s*639px\)\s*and\s*\(max-height:\s*630px\)/)
+  assert.match(css,/@media\s*\(max-width:\s*639px\)\s*and\s*\(max-height:\s*650px\)/)
   assert.match(css,/\.prime-login-cena>\s*p\s*\{\s*display:none/)
   assert.match(css,/overflow-y:\s*visible/)
   assert.match(css,/min-height:\s*2\.75rem/)
   assert.match(css,/\.prime-book-spread\{--book-scale/)
 });
+
+
+test('login mobile equilibrado coloca zELO+ na capa azul e deixa a marca branca apenas no desktop',()=>{
+  const cena=login.slice(login.indexOf('className="prime-login-cena"'),login.indexOf('className="prime-login-corpo"'))
+  assert.match(cena,/ZeloMarca className="zelo-login-cena-marca"/)
+  assert.match(css,/\.entrada-login \.prime-login-cena > \.zelo-login-cena-marca/)
+  assert.match(css,/\.entrada-login \.prime-login \.portal-login-cabecalho > \.zelo-login-lockup\s*\{\s*display:none/)
+})
+
+test('a capa ganha altura, mas a tela usual respeita viewport e libera scroll com teclado',()=>{
+  assert.match(css,/\.entrada-login>\.portal-login\.prime-login\s*\{/)
+  assert.match(css,/height:min\(774px,calc\(100svh - 1rem\)\)/)
+  assert.match(css,/grid-template-rows:clamp\(210px,33%,255px\) minmax\(0,1fr\)/)
+  assert.match(css,/\.entrada-login \.prime-login-cena \.prime-book-spread\{--book-scale:\.83\}/)
+  assert.match(css,/@media\(max-width:639px\) and \(max-height:650px\)/)
+  assert.match(css,/\.entrada-login>\.portal-login\.prime-login\{height:auto;grid-template-rows:auto auto\}/)
+  assert.match(css,/\.entrada-login\{height:auto;min-height:100svh;overflow-y:auto\}/)
+  assert.match(css,/\.entrada-login:has\(>\.entrada-rodape\[role="status"\]\)>\.portal-login\.prime-login/)
+  assert.match(css,/height:min\(745px,calc\(100svh - 2\.9rem\)\)/)
+})
