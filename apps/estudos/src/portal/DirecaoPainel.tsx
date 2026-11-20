@@ -10,7 +10,7 @@ import GestaoTurma from './GestaoTurma'
 import AuditoriaEscola from './AuditoriaEscola'
 
 const disciplinas=['MATEMATICA','PORTUGUES','FISICA','HISTORIA','BIOLOGIA','QUIMICA','GEOGRAFIA','INGLES','SOCIOLOGIA','FILOSOFIA']
-export default function DirecaoPainel(){
+export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
   const [aba,setAba]=useState('inicio')
   const [turmas,setTurmas]=useState<TurmaEscolar[]>([])
   const [matriculas,setMatriculas]=useState<MatriculaResumo[]>([])
@@ -98,6 +98,11 @@ export default function DirecaoPainel(){
       'Vínculo de professor removido.')
     setConfirmarRemocao(null)
   }
+  const totalProfessores=usuarios.filter(u=>u.papel==='PROFESSOR').length
+  const totalAlunos=usuarios.filter(u=>u.papel==='ALUNO').length
+  const totalMatriculados=new Set(matriculas.map(m=>m.alunoId)).size
+  const alunosSemTurma=Math.max(0,totalAlunos-totalMatriculados)
+  const recarregarFeed=async()=>setAvisos(await apiEscolar.avisos())
   return <div className="portal-paineis portal-mobile">
     <Abas abas={acoesPorPerfil('DIRECAO')} atual={aba} mudar={setAba}/>
     <MensagemStatus estado={mensagem}/>
@@ -108,6 +113,17 @@ export default function DirecaoPainel(){
         <Selo valor={usuarios.filter(u=>u.papel==='PROFESSOR').length} legenda="Professores"/>
         <Selo valor={usuarios.filter(u=>u.papel==='ALUNO').length} legenda="Alunos"/>
       </div>
+      <Cartao titulo="Acompanhamento da escola">
+        <p>Gestão do zELO+: organizar vínculos, permitir publicações na turma e acompanhar estudos.
+          Esta área não substitui diário de classe, boletim ou secretaria escolar.</p>
+        <div className="portal-metricas">
+          <Selo valor={totalMatriculados} legenda="Alunos matriculados"/>
+          <Selo valor={alunosSemTurma} legenda="Aguardando turma"/>
+          <Selo valor={avisos.length} legenda="Publicações no feed"/>
+        </div>
+        {alunosSemTurma>0&&<p className="portal-aviso-discreto">
+          Existem {alunosSemTurma} alunos da escola sem matrícula encontrada no portal.</p>}
+      </Cartao>
       <Cartao titulo="Organizar a escola">
         <div className="portal-acoes-rapidas">
           <button type="button" className="botao-principal" onClick={()=>setAba('turmas')}>
@@ -116,7 +132,9 @@ export default function DirecaoPainel(){
             <Bell size={18}/> Publicar comunicado</button>
         </div>
       </Cartao>
-      <Cartao titulo="Avisos recentes"><Mural avisos={avisos.slice(0,3)}/></Cartao>
+      <Cartao titulo="Publicações recentes da comunidade">
+        <Mural avisos={avisos.slice(0,3)} usuarioId={usuarioId} perfil="DIRECAO" atualizado={recarregarFeed}/>
+      </Cartao>
       <Cartao titulo="Calendário escolar">
         <p className="portal-aviso-discreto"><CalendarDays size={17}/> Horários e calendário oficial entrarão na próxima etapa.
           Por enquanto, a direção pode informar datas no mural.</p>
@@ -250,7 +268,11 @@ export default function DirecaoPainel(){
       <Cartao titulo="Novo comunicado">
         <CriarAviso turmas={turmas} como="DIRECAO" enviado={async()=>setAvisos(await apiEscolar.avisos())}/>
       </Cartao>
-      <Cartao titulo="Mural da escola"><Mural avisos={avisos}/></Cartao>
+      <Cartao titulo="Feed da escola · moderação">
+        <p>A direção pode remover publicações inadequadas apenas na própria escola.
+          A ação fica registrada no histórico administrativo.</p>
+        <Mural avisos={avisos} usuarioId={usuarioId} perfil="DIRECAO" atualizado={recarregarFeed}/>
+      </Cartao>
     </>}
   </div>
 }
