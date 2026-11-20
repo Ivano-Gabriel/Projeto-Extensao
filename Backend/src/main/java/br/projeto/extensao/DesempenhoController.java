@@ -2,6 +2,8 @@ package br.projeto.extensao;
 
 import java.util.List;
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -87,6 +89,21 @@ public class DesempenhoController {
             rs.getInt("atividades"),rs.getInt("respondidas"),rs.getInt("acertos")),params);
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(lista);
     }
+    @GetMapping("/professor/turmas/{turmaId}/desempenho.csv")
+    public ResponseEntity<String> exportarCsv(@PathVariable long turmaId,Authentication auth) {
+        List<DesempenhoAluno> dados=desempenho(turmaId,auth).getBody();
+        StringBuilder csv=new StringBuilder("\uFEFFAluno;Atividades;Respondidas;Acertos\r\n");
+        for(DesempenhoAluno d:dados){
+            csv.append(CsvSeguro.celula(d.alunoNome())).append(';').append(d.atividades())
+                .append(';').append(d.respondidas()).append(';').append(d.acertos()).append("\r\n");
+        }
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+            .contentType(MediaType.parseMediaType("text/csv;charset=UTF-8"))
+            .header(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"desempenho-turma-"+turmaId+".csv\"")
+            .body(csv.toString());
+    }
+
     @GetMapping("/portal/meu-desempenho")
     public ResponseEntity<MeuDesempenho> meuDesempenho(Authentication auth){
         Usuario aluno=usuario(auth);

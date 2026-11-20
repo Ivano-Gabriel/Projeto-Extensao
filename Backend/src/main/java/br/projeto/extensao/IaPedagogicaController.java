@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
@@ -41,12 +40,6 @@ public class IaPedagogicaController {
         @NotBlank @Size(min=3,max=500) String pergunta) {}
     public record Explicacao(String texto,String aviso,int restantesHoje) {}
 
-    private static final Pattern EMAIL=Pattern.compile(
-        "(?i)[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}");
-    private static final Pattern NUMERO_PESSOAL=Pattern.compile(
-        "(?:\\+?55[\\s-]?)?\\(?\\d{2}\\)?[\\s-]?9?\\d{4}[\\s-]?\\d{4}|\\b\\d{3}[. ]?\\d{3}[. ]?\\d{3}[- ]?\\d{2}\\b");
-    private static final Pattern IDENTIFICADOR=Pattern.compile(
-        "(?i)\\b(?:cpf|rg|telefone|celular|endereco|endereço|senha|matricula|matrícula)\\s*[:=]");
     private static final String ALERTA="Conteúdo gerado por IA, sujeito a erros. "+
         "O professor deve revisar antes de usar. Nenhuma atividade foi publicada automaticamente.";
 
@@ -93,12 +86,7 @@ public class IaPedagogicaController {
             "IA generativa nao habilitada neste ambiente.");
     }
     static void impedirDadosPessoais(String... textos){
-        for(String texto:textos){
-            if(texto!=null&&(EMAIL.matcher(texto).find()||
-                NUMERO_PESSOAL.matcher(texto).find()||IDENTIFICADOR.matcher(texto).find()))
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Remova dados pessoais e identificadores antes de enviar para IA.");
-        }
+        IaPrivacidade.validar(textos);
     }
     private void autorizarProfessor(Usuario professor,Pedido pedido){
         acessoBasico(professor,Papel.PROFESSOR);
@@ -139,26 +127,6 @@ public class IaPedagogicaController {
                 rs.getString("disciplina")),aluno.getId(),aluno.getEscolaId());
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(dados);
     }
-    private String texto(Map<?,?> resposta){
-        if(!"completed".equals(resposta.get("status")))
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-                "A geração de texto não foi concluída.");
-        if(!(resposta.get("output") instanceof List<?> itens))
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY);
-        StringBuilder texto=new StringBuilder();
-        for(Object item:itens){
-            if(!(item instanceof Map<?,?> bloco) ||
-                !(bloco.get("content") instanceof List<?> partes))continue;
-            for(Object parte:partes){
-                if(parte instanceof Map<?,?> dado &&
-                    "output_text".equals(dado.get("type")) &&
-                    dado.get("text") instanceof String trecho)texto.append(trecho);
-            }
-        }
-        if(texto.isEmpty())throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-            "O modelo não retornou um conteúdo válido.");
-        return texto.toString().trim();
-    }
     private String chamar(String orientacoes,String entrada,boolean quiz){
         Map<String,Object> body=new java.util.HashMap<>(Map.of(
             "model",modelo,"store",false,
@@ -185,7 +153,7 @@ public class IaPedagogicaController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(body).retrieve().body(Map.class);
             if(response==null)throw new ResponseStatusException(HttpStatus.BAD_GATEWAY);
-            return texto(response);
+            return IaTextoResposta.ler(response);
         }catch(RestClientException ex){
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
                 "Falha na consulta ao provedor de IA. Nenhum conteúdo foi publicado.");

@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.net.URI;
 import java.sql.PreparedStatement;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.CacheControl;
@@ -32,18 +34,30 @@ public class AtividadesController {
         @NotBlank @Size(max=500) String pergunta,
         @NotNull @Size(min=4,max=4) List<@NotBlank @Size(max=200) String> opcoes,
         @NotNull @Min(0) @Max(3) Integer correta,
-        @NotBlank @Size(max=1000) String explicacao) {}
+        @NotBlank @Size(max=1000) String explicacao,LocalDate prazoEntrega) {}
     public record AtividadeResumo(
-        Long id,Long turmaId,String disciplina,String titulo,String pergunta,List<String> opcoes) {}
+        Long id,Long turmaId,String disciplina,String titulo,String pergunta,List<String> opcoes,LocalDate prazoEntrega) {}
     public record NovaResposta(@NotNull @Min(0) @Max(3) Integer opcao) {}
     public record ResultadoResposta(boolean acertou,String explicacao) {}
-    private record QuestaoInterna(Long id,int correta,String explicacao) {}
+    private record QuestaoInterna(Long id,int correta,String explicacao,LocalDate prazoEntrega) {}
 
     private final UsuarioRepository usuarios;
     private final JdbcTemplate jdbc;
-    public AtividadesController(UsuarioRepository usuarios,JdbcTemplate jdbc){
+    private final AuditoriaService auditoria;
+    public AtividadesController(UsuarioRepository usuarios,JdbcTemplate jdbc,AuditoriaService auditoria){
         this.usuarios=usuarios;
         this.jdbc=jdbc;
+        this.auditoria=auditoria;
+    }
+    private static LocalDate hoje(){return LocalDate.now(ZoneId.of("America/Sao_Paulo"));}
+    private static java.sql.Date dataSql(LocalDate d){return d==null?null:java.sql.Date.valueOf(d);}
+    private static LocalDate dataResultado(java.sql.ResultSet rs,String coluna)throws java.sql.SQLException {
+        java.sql.Date d=rs.getDate(coluna);
+        return d==null?null:d.toLocalDate();
+    }
+    private static void prazoValido(LocalDate prazo){
+        if(prazo!=null&&prazo.isBefore(hoje()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Prazo de entrega anterior a hoje.");
     }
     private Usuario usuario(Authentication auth){
         if(auth==null)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -78,26 +92,29 @@ public class AtividadesController {
             "WHERE t.id=? AND t.escola_id=? AND v.professor_id=? AND v.disciplina=?",
             Integer.class,dados.turmaId(),escolaId,professor.getId(),dados.disciplina());
         if(vinculado==0)throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Turma nao vinculada ao docente.");
+        prazoValido(dados.prazoEntrega());
         Long atividadeId=inserir(
-            "INSERT INTO atividades(escola_id,turma_id,professor_id,disciplina,titulo) VALUES (?,?,?,?,?)",
-            escolaId,dados.turmaId(),professor.getId(),dados.disciplina(),dados.titulo().trim());
+            "INSERT INTO atividades(escola_id,turma_id,professor_id,disciplina,titulo,prazo_entrega) VALUES (?,?,?,?,?,?)",
+            escolaId,dados.turmaId(),professor.getId(),dados.disciplina(),dados.titulo().trim(),
+            dataSql(dados.prazoEntrega()));
         inserir("INSERT INTO questoes_atividade(atividade_id,pergunta,opcao_a,opcao_b,opcao_c,opcao_d,correta,explicacao) "+
                 "VALUES (?,?,?,?,?,?,?,?)",atividadeId,dados.pergunta().trim(),
             dados.opcoes().get(0).trim(),dados.opcoes().get(1).trim(),
             dados.opcoes().get(2).trim(),dados.opcoes().get(3).trim(),
             dados.correta(),dados.explicacao().trim());
+        auditoria.registrar(escolaId,professor.getId(),"ATIVIDADE_PUBLICADA","ATIVIDADE",atividadeId);
         return ResponseEntity.created(URI.create("/api/portal/atividades/"+atividadeId))
             .body(new AtividadeResumo(atividadeId,dados.turmaId(),dados.disciplina(),
-                dados.titulo().trim(),dados.pergunta().trim(),dados.opcoes()));
+                dados.titulo().trim(),dados.pergunta().trim(),dados.opcoes(),dados.prazoEntrega()));
     }
     private List<AtividadeResumo> consultar(String sufixo,Object... argumentos){
-        String sql="SELECT a.id,a.turma_id,a.disciplina,a.titulo,q.pergunta,q.opcao_a,q.opcao_b,q.opcao_c,q.opcao_d "+
+        String sql="SELECT a.id,a.turma_id,a.disciplina,a.titulo,a.prazo_entrega,q.pergunta,q.opcao_a,q.opcao_b,q.opcao_c,q.opcao_d "+
             "FROM atividades a JOIN questoes_atividade q ON q.atividade_id=a.id "+sufixo+
             " ORDER BY a.criado_em DESC,a.id DESC";
         return jdbc.query(sql,(rs,i)->new AtividadeResumo(rs.getLong("id"),
             rs.getLong("turma_id"),rs.getString("disciplina"),rs.getString("titulo"),
             rs.getString("pergunta"),List.of(rs.getString("opcao_a"),rs.getString("opcao_b"),
-                rs.getString("opcao_c"),rs.getString("opcao_d"))),argumentos);
+                rs.getString("opcao_c"),rs.getString("opcao_d")),dataResultado(rs,"prazo_entrega")),argumentos);
     }
     @GetMapping("/portal/atividades")
     public ResponseEntity<List<AtividadeResumo>> minhasAtividades(Authentication auth){
@@ -129,14 +146,16 @@ public class AtividadesController {
         if(aluno.getPapel()!=Papel.ALUNO)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         List<QuestaoInterna> questoes=jdbc.query(
-            "SELECT q.id,q.correta,q.explicacao FROM questoes_atividade q "+
+            "SELECT q.id,q.correta,q.explicacao,a.prazo_entrega FROM questoes_atividade q "+
             "JOIN atividades a ON a.id=q.atividade_id "+
             "JOIN matriculas m ON m.turma_id=a.turma_id "+
             "WHERE a.id=? AND a.escola_id=? AND m.aluno_id=?",
             (rs,i)->new QuestaoInterna(rs.getLong("id"),rs.getInt("correta"),
-                rs.getString("explicacao")),atividadeId,escolaId,aluno.getId());
+                rs.getString("explicacao"),dataResultado(rs,"prazo_entrega")),atividadeId,escolaId,aluno.getId());
         if(questoes.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         QuestaoInterna questao=questoes.get(0);
+        if(questao.prazoEntrega()!=null&&questao.prazoEntrega().isBefore(hoje()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Prazo da atividade encerrado.");
         try{
             jdbc.update("INSERT INTO respostas_atividade(questao_id,aluno_id,opcao) VALUES (?,?,?)",
                 questao.id(),aluno.getId(),dados.opcao());
@@ -173,12 +192,12 @@ public class AtividadesController {
         Usuario professor=usuario(auth);
         autorizarEdicao(atividadeId,professor,null,null);
         List<NovaAtividade> dados=jdbc.query(
-            "SELECT a.turma_id,a.disciplina,a.titulo,q.pergunta,q.opcao_a,q.opcao_b,q.opcao_c,q.opcao_d,q.correta,q.explicacao "+
+            "SELECT a.turma_id,a.disciplina,a.titulo,q.pergunta,q.opcao_a,q.opcao_b,q.opcao_c,q.opcao_d,q.correta,q.explicacao,a.prazo_entrega "+
             "FROM atividades a JOIN questoes_atividade q ON q.atividade_id=a.id WHERE a.id=?",
             (rs,i)->new NovaAtividade(rs.getLong("turma_id"),rs.getString("disciplina"),
                 rs.getString("titulo"),rs.getString("pergunta"),
                 List.of(rs.getString("opcao_a"),rs.getString("opcao_b"),rs.getString("opcao_c"),rs.getString("opcao_d")),
-                rs.getInt("correta"),rs.getString("explicacao")),atividadeId);
+                rs.getInt("correta"),rs.getString("explicacao"),dataResultado(rs,"prazo_entrega")),atividadeId);
         if(dados.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(dados.get(0));
     }
@@ -189,11 +208,14 @@ public class AtividadesController {
         Usuario professor=usuario(auth);
         autorizarEdicao(atividadeId,professor,dados.turmaId(),dados.disciplina());
         semRespostas(atividadeId);
-        jdbc.update("UPDATE atividades SET titulo=? WHERE id=?",dados.titulo().trim(),atividadeId);
+        prazoValido(dados.prazoEntrega());
+        jdbc.update("UPDATE atividades SET titulo=?,prazo_entrega=? WHERE id=?",
+            dados.titulo().trim(),dataSql(dados.prazoEntrega()),atividadeId);
         jdbc.update("UPDATE questoes_atividade SET pergunta=?,opcao_a=?,opcao_b=?,opcao_c=?,opcao_d=?,correta=?,explicacao=? "+
             "WHERE atividade_id=?",dados.pergunta().trim(),dados.opcoes().get(0).trim(),
             dados.opcoes().get(1).trim(),dados.opcoes().get(2).trim(),dados.opcoes().get(3).trim(),
             dados.correta(),dados.explicacao().trim(),atividadeId);
+        auditoria.registrar(escola(professor),professor.getId(),"ATIVIDADE_EDITADA","ATIVIDADE",atividadeId);
         return ResponseEntity.noContent().build();
     }
     @Transactional
@@ -204,6 +226,7 @@ public class AtividadesController {
         semRespostas(atividadeId);
         jdbc.update("DELETE FROM questoes_atividade WHERE atividade_id=?",atividadeId);
         jdbc.update("DELETE FROM atividades WHERE id=?",atividadeId);
+        auditoria.registrar(escola(professor),professor.getId(),"ATIVIDADE_REMOVIDA","ATIVIDADE",atividadeId);
         return ResponseEntity.noContent().build();
     }
 
