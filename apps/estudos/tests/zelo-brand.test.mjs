@@ -29,7 +29,7 @@ test('identidade PWA usa a nova marca com assets separados por tamanho e atualiz
   assert.match(index,/<title>zELO\+/)
   assert.match(index,/zelo-icon-192\.png/)
   assert.match(worker,/zelo-icon-192\.png/)
-  assert.match(worker,/zelo-icon-512\.png/)
+  assert.match(worker,/app-icon\.svg/)
   assert.match(worker,/zelo-wordmark\.svg/)
   assert.doesNotMatch(worker,/extensao-estudos-v3/)
 })
