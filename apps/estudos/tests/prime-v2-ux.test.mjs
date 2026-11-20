@@ -121,4 +121,6 @@ test('a capa ganha altura, mas a tela usual respeita viewport e libera scroll co
   assert.match(css,/@media\(max-width:639px\) and \(max-height:650px\)/)
   assert.match(css,/\.entrada-login>\.portal-login\.prime-login\{height:auto;grid-template-rows:auto auto\}/)
   assert.match(css,/\.entrada-login\{height:auto;min-height:100svh;overflow-y:auto\}/)
+  assert.match(css,/\.entrada-login:has\(>\.entrada-rodape\[role="status"\]\)>\.portal-login\.prime-login/)
+  assert.match(css,/height:min\(745px,calc\(100svh - 2\.9rem\)\)/)
 })
