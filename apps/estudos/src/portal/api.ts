@@ -28,7 +28,7 @@ export type AtividadeEscolar = {
 export type ResultadoAtividade = {acertou:boolean;explicacao:string}
 export type AtividadeFormulario = {turmaId:number;disciplina:string;titulo:string;pergunta:string;opcoes:string[];correta:number;explicacao:string;prazoEntrega:string|null}
 export type PublicoAviso = 'TODOS'|'ALUNOS'|'FUNCIONARIOS'
-export type Aviso = {id:number;turmaId:number|null;publico:PublicoAviso;titulo:string;texto:string;importante:boolean;criadoEm:string}
+export type Aviso = {id:number;turmaId:number|null;publico:PublicoAviso;titulo:string;texto:string;importante:boolean;criadoEm:string;autorId:number|null;autorNome:string;autorPapel:'PROFESSOR'|'DIRECAO'|'ESCOLA'}
 export type Vinculo = {professorId:number;nome:string;disciplina:string}
 export type EventoAuditoria = {id:number;escolaId:number;atorId:number;acao:string;entidade:string;entidadeId:number;data:string}
 export type DesempenhoAluno = {alunoId:number;alunoNome:string;atividades:number;respondidas:number;acertos:number}
@@ -150,6 +150,10 @@ export const apiEscolar={
     requisitar<Aviso>('POST','/api/gestao/avisos',body),
   enviarAvisoProfessor:(body:{turmaId:number;publico:'ALUNOS';titulo:string;texto:string;importante:boolean})=>
     requisitar<Aviso>('POST','/api/professor/avisos',body),
+  editarAvisoProfessor:(id:number,body:{titulo:string;texto:string;importante:boolean})=>
+    requisitar<Aviso>('PUT',`/api/professor/avisos/${id}`,body),
+  removerAvisoProfessor:(id:number)=>requisitar<void>('DELETE',`/api/professor/avisos/${id}`),
+  moderarAvisoDirecao:(id:number)=>requisitar<void>('DELETE',`/api/gestao/avisos/${id}`),
   vinculos:(turmaId:number)=>requisitar<Vinculo[]>('GET',`/api/gestao/turmas/${turmaId}/vinculos`),
   desvincular:(turmaId:number,professorId:number,disciplina:string)=>
     requisitar<void>('DELETE',`/api/gestao/turmas/${turmaId}/professores/${professorId}/disciplinas/${disciplina}`),
