@@ -546,3 +546,41 @@ html[data-tema="escuro"] .prime-presenca-discreta>summary{color:var(--ink)}
   .prime-book-page{transform:rotateY(-3deg)!important}
   .prime-menu-destaque:hover,.prime-menu-destaque:focus-visible{transform:none}
 }
+
+
+/* Identidade zELO+ — aplicações visuais e tipografia da marca */
+.zelo-marca{display:inline-flex;align-items:center;gap:.56rem;max-width:100%;min-width:0}
+.zelo-marca-compacta>img{width:2.85rem;height:2.85rem;object-fit:contain;flex:none;border-radius:.8rem}
+.zelo-marca-compacta>span{display:inline-block;font-family:"Trebuchet MS","Arial Rounded MT Bold",Arial,sans-serif;font-style:italic;font-weight:950;font-size:clamp(1.2rem,2.4vw,1.65rem);letter-spacing:-.055em;line-height:1;color:#14365e;white-space:nowrap}
+.zelo-marca-compacta>span>span{font-weight:950}
+.zelo-marca-compacta>span>b{color:#d89b20;font-style:normal;font-size:1.14em;margin-left:.03em}
+.zelo-marca-imagem{display:block;max-width:100%;width:min(100%,258px);height:auto;aspect-ratio:620/190;object-fit:contain}
+.prime-login .zelo-login-lockup{width:clamp(205px,40vw,264px);margin-bottom:.2rem}
+.prime-login .portal-login-cabecalho{display:grid;gap:.4rem}
+.prime-login .portal-login-cabecalho h2{margin-top:.12rem}
+.navegacao-marca .marca{display:grid;justify-items:start;gap:.2rem}
+.navegacao-marca .zelo-marca-compacta>span{color:#fffdf1;font-size:1.5rem}
+.navegacao-marca .marca-subtitulo{color:#b5cee7;font-size:.72rem;font-weight:750;padding-left:3.5rem}
+.prime-brand{display:flex!important;flex-direction:row;align-items:center;gap:.7rem;min-width:0}
+.prime-brand .zelo-marca-compacta>img{width:2.45rem;height:2.45rem}
+.prime-brand .zelo-marca-compacta>span{font-size:1.32rem}
+.prime-brand-legenda{font-size:.78rem;line-height:1.25;color:var(--muted);white-space:nowrap;padding-left:.75rem;border-left:1px solid var(--line)}
+.entrada-marca{min-height:3.5rem;display:flex;align-items:center;justify-content:center;margin-bottom:.6rem}
+.entrada-marca .zelo-marca-compacta>img{width:3.35rem;height:3.35rem}
+.entrada-marca .zelo-marca-compacta>span{font-size:1.8rem}
+.portal-hero .portal-hero-marca{display:flex;align-items:center;gap:.8rem;letter-spacing:.04em;font-size:.72rem}
+.portal-hero .zelo-marca-compacta>img{width:2.35rem;height:2.35rem}
+.portal-hero .zelo-marca-compacta>span{color:#fff;font-size:1.3rem}
+.portal-hero .zelo-marca-compacta>span>b{color:#ffdb79}
+@media(max-width:639px){
+  .prime-login .zelo-login-lockup{width:min(230px,75vw)}
+  .prime-brand-legenda{display:none}
+  .prime-brand .zelo-marca-compacta>img{width:2.4rem;height:2.4rem}
+  .prime-brand .zelo-marca-compacta>span{font-size:1.32rem}
+  .entrada-marca{margin-bottom:.25rem}
+  .entrada-marca .zelo-marca-compacta>img{width:2.6rem;height:2.6rem}
+  .entrada-marca .zelo-marca-compacta>span{font-size:1.52rem}
+  .portal-hero .portal-hero-marca{flex-wrap:wrap;gap:.5rem}
+}
+html[data-tema="escuro"] .prime-brand .zelo-marca-compacta>span{color:#e6f1ff}
+html[data-tema="escuro"] .zelo-marca-compacta>span>b{color:#ffd275}
