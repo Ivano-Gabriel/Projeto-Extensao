@@ -606,7 +606,7 @@ html[data-tema="escuro"] .zelo-marca-compacta>span>b{color:#ffd275}
   .entrada-login>.portal-login.prime-login{
     display:grid;
     grid-template-columns:minmax(0,1fr);
-    grid-template-rows:clamp(210px,33%,255px) minmax(0,1fr);
+    grid-template-rows:clamp(235px,38%,290px) minmax(0,1fr);
     height:min(774px,calc(100svh - 1rem));
     min-height:0;
     max-width:460px;
@@ -644,12 +644,13 @@ html[data-tema="escuro"] .zelo-marca-compacta>span>b{color:#ffd275}
     height:clamp(103px,15svh,143px);
     min-height:0;
     margin:0 auto;
-    transform:none;
+    transform:translateY(-12px);
     overflow:visible;
   }
   .entrada-login .prime-login-cena .prime-book-spread{--book-scale:.83}
   .entrada-login .prime-login-cena>strong{
     margin:0;
+    margin-top:.4rem;
     max-width:100%;
     font-size:1.15rem;
     line-height:1.15;
@@ -657,6 +658,7 @@ html[data-tema="escuro"] .zelo-marca-compacta>span>b{color:#ffd275}
   }
   .entrada-login .prime-login-cena>p{
     margin:0;
+    margin-top:.1rem;
     max-width:100%;
     font-size:.76rem;
     line-height:1.25;
