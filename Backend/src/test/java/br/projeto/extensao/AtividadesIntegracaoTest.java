@@ -115,4 +115,28 @@ class AtividadesIntegracaoTest {
             .contentType(MediaType.APPLICATION_JSON).content("{\"opcao\":1}"))
             .andExpect(status().isNotFound());
     }
+
+    @Test
+    void professorDefinePrazoEAlunoNaoPodeResponderDepoisDoVencimento() throws Exception {
+        String futuro=entrada(turmaA).replace("\"explicacao\"",
+            "\"prazoEntrega\":\"2030-12-31\",\"explicacao\"");
+        mvc.perform(post("/api/professor/atividades")
+            .with(user("prof-a@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(futuro))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.prazoEntrega").value("2030-12-31"));
+        long id=jdbc.queryForObject("SELECT id FROM atividades",Long.class);
+        mvc.perform(get("/api/portal/atividades")
+            .with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].prazoEntrega").value("2030-12-31"))
+            .andExpect(jsonPath("$[0].correta").doesNotExist());
+        jdbc.update("UPDATE atividades SET prazo_entrega=? WHERE id=?",
+            java.sql.Date.valueOf(java.time.LocalDate.now().minusDays(2)),id);
+        mvc.perform(post("/api/portal/atividades/"+id+"/respostas")
+            .with(user("aluno-a@escola.test").roles("ALUNO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content("{\"opcao\":1}"))
+            .andExpect(status().isConflict());
+        org.junit.jupiter.api.Assertions.assertEquals(0,
+            jdbc.queryForObject("SELECT COUNT(*) FROM respostas_atividade",Integer.class));
+    }
+
 }
