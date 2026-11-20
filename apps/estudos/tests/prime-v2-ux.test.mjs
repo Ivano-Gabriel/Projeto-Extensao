@@ -132,3 +132,33 @@ test('o texto do login fica visualmente abaixo do livro mobile, sem alterar form
   assert.match(css,/\.entrada-login \.prime-login-cena>p\{[\s\S]*?margin-top:\.1rem/)
   assert.match(css,/\.entrada-login>\.portal-login\.prime-login\{[\s\S]*?height:min\(774px,calc\(100svh - 1rem\)\)/)
 })
+
+
+test('o folhear troca a pilha das folhas para Ciencias nao cobrir as outras materias',()=>{
+  const layers=[
+    {nome:'one',chave:'One',inicial:8,virada:1,meio:15},
+    {nome:'two',chave:'Two',inicial:7,virada:2,meio:30},
+    {nome:'three',chave:'Three',inicial:6,virada:3,meio:45},
+    {nome:'four',chave:'Four',inicial:5,virada:4,meio:60},
+  ]
+  for(const leaf of layers){
+    assert.ok(css.includes('primeBookStack'+leaf.chave),'Sem troca de profundidade: '+leaf.nome)
+    const selector=css.split('\n').find(line=>line.startsWith('.prime-book-page-'+leaf.nome+'{'))
+    assert.ok(selector?.includes('primeBookStack'+leaf.chave),'A folha '+leaf.nome+' nao esta animando z-index')
+    const start=css.indexOf('@keyframes primeBookStack'+leaf.chave+'{')
+    assert.ok(start>=0)
+    const keyframes=css.slice(start,css.indexOf('\n}',start)+2)
+    assert.match(keyframes,new RegExp('z-index:'+leaf.inicial))
+    assert.match(keyframes,new RegExp('z-index:'+leaf.virada))
+    assert.ok(keyframes.includes(leaf.meio+'%'),'A folha nao troca de camada ao cruzar a lombada')
+    assert.match(keyframes,/87%,100%\{z-index:/)
+  }
+  assert.match(css,/\.prime-book-page-back\{[\s\S]*?rotateY\(180deg\)/)
+})
+
+test('livro fica menos inclinado com ponta direita levemente mais baixa',()=>{
+  const trecho=css.slice(css.indexOf('@keyframes primeBookFloat{'),css.indexOf('@keyframes primeBookTurnOne{'))
+  assert.match(trecho,/rotate\(-10deg\)/)
+  assert.match(trecho,/rotate\(-7deg\)/)
+  assert.doesNotMatch(trecho,/rotate\(-15deg\)/)
+})
