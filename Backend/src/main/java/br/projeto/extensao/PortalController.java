@@ -40,9 +40,11 @@ public class PortalController {
 
     private final JdbcTemplate jdbc;
     private final UsuarioRepository usuarios;
-    public PortalController(JdbcTemplate jdbc,UsuarioRepository usuarios){
+    private final AuditoriaService auditoria;
+    public PortalController(JdbcTemplate jdbc,UsuarioRepository usuarios,AuditoriaService auditoria){
         this.jdbc=jdbc;
         this.usuarios=usuarios;
+        this.auditoria=auditoria;
     }
     private Usuario atual(Authentication auth){
         if(auth==null)return negar(HttpStatus.UNAUTHORIZED);
@@ -209,6 +211,7 @@ public class PortalController {
             "escola_id,aluno_id,origem_turma_id,destino_turma_id,direcao_id,ano_letivo) "+
             "VALUES(?,?,?,?,?,?)",escolaId,dados.alunoId(),origemId,destino.id(),
             user.getId(),origem.anoLetivo());
+        auditoria.registrar(escolaId,user.getId(),"ALUNO_TRANSFERIDO","MATRICULA",dados.alunoId());
         return ResponseEntity.noContent().build();
     }
     @GetMapping("/gestao/alunos/{alunoId}/transferencias")
