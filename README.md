@@ -37,6 +37,7 @@ Consulte [COMO_RODAR_LOCAL.md](./COMO_RODAR_LOCAL.md). O guia cobre API local na
 | Arquivo | Para quê serve |
 | --- | --- |
 | [Relatório acadêmico](docs/TRABALHO-ACADEMICO-ZELO.md) | Introdução, objetivos, metodologia, arquitetura, resultados e limitações |
+| [Roteiro de apresentação](docs/APRESENTACAO-ZELO.md) | Apresentação a duas vozes e demo do produto |
 | [Roteiro de homologação](docs/HOMOLOGACAO-ZELO.md) | 20 cenários, critérios, dispositivos e modelo de relato de bug |
 | [Massa de dados de teste](docs/DADOS-HOMOLOGACAO-ZELO.md) | Contas fictícias e atividades curadas para cadastro persistido |
 | [Plano de prontidão institucional](docs/PLANO-INSTITUCIONAL-ZELO.md) | Acessibilidade, LGPD, auditoria, disponibilidade e apresentação a órgãos |
