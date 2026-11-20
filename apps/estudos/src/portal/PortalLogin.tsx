@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Atom, BookOpenCheck, BookText, Brain, Code2, Eye, EyeOff, FlaskConical, Globe2, GraduationCap, Landmark, LockKeyhole, ShieldCheck, Sigma, Users } from 'lucide-react'
 import { apiEscolar } from './api'
+import ZeloMarca from '../marca/ZeloMarca'
 import type { UsuarioEscolar } from './api'
 import './portal.css'
 import './portal-premium.css'
@@ -105,8 +106,9 @@ export default function PortalLogin({entrar}:Props){
     </div>
     <div className="prime-login-corpo">
     <header className="portal-login-cabecalho">
-      <span className="sobretitulo">ACESSO INSTITUCIONAL</span>
-      <h2 id="portal-titulo-login">Bem-vindo ao Extensão</h2>
+      <ZeloMarca className="zelo-login-lockup"/>
+      <span className="sobretitulo">ACESSO ESCOLAR</span>
+      <h2 id="portal-titulo-login">Bem-vindo ao zELO+</h2>
       <p>Entre para continuar seus estudos.</p>
     </header>
     <div className="portal-perfis" role="group" aria-label="Área de acesso">
