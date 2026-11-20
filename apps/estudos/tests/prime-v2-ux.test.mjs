@@ -116,11 +116,19 @@ test('login mobile equilibrado coloca zELO+ na capa azul e deixa a marca branca 
 test('a capa ganha altura, mas a tela usual respeita viewport e libera scroll com teclado',()=>{
   assert.match(css,/\.entrada-login>\.portal-login\.prime-login\s*\{/)
   assert.match(css,/height:min\(774px,calc\(100svh - 1rem\)\)/)
-  assert.match(css,/grid-template-rows:clamp\(210px,33%,255px\) minmax\(0,1fr\)/)
+  assert.match(css,/grid-template-rows:clamp\(235px,38%,290px\) minmax\(0,1fr\)/)
   assert.match(css,/\.entrada-login \.prime-login-cena \.prime-book-spread\{--book-scale:\.83\}/)
   assert.match(css,/@media\(max-width:639px\) and \(max-height:650px\)/)
   assert.match(css,/\.entrada-login>\.portal-login\.prime-login\{height:auto;grid-template-rows:auto auto\}/)
   assert.match(css,/\.entrada-login\{height:auto;min-height:100svh;overflow-y:auto\}/)
   assert.match(css,/\.entrada-login:has\(>\.entrada-rodape\[role="status"\]\)>\.portal-login\.prime-login/)
   assert.match(css,/height:min\(745px,calc\(100svh - 2\.9rem\)\)/)
+})
+
+
+test('o texto do login fica visualmente abaixo do livro mobile, sem alterar formulario ou animacao',()=>{
+  assert.match(css,/\.entrada-login \.prime-login-cena \.prime-login-arte\{[\s\S]*?transform:translateY\(-12px\)/)
+  assert.match(css,/\.entrada-login \.prime-login-cena>strong\{[\s\S]*?margin-top:\.4rem/)
+  assert.match(css,/\.entrada-login \.prime-login-cena>p\{[\s\S]*?margin-top:\.1rem/)
+  assert.match(css,/\.entrada-login>\.portal-login\.prime-login\{[\s\S]*?height:min\(774px,calc\(100svh - 1rem\)\)/)
 })
