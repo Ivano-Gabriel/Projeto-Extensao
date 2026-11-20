@@ -44,6 +44,10 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
   const [temaAula,setTemaAula]=useState('')
   const [aulaSelecionada,setAulaSelecionada]=useState(0)
   const [marcadas,setMarcadas]=useState<Record<string,boolean>>({})
+  const [carregandoChamada,setCarregandoChamada]=useState(false)
+  const [chamadaPronta,setChamadaPronta]=useState(false)
+  const [registrandoPresenca,setRegistrandoPresenca]=useState<number|null>(null)
+  const [recargaChamada,setRecargaChamada]=useState(0)
   const atualizar=async()=>{
     const [t,a,v]=await Promise.all([apiEscolar.turmas(),apiEscolar.atividades(),apiEscolar.avisos()])
     setTurmas(t);setAtividades(a);setAvisos(v);setTurma(atual=>atual||t[0]?.id||0)
@@ -69,6 +73,22 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
     }).catch(e=>{if(vivo)setMensagem({erro:falha(e)})})
     return()=>{vivo=false}
   },[turma])
+  useEffect(()=>{
+    let ativo=true
+    setMarcadas({})
+    setChamadaPronta(false)
+    if(!aulaSelecionada){setCarregandoChamada(false);return}
+    setCarregandoChamada(true)
+    apiEscolar.presencasAula(aulaSelecionada)
+      .then(registros=>{
+        if(!ativo)return
+        setMarcadas(Object.fromEntries(registros.map(p=>[`${aulaSelecionada}:${p.alunoId}`,p.presente])))
+        setChamadaPronta(true)
+      })
+      .catch(e=>{if(ativo)setMensagem({erro:falha(e)})})
+      .finally(()=>{if(ativo)setCarregandoChamada(false)})
+    return()=>{ativo=false}
+  },[aulaSelecionada,recargaChamada])
   const completarQuestao=()=>{
     const q=questoes.find(q=>q.materialId===temaCatalogo&&assuntoDe(q.materia)===disciplina)
     const m=materiais.find(m=>m.id===temaCatalogo)
@@ -130,12 +150,13 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
     }catch(e){setMensagem({erro:falha(e)})}
   }
   const marcar=async(alunoId:number,presente:boolean)=>{
-    if(!aulaSelecionada)return
-    setMensagem({})
+    if(!aulaSelecionada||!chamadaPronta||registrandoPresenca!==null)return
+    setMensagem({});setRegistrandoPresenca(alunoId)
     try{await apiEscolar.registrarPresenca(aulaSelecionada,{alunoId,presente})
       setMarcadas(prev=>({...prev,[`${aulaSelecionada}:${alunoId}`]:presente}))
       setMensagem({ok:'Presença registrada.'})}
     catch(e){setMensagem({erro:falha(e)})}
+    finally{setRegistrandoPresenca(null)}
   }
   const selecionada=turmas.find(t=>t.id===turma)
   const atividadesDaTurma=atividades.filter(a=>a.turmaId===turma)
@@ -311,19 +332,25 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
       <Cartao titulo="Chamada de teste">
         <p>Registro provisório. A frequência oficial depende da escola.</p>
         <label htmlFor="prof-aula-lista">Aula</label>
-        <select id="prof-aula-lista" value={aulaSelecionada} onChange={e=>{setAulaSelecionada(Number(e.target.value));setMarcadas({})}}>
+        <select id="prof-aula-lista" value={aulaSelecionada} onChange={e=>{setAulaSelecionada(Number(e.target.value));setMarcadas({});setChamadaPronta(false)}}>
           {aulas.length===0&&<option value={0}>Nenhuma aula</option>}
           {aulas.map(a=><option key={a.id} value={a.id}>{a.data} · {a.tema} · {a.disciplina}</option>)}
         </select>
-        {aulaSelecionada>0&&<div className="portal-chamada">{alunos.map(aluno=>{
+        {aulaSelecionada>0&&<>
+          <button type="button" className="botao-secundario" disabled={carregandoChamada}
+            onClick={()=>setRecargaChamada(v=>v+1)}>Recarregar chamada</button>
+          {carregandoChamada&&<p role="status">Consultando presenças registradas...</p>}
+          {!carregandoChamada&&!chamadaPronta&&<p role="alert">Não foi possível carregar a chamada. Recarregue antes de marcar.</p>}
+        </>}
+        {aulaSelecionada>0&&chamadaPronta&&<div className="portal-chamada">{alunos.map(aluno=>{
           const chave=`${aulaSelecionada}:${aluno.id}`
           return <div className="portal-chamada-linha" key={aluno.id}>
             <strong>{aluno.nome}</strong>
             {Object.hasOwn(marcadas,chave)?
               <span className="portal-situacao"><CheckCircle2 size={16}/>{marcadas[chave]?'Presente':'Ausente'} anotado</span>:
               <div className="portal-chamada-botoes">
-                <button type="button" onClick={()=>void marcar(aluno.id,true)}>Presente</button>
-                <button type="button" onClick={()=>void marcar(aluno.id,false)}>Ausente</button>
+                <button type="button" disabled={registrandoPresenca!==null} onClick={()=>void marcar(aluno.id,true)}>Presente</button>
+                <button type="button" disabled={registrandoPresenca!==null} onClick={()=>void marcar(aluno.id,false)}>Ausente</button>
               </div>}
           </div>
         })}</div>}

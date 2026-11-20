@@ -247,6 +247,35 @@ class ComunicacaoEAprendizagemIntegracaoTest {
             .with(user("aluno-b@escola.test").roles("ALUNO")))
             .andExpect(jsonPath("$.aulasRegistradas").value(0));
     }
+    @Test void professorReabreChamadaSalvaSemExporDadosDeOutrosPerfis()throws Exception{
+        String aulaJson="""
+            {"turmaId":%d,"disciplina":"MATEMATICA","data":"2026-11-20","ordem":2,"tema":"Aula de teste"}
+            """.formatted(turmaA);
+        mvc.perform(post("/api/professor/aulas")
+            .with(user("prof-a@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(aulaJson))
+            .andExpect(status().isCreated());
+        Long aula=jdbc.queryForObject("SELECT id FROM aulas_registradas WHERE turma_id=?",Long.class,turmaA);
+        String rota="/api/professor/aulas/"+aula+"/presencas";
+        mvc.perform(get(rota).with(user("prof-a@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
+        String presencaJson="""
+            {"alunoId":%d,"presente":false}
+            """.formatted(alunoA);
+        mvc.perform(post(rota).with(user("prof-a@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(presencaJson))
+            .andExpect(status().isCreated());
+        mvc.perform(get(rota).with(user("prof-a@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].alunoId").value(alunoA))
+            .andExpect(jsonPath("$[0].presente").value(false))
+            .andExpect(jsonPath("$[0].email").doesNotExist());
+        mvc.perform(get(rota).with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(status().isForbidden());
+        mvc.perform(get(rota).with(user("prof-b@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isNotFound());
+        mvc.perform(get(rota)).andExpect(status().isUnauthorized());
+    }
     @Test void professorDeOutraEscolaNaoRegistraNemLePresenca()throws Exception{
         mvc.perform(post("/api/professor/aulas").with(user("prof-b@escola.test").roles("PROFESSOR"))
             .with(csrf()).contentType(MediaType.APPLICATION_JSON)
