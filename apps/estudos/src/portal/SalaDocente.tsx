@@ -4,16 +4,25 @@ import { BookOpen, Bot, ClipboardCopy, Edit3, Save, Sparkles, Trash2 } from 'luc
 import { apiEscolar } from './api'
 import type { MaterialFormulario, MaterialTurma, QuizGeradoIa, RespostaIa, StatusIa, TipoRascunho } from './api'
 import { falha } from './ComponentesPortal'
+import { prepararPublicacaoPacote } from './pacotes'
 
-type Props={turmaId:number;disciplina:string;disciplinas:readonly string[];aoPrepararQuiz:(quiz:QuizGeradoIa)=>void}
+type Props={turmaId:number;disciplina:string;disciplinas:readonly string[];
+  aoPrepararQuiz:(quiz:QuizGeradoIa)=>void;aoPublicarPacote:()=>Promise<void>}
 const vazio:MaterialFormulario={disciplina:'',titulo:'',conteudo:'',publicado:false}
-export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQuiz}:Props){
+export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQuiz,aoPublicarPacote}:Props){
   const [materiais,setMateriais]=useState<MaterialTurma[]>([])
   const [usuarioId,setUsuarioId]=useState(0)
   const [form,setForm]=useState<MaterialFormulario>(vazio)
   const [editando,setEditando]=useState<number|null>(null)
   const [tema,setTema]=useState('')
-  const [tipo,setTipo]=useState<TipoRascunho>('QUIZ')
+  const [tipo,setTipo]=useState<TipoRascunho|'PACOTE'>('QUIZ')
+  const [fonteTexto,setFonteTexto]=useState('')
+  const [arquivoPdf,setArquivoPdf]=useState<File|null>(null)
+  const [lendoPdf,setLendoPdf]=useState(false)
+  const [quantidade,setQuantidade]=useState(4)
+  const [prazoPacote,setPrazoPacote]=useState('')
+  const [pacote,setPacote]=useState<QuizGeradoIa[]|null>(null)
+  const [publicandoPacote,setPublicandoPacote]=useState(false)
   const [contexto,setContexto]=useState('')
   const [resposta,setResposta]=useState<RespostaIa|null>(null)
   const [statusIa,setStatusIa]=useState<StatusIa|null>(null)
@@ -24,7 +33,8 @@ export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQu
   useEffect(()=>{
     if(!turmaId)return
     let ativo=true
-    setErro('');setForm({...vazio,disciplina});setEditando(null)
+    setErro('');setForm({...vazio,disciplina});setEditando(null);setPacote(null)
+    setFonteTexto('');setArquivoPdf(null)
     Promise.all([apiEscolar.materiaisTurma(turmaId),apiEscolar.me(),apiEscolar.statusIa()])
       .then(([m,eu,si])=>{if(ativo){setMateriais(m);setUsuarioId(eu.id);setStatusIa(si)}})
       .catch(e=>{if(ativo)setErro(falha(e))})
@@ -50,13 +60,47 @@ export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQu
   }
   const gerar=async(e:FormEvent)=>{
     e.preventDefault();if(!turmaId||!disciplina)return
-    setGerando(true);setErro('');setResposta(null)
+    setGerando(true);setErro('');setResposta(null);setPacote(null);setSucesso('')
     try{
-      const r=await apiEscolar.gerarRascunho({turmaId,disciplina,tema,tipo,contexto})
-      setResposta(r)
-      setStatusIa(prev=>prev?{...prev,restantesHoje:r.restantesHoje}:prev)
-    }
-    catch(e){setErro(falha(e))}finally{setGerando(false)}
+      if(tipo==='PACOTE'){
+        const r=await apiEscolar.gerarPacote({
+          turmaId,disciplina,tema,contexto,fonteTexto,quantidade})
+        setPacote(r.questoes)
+        setStatusIa(prev=>prev?{...prev,restantesHoje:r.restantesHoje}:prev)
+      }else{
+        const r=await apiEscolar.gerarRascunho({turmaId,disciplina,tema,tipo,contexto,fonteTexto})
+        setResposta(r)
+        setStatusIa(prev=>prev?{...prev,restantesHoje:r.restantesHoje}:prev)
+      }
+    }catch(e){setErro(falha(e))}finally{setGerando(false)}
+  }
+  const lerPdf=async()=>{
+    if(!arquivoPdf||lendoPdf)return
+    setErro('');setSucesso('');setLendoPdf(true)
+    try{
+      const r=await apiEscolar.extrairPdf(turmaId,disciplina,arquivoPdf)
+      setFonteTexto(r.texto)
+      setSucesso('Texto extraído de '+r.paginas+' página(s). Revise o conteúdo antes de pedir à IA.'+
+        (r.truncado?' Foram usados apenas os primeiros 6.000 caracteres.':''))
+    }catch(e){setErro(falha(e))}finally{setLendoPdf(false)}
+  }
+  const editarQuestao=(indice:number,alteracoes:Partial<QuizGeradoIa>)=>{
+    setPacote(atual=>atual?.map((q,i)=>i===indice?{...q,...alteracoes}:q)||null)
+  }
+  const publicarPacote=async()=>{
+    if(!pacote||publicandoPacote)return
+    let salvo=false
+    setErro('');setSucesso('')
+    try{
+      const atividades=prepararPublicacaoPacote(turmaId,disciplina,pacote,prazoPacote)
+      setPublicandoPacote(true)
+      await apiEscolar.publicarLote({atividades})
+      salvo=true;setPacote(null)
+      await aoPublicarPacote()
+      setSucesso(atividades.length+' atividades publicadas. Os alunos da turma já podem respondê-las.')
+    }catch(e){
+      setErro(salvo?'O pacote foi publicado, mas a lista não atualizou. Recarregue a página para conferir.':falha(e))
+    }finally{setPublicandoPacote(false)}
   }
   if(!turmaId)return <p className="ext-empty">A direção precisa vincular você a uma turma.</p>
   const visiveis=materiais.filter(m=>m.disciplina===disciplina)
@@ -102,8 +146,10 @@ export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQu
         </p>
         <form className="portal-form" onSubmit={e=>void gerar(e)}>
           <label htmlFor="ia-tipo">Tipo de rascunho</label>
-          <select id="ia-tipo" value={tipo} onChange={e=>setTipo(e.target.value as TipoRascunho)}>
+          <select id="ia-tipo" value={tipo} onChange={e=>{setTipo(e.target.value as TipoRascunho|'PACOTE');setPacote(null);setResposta(null)}}>
             <option value="QUIZ">Questão de múltipla escolha</option>
+            <option value="RESUMO">Resumo do conteúdo</option>
+            <option value="PACOTE">Gerar pacote de questões (2 a 6)</option>
             <option value="EXPLICACAO">Explicação didática</option>
             <option value="PLANO_AULA">Plano de aula</option>
           </select>
@@ -114,10 +160,68 @@ export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQu
           <textarea id="ia-contexto" rows={3} maxLength={1200} value={contexto}
             placeholder="Ex.: linguagem simples, duração de 45 minutos."
             onChange={e=>setContexto(e.target.value)}/>
+          {tipo==='PACOTE'&&<>
+            <label htmlFor="ia-quantidade">Questões no pacote</label>
+            <select id="ia-quantidade" value={quantidade} onChange={e=>setQuantidade(Number(e.target.value))}>
+              {[2,3,4,5,6].map(n=><option key={n} value={n}>{n} questões</option>)}
+            </select>
+          </>}
+          <label htmlFor="ia-pdf">Importar PDF com texto (opcional)</label>
+          <input id="ia-pdf" type="file" accept=".pdf,application/pdf"
+            onChange={e=>setArquivoPdf(e.target.files?.[0]||null)}/>
+          <button type="button" className="botao-secundario" disabled={!arquivoPdf||lendoPdf||gerando}
+            onClick={()=>void lerPdf()}>
+            {lendoPdf?'Lendo PDF...':'Ler PDF para revisão'}
+          </button>
+          <small>PDF com texto selecionável, sem senha, até 2 MB e 12 páginas. Sem OCR e sem guardar o arquivo.</small>
+          <label htmlFor="ia-fonte">Texto do professor (opcional)</label>
+          <textarea id="ia-fonte" rows={6} maxLength={6000} value={fonteTexto}
+            onChange={e=>setFonteTexto(e.target.value)}
+            placeholder="Cole textos, resumos ou trechos da aula; palavras-chave também podem ir no campo Tema."/>
+          <small>O texto será enviado ao provedor de IA somente ao clicar em Gerar. Remova dados pessoais.</small>
           <p className="ext-aviso-ia">Não envie dados pessoais de alunos. Revise toda resposta antes de utilizar.</p>
           <button type="submit" className="botao-principal" disabled={!disciplina||gerando||!statusIa?.habilitada||statusIa.restantesHoje===0}>
-            <Sparkles size={18}/>{gerando?'Gerando...':'Gerar rascunho com IA'}</button>
+            <Sparkles size={18}/>{gerando?'Gerando...':tipo==='PACOTE'?'Gerar pacote de questões':'Gerar rascunho com IA'}</button>
         </form>
+        {pacote&&<div className="ext-resposta" aria-live="polite">
+          <h4>Revisão do professor — {pacote.length} questões</h4>
+          <p>Revise o texto, as alternativas, o gabarito e a explicação de cada questão. Nada será publicado antes da sua confirmação.</p>
+          {pacote.map((q,indice)=><div key={indice} className="ext-registro">
+            <div className="portal-form">
+              <strong>Questão {indice+1}</strong>
+              <label htmlFor={'pacote-titulo-'+indice}>Título</label>
+              <input id={'pacote-titulo-'+indice} value={q.titulo} maxLength={150}
+                onChange={e=>editarQuestao(indice,{titulo:e.target.value})}/>
+              <label htmlFor={'pacote-pergunta-'+indice}>Pergunta</label>
+              <textarea id={'pacote-pergunta-'+indice} rows={2} value={q.pergunta} maxLength={500}
+                onChange={e=>editarQuestao(indice,{pergunta:e.target.value})}/>
+              {q.opcoes.map((opcao,j)=><div key={j}>
+                <label htmlFor={'pacote-opcao-'+indice+'-'+j}>Alternativa {String.fromCharCode(65+j)}</label>
+                <input id={'pacote-opcao-'+indice+'-'+j} maxLength={200} value={opcao}
+                  onChange={e=>editarQuestao(indice,{opcoes:q.opcoes.map((v,k)=>k===j?e.target.value:v)})}/>
+              </div>)}
+              <label htmlFor={'pacote-correta-'+indice}>Gabarito correto</label>
+              <select id={'pacote-correta-'+indice} value={q.correta}
+                onChange={e=>editarQuestao(indice,{correta:Number(e.target.value)})}>
+                {[0,1,2,3].map(i=><option key={i} value={i}>{String.fromCharCode(65+i)}</option>)}
+              </select>
+              <label htmlFor={'pacote-explicacao-'+indice}>Explicação ao aluno</label>
+              <textarea id={'pacote-explicacao-'+indice} rows={2} maxLength={1000}
+                value={q.explicacao} onChange={e=>editarQuestao(indice,{explicacao:e.target.value})}/>
+            </div>
+          </div>)}
+          <label htmlFor="pacote-prazo">Prazo de entrega (opcional)</label>
+          <input id="pacote-prazo" type="date" value={prazoPacote}
+            onChange={e=>setPrazoPacote(e.target.value)}/>
+          <div className="ext-acoes">
+            <button type="button" className="botao-principal" disabled={publicandoPacote}
+              onClick={()=>void publicarPacote()}>
+              <Save size={17}/>{publicandoPacote?'Publicando...':'Publicar pacote revisado'}
+            </button>
+            <button type="button" className="botao-secundario" disabled={publicandoPacote}
+              onClick={()=>setPacote(null)}>Descartar rascunho</button>
+          </div>
+        </div>}
         {resposta&&<div className="ext-resposta" aria-live="polite">
           <strong>Rascunho para revisão</strong>
           {resposta.quiz?<div className="ext-quiz-ia">

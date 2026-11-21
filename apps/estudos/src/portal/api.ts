@@ -14,9 +14,12 @@ export type TurmaConfiguracao = TurmaEscolar & {descricao:string;cor:string}
 export type HorarioTurma = {id:number;turmaId:number;disciplina:string;diaSemana:number;inicio:string;fim:string;professorId:number|null;professorNome:string|null}
 export type MaterialTurma = {id:number;turmaId:number;professorId:number;disciplina:string;titulo:string;conteudo:string;publicado:boolean}
 export type MaterialFormulario = Pick<MaterialTurma,'disciplina'|'titulo'|'conteudo'|'publicado'>
-export type TipoRascunho = 'QUIZ'|'EXPLICACAO'|'PLANO_AULA'
+export type TipoRascunho = 'QUIZ'|'RESUMO'|'EXPLICACAO'|'PLANO_AULA'
 export type QuizGeradoIa = {titulo:string;pergunta:string;opcoes:string[];correta:number;explicacao:string}
 export type RespostaIa = {texto:string;status:'RASCUNHO';aviso:string;quiz:QuizGeradoIa|null;restantesHoje:number}
+export type TextoPdf = {texto:string;paginas:number;truncado:boolean}
+export type PacoteRascunhoIa = {questoes:QuizGeradoIa[];status:'RASCUNHO';aviso:string;restantesHoje:number}
+export type PacotePedidoIa = {turmaId:number;disciplina:string;tema:string;contexto:string;fonteTexto:string;quantidade:number}
 export type StatusIa = {habilitada:boolean;restantesHoje:number;mensagem:string}
 export type DisciplinaIaAluno = {turmaId:number;turmaNome:string;disciplina:string}
 export type ExplicacaoIa = {texto:string;aviso:string;restantesHoje:number}
@@ -91,6 +94,40 @@ export async function requisitar<T>(
   if(metodo!=='GET'&&!resposta.headers.get('content-type'))return undefined as T
   return jsonSeguro<T>(resposta)
 }
+export async function extrairTextoPdf(
+  turmaId:number,disciplina:string,arquivo:File,transport:typeof fetch=fetch
+):Promise<TextoPdf>{
+  if(!Number.isInteger(turmaId)||turmaId<=0||!disciplina)
+    throw new Error('Selecione a turma e a disciplina.')
+  if(arquivo.size<1||arquivo.size>2*1024*1024)
+    throw new Error('Selecione um PDF de até 2 MB.')
+  if(arquivo.type!=='application/pdf'||!arquivo.name.toLowerCase().endsWith('.pdf'))
+    throw new Error('Selecione um arquivo PDF válido.')
+  const csrf=await transport('/api/csrf',{
+    credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'},
+  })
+  if(!csrf.ok)throw new Error('Não foi possível iniciar a sessão segura.')
+  const dados=await jsonSeguro<{token:string}>(csrf)
+  if(!dados.token)throw new Error('Proteção da sessão indisponível.')
+  const form=new FormData()
+  form.append('turmaId',String(turmaId))
+  form.append('disciplina',disciplina)
+  form.append('arquivo',arquivo,arquivo.name)
+  const resposta=await transport('/api/professor/ia/pdf-extrair',{
+    method:'POST',credentials:'same-origin',cache:'no-store',redirect:'error',
+    headers:{Accept:'application/json','X-XSRF-TOKEN':dados.token},
+    body:form,
+  })
+  if(!resposta.ok){
+    if(resposta.status===403)throw new Error('Você não tem permissão para enviar PDF desta turma.')
+    if(resposta.status===413)throw new Error('PDF acima do limite de 2 MB.')
+    if(resposta.status===415)throw new Error('O arquivo não é um PDF válido.')
+    if(resposta.status===422)throw new Error('Use PDF com texto selecionável, sem senha e até 12 páginas.')
+    throw new Error('Não foi possível ler este PDF. Verifique o arquivo.')
+  }
+  return jsonSeguro<TextoPdf>(resposta)
+}
+
 export const apiEscolar={
   me:()=>requisitar<UsuarioEscolar>('GET','/api/me'),
   configuracaoTurma:(id:number)=>requisitar<TurmaConfiguracao>('GET',`/api/portal/turmas/${id}/configuracao`),
@@ -111,8 +148,13 @@ export const apiEscolar={
   disciplinasIaAluno:()=>requisitar<DisciplinaIaAluno[]>('GET','/api/portal/ia/disciplinas'),
   explicarIa:(body:{turmaId:number;disciplina:string;pergunta:string})=>
     requisitar<ExplicacaoIa>('POST','/api/portal/ia/explicar',body),
-  gerarRascunho:(body:{turmaId:number;disciplina:string;tema:string;tipo:TipoRascunho;contexto:string})=>
+  gerarRascunho:(body:{turmaId:number;disciplina:string;tema:string;tipo:TipoRascunho;contexto:string;fonteTexto?:string})=>
     requisitar<RespostaIa>('POST','/api/professor/ia/rascunho',body),
+  extrairPdf:extrairTextoPdf,
+  gerarPacote:(body:PacotePedidoIa)=>
+    requisitar<PacoteRascunhoIa>('POST','/api/professor/ia/pacote',body),
+  publicarLote:(body:{atividades:AtividadeFormulario[]})=>
+    requisitar<AtividadeEscolar[]>('POST','/api/professor/atividades/lote',body),
   login:(email:string,senha:string)=>requisitar<UsuarioEscolar>('POST','/api/login',{email,senha}),
   logout:()=>requisitar<void>('POST','/api/logout'),
   trocarSenha:(senhaAtual:string,novaSenha:string)=>

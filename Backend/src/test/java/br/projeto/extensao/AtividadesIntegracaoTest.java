@@ -117,6 +117,70 @@ class AtividadesIntegracaoTest {
     }
 
     @Test
+    void pacoteRevisadoProfessorPublicaTresQuestoesEAlunoRespondeSemAcessarGabarito() throws Exception {
+        String lote="""
+          {"atividades":[
+            {"turmaId":%d,"disciplina":"MATEMATICA","titulo":"QA: Frações 1",
+             "pergunta":"Quanto e metade de 10?","opcoes":["3","5","6","8"],"correta":1,
+             "explicacao":"Metade de 10 é 5."},
+            {"turmaId":%d,"disciplina":"MATEMATICA","titulo":"QA: Frações 2",
+             "pergunta":"Quanto e dobro de 4?","opcoes":["2","4","8","10"],"correta":2,
+             "explicacao":"Duas vezes quatro é oito."},
+            {"turmaId":%d,"disciplina":"MATEMATICA","titulo":"QA: Frações 3",
+             "pergunta":"Quanto e um quarto de 20?","opcoes":["4","5","10","15"],"correta":1,
+             "explicacao":"Vinte dividido por quatro resulta cinco."}
+          ]}
+          """.formatted(turmaA,turmaA,turmaA);
+        String url="/api/professor/atividades/lote";
+        mvc.perform(post(url).with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(lote))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$[2].titulo").value("QA: Frações 3"));
+        org.junit.jupiter.api.Assertions.assertEquals(3,
+            jdbc.queryForObject("SELECT COUNT(*) FROM atividades",Integer.class));
+        mvc.perform(get("/api/portal/atividades").with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[2].titulo").exists())
+            .andExpect(jsonPath("$[0].correta").doesNotExist())
+            .andExpect(jsonPath("$[0].explicacao").doesNotExist());
+        mvc.perform(get("/api/portal/atividades").with(user("aluno-b@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
+        Long primeiro=jdbc.queryForObject(
+            "SELECT id FROM atividades WHERE titulo='QA: Frações 1'",Long.class);
+        mvc.perform(post("/api/portal/atividades/"+primeiro+"/respostas")
+            .with(user("aluno-a@escola.test").roles("ALUNO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content("{\"opcao\":1}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.acertou").value(true));
+        org.junit.jupiter.api.Assertions.assertEquals(3,
+            jdbc.queryForObject("SELECT COUNT(*) FROM auditoria_escolar WHERE acao='ATIVIDADE_PUBLICADA'",
+                Integer.class));
+    }
+    @Test
+    void pacoteExigeDocenteCsrfMesmaTurmaEMesmaDisciplinaSemInsercaoParcial() throws Exception {
+        String item=entrada(turmaA);
+        String lote="{\"atividades\":["+item+","+item+"]}";
+        String url="/api/professor/atividades/lote";
+        mvc.perform(post(url).with(user("prof-b@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(lote))
+            .andExpect(status().isForbidden());
+        mvc.perform(post(url).with(user("aluno-a@escola.test").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(lote))
+            .andExpect(status().isForbidden());
+        mvc.perform(post(url).with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .contentType(MediaType.APPLICATION_JSON).content(lote))
+            .andExpect(status().isForbidden());
+        String outro=entrada(turmaB);
+        mvc.perform(post(url).with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"atividades\":["+item+","+outro+"]}"))
+            .andExpect(status().isBadRequest());
+        String invalida=item.replace("\"correta\":1","\"correta\":4");
+        mvc.perform(post(url).with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"atividades\":["+item+","+invalida+"]}"))
+            .andExpect(status().isBadRequest());
+        org.junit.jupiter.api.Assertions.assertEquals(0,
+            jdbc.queryForObject("SELECT COUNT(*) FROM atividades",Integer.class));
+    }
+    @Test
     void professorDefinePrazoEAlunoNaoPodeResponderDepoisDoVencimento() throws Exception {
         String futuro=entrada(turmaA).replace("\"explicacao\"",
             "\"prazoEntrega\":\"2030-12-31\",\"explicacao\"");

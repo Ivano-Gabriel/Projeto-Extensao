@@ -254,6 +254,137 @@ class TurmasEditaveisIntegracaoTest {
     }
 
     @Test
+    void iaValidaPacoteCompletoENaoAceitaDuplicatasOuGabaritoInvalido() {
+        String valido="""
+          {"questoes":[
+            {"titulo":"Revisão A","pergunta":"Quanto e 2 mais 2?","opcoes":["2","3","4","5"],
+             "correta":2,"explicacao":"Quatro."},
+            {"titulo":"Revisão B","pergunta":"Quanto e 3 mais 3?","opcoes":["4","5","6","7"],
+             "correta":2,"explicacao":"Seis."}
+          ]}
+          """;
+        var pacote=iaPedagogica.lerPacote(valido,2);
+        org.junit.jupiter.api.Assertions.assertEquals(2,pacote.size());
+        org.junit.jupiter.api.Assertions.assertEquals(2,pacote.get(1).correta());
+        org.junit.jupiter.api.Assertions.assertThrows(
+            org.springframework.web.server.ResponseStatusException.class,
+            ()->iaPedagogica.lerPacote(valido,3));
+        String duplicado=valido.replace("Quanto e 3 mais 3?","Quanto e 2 mais 2?");
+        org.junit.jupiter.api.Assertions.assertThrows(
+            org.springframework.web.server.ResponseStatusException.class,
+            ()->iaPedagogica.lerPacote(duplicado,2));
+        String gabaritoInvalido=valido.replace("\"correta\":2","\"correta\":9");
+        org.junit.jupiter.api.Assertions.assertThrows(
+            org.springframework.web.server.ResponseStatusException.class,
+            ()->iaPedagogica.lerPacote(gabaritoInvalido,2));
+    }
+    @Test
+    void iaPacoteProtegeDadosEValidacaoAntesDeChamadaExterna() throws Exception {
+        String pedido="""
+          {"turmaId":%d,"disciplina":"MATEMATICA","tema":"Frações",
+           "contexto":"Nível fácil","fonteTexto":"A metade de vinte é dez.","quantidade":3}
+          """.formatted(turma);
+        String rota="/api/professor/ia/pacote";
+        mvc.perform(post(rota).with(user("aluno-edit@escola.test").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(pedido))
+            .andExpect(status().isForbidden());
+        mvc.perform(post(rota).with(user("prof-edit-b@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(pedido))
+            .andExpect(status().isForbidden());
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .contentType(MediaType.APPLICATION_JSON).content(pedido))
+            .andExpect(status().isForbidden());
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(pedido))
+            .andExpect(status().isServiceUnavailable());
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content(pedido.replace("A metade de vinte é dez.","aluno@escola.com")))
+            .andExpect(status().isBadRequest());
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content(pedido.replace("\"quantidade\":3","\"quantidade\":7")))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void resumoEPlanoDeAulaPodemUsarTextoDeApoioSemVazarDadosPessoais() throws Exception {
+        String base="""
+          {"turmaId":%d,"disciplina":"MATEMATICA","tema":"Frações",
+           "tipo":"RESUMO","contexto":"Linguagem simples",
+           "fonteTexto":"Frações representam partes de um inteiro."}
+          """.formatted(turma);
+        String rota="/api/professor/ia/rascunho";
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(base))
+            .andExpect(status().isServiceUnavailable());
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content(base.replace("Frações representam partes de um inteiro.","Contato prof@escola.com")))
+            .andExpect(status().isBadRequest());
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content(base.replace("RESUMO","PLANO_AULA")))
+            .andExpect(status().isServiceUnavailable());
+        mvc.perform(post(rota).with(user("aluno-edit@escola.test").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(base))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void pdfDoProfessorExtraiTextoSemPublicarArquivoNemConsultarIa() throws Exception {
+        byte[] bytes;
+        try(var pdf=new org.apache.pdfbox.pdmodel.PDDocument()){
+            var page=new org.apache.pdfbox.pdmodel.PDPage();
+            pdf.addPage(page);
+            try(var cs=new org.apache.pdfbox.pdmodel.PDPageContentStream(pdf,page)){
+                cs.beginText();
+                cs.setFont(new org.apache.pdfbox.pdmodel.font.PDType1Font(
+                    org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.HELVETICA),12);
+                cs.newLineAtOffset(50,650);
+                cs.showText("Fractions describe parts of a whole.");
+                cs.endText();
+            }
+            var out=new java.io.ByteArrayOutputStream();
+            pdf.save(out);bytes=out.toByteArray();
+        }
+        var arquivo=new org.springframework.mock.web.MockMultipartFile(
+            "arquivo","conteudo.pdf","application/pdf",bytes);
+        String url="/api/professor/ia/pdf-extrair";
+        mvc.perform(multipart(url).file(arquivo)
+            .param("turmaId",turma.toString()).param("disciplina","MATEMATICA")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.texto",org.hamcrest.Matchers.containsString("Fractions describe")))
+            .andExpect(jsonPath("$.paginas").value(1))
+            .andExpect(jsonPath("$.truncado").value(false));
+        mvc.perform(multipart(url).file(arquivo)
+            .param("turmaId",turma.toString()).param("disciplina","MATEMATICA")
+            .with(user("aluno-edit@escola.test").roles("ALUNO")).with(csrf()))
+            .andExpect(status().isForbidden());
+        mvc.perform(multipart(url).file(arquivo)
+            .param("turmaId",turma.toString()).param("disciplina","MATEMATICA")
+            .with(user("prof-edit-b@escola.test").roles("PROFESSOR")).with(csrf()))
+            .andExpect(status().isForbidden());
+        mvc.perform(multipart(url).file(arquivo)
+            .param("turmaId",turma.toString()).param("disciplina","MATEMATICA")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isForbidden());
+        var falso=new org.springframework.mock.web.MockMultipartFile(
+            "arquivo","ata.pdf","application/pdf","sem PDF".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        mvc.perform(multipart(url).file(falso)
+            .param("turmaId",turma.toString()).param("disciplina","MATEMATICA")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf()))
+            .andExpect(status().isUnsupportedMediaType());
+        var grande=new org.springframework.mock.web.MockMultipartFile(
+            "arquivo","grande.pdf","application/pdf",new byte[2*1024*1024+1]);
+        mvc.perform(multipart(url).file(grande)
+            .param("turmaId",turma.toString()).param("disciplina","MATEMATICA")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf()))
+            .andExpect(status().isPayloadTooLarge());
+    }
+
+    @Test
     void direcaoTransfereAlunoEntreTurmasDaMesmaEscolaMantendoHistorico() throws Exception {
         jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES(?,?,?,2026)",
             escolaA,"3B","Terceiro B");
