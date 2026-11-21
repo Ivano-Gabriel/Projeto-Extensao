@@ -134,7 +134,7 @@ export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
   const recarregarFeed=async()=>setAvisos(await apiEscolar.avisos())
   return <div className="portal-paineis portal-mobile zelo-layout zelo-direcao">
     <NavegacaoDireta perfil="DIRECAO" atual={aba} mudar={setAba}/>
-    <main className="zelo-area-conteudo">
+    <main className={`zelo-area-conteudo ${aba==='inicio'?'zelo-area-inicio':''}`}>
     <MensagemStatus estado={mensagem}/>
     {carregando&&<Vazio texto="Carregando sua escola..."/>}
     {!carregando&&aba==='inicio'&&<>
