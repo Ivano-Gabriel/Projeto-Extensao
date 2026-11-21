@@ -1,11 +1,11 @@
+import NavegacaoDireta from './NavegacaoDireta'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ArrowRight, Bell, CalendarDays, Link2, School, Trash2, UserPlus, Users } from 'lucide-react'
 import { apiEscolar } from './api'
 import type { Aviso, MatriculaResumo, TurmaEscolar, UsuarioResumido, Vinculo } from './api'
-import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
+import { Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
 import { CriarAviso, Mural } from './Avisos'
-import { acoesPorPerfil } from './navegacao'
 import GestaoTurma from './GestaoTurma'
 import AuditoriaEscola from './AuditoriaEscola'
 import { prepararTransferencia, type TransferenciaPendente } from './transferencia'
@@ -132,11 +132,19 @@ export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
   const totalMatriculados=new Set(matriculas.map(m=>m.alunoId)).size
   const alunosSemTurma=Math.max(0,totalAlunos-totalMatriculados)
   const recarregarFeed=async()=>setAvisos(await apiEscolar.avisos())
-  return <div className="portal-paineis portal-mobile">
-    <Abas abas={acoesPorPerfil('DIRECAO')} atual={aba} mudar={setAba}/>
+  return <div className="portal-paineis portal-mobile zelo-layout zelo-direcao">
+    <NavegacaoDireta perfil="DIRECAO" atual={aba} mudar={setAba}/>
     <MensagemStatus estado={mensagem}/>
     {carregando&&<Vazio texto="Carregando sua escola..."/>}
     {!carregando&&aba==='inicio'&&<>
+      <Cartao titulo="O que fazer agora" classe="zelo-destaque-tarefa">
+        <div className="portal-acoes-rapidas">
+          <button type="button" className="botao-principal" onClick={()=>setAba('turmas')}>
+            <Link2 size={18}/> Organizar turmas <ArrowRight size={17}/></button>
+          <button type="button" className="botao-secundario" onClick={()=>setAba('avisos')}>
+            <Bell size={18}/> Publicar comunicado</button>
+        </div>
+      </Cartao>
       <div className="portal-metricas">
         <Selo valor={turmas.length} legenda="Turmas"/>
         <Selo valor={usuarios.filter(u=>u.papel==='PROFESSOR').length} legenda="Professores"/>
@@ -153,14 +161,7 @@ export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
         {alunosSemTurma>0&&<p className="portal-aviso-discreto">
           Existem {alunosSemTurma} alunos da escola sem matrícula encontrada no portal.</p>}
       </Cartao>
-      <Cartao titulo="Organizar a escola">
-        <div className="portal-acoes-rapidas">
-          <button type="button" className="botao-principal" onClick={()=>setAba('turmas')}>
-            <Link2 size={18}/> Organizar turmas <ArrowRight size={17}/></button>
-          <button type="button" className="botao-secundario" onClick={()=>setAba('avisos')}>
-            <Bell size={18}/> Publicar comunicado</button>
-        </div>
-      </Cartao>
+
       <Cartao titulo="Publicações recentes da comunidade">
         <Mural avisos={avisos.slice(0,3)} usuarioId={usuarioId} perfil="DIRECAO" atualizado={recarregarFeed}/>
       </Cartao>
