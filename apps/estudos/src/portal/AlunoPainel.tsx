@@ -75,6 +75,7 @@ export default function AlunoPainel(){
       .includes(buscaMaterial.trim().toLocaleLowerCase('pt-BR')))
   return <div className="portal-paineis portal-mobile zelo-layout zelo-aluno">
     <NavegacaoDireta perfil="ALUNO" atual={aba} mudar={setAba}/>
+    <main className="zelo-area-conteudo">
     <MensagemStatus estado={mensagem}/>
     {carregando&&<p className="portal-vazio">Carregando sua escola...</p>}
     {!carregando&&aba==='inicio'&&<>
@@ -220,5 +221,6 @@ export default function AlunoPainel(){
         <p className="portal-aviso-discreto">Somente aulas registradas no Extensão. Não é frequência oficial nem indica quantas faltas são permitidas.</p>
       </Cartao>
     </>}
+    </main>
   </div>
 }
