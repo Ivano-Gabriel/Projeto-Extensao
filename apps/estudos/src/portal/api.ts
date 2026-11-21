@@ -170,5 +170,7 @@ export const apiEscolar={
   presencasAula:(aulaId:number)=>requisitar<PresencaSalva[]>('GET',`/api/professor/aulas/${aulaId}/presencas`),
   registrarPresenca:(aulaId:number,body:{alunoId:number;presente:boolean})=>
     requisitar<void>('POST',`/api/professor/aulas/${aulaId}/presencas`,body),
+  corrigirPresenca:(aulaId:number,body:{alunoId:number;presente:boolean})=>
+    requisitar<void>('PUT',`/api/professor/aulas/${aulaId}/presencas`,body),
   assistente:(pergunta:string)=>requisitar<RespostaAssistente>('POST','/api/portal/assistente',{pergunta}),
 }
