@@ -12,6 +12,7 @@ import { falha } from './ComponentesPortal'
 import './portal.css'
 import './portal-academico.css'
 import './portal-premium.css'
+import './gestao-responsive.css'
 
 type Props={usuario:UsuarioEscolar;onSair:()=>Promise<void>;voltar?:()=>void}
 export default function Portal({usuario,onSair,voltar}:Props){
