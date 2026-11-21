@@ -387,7 +387,7 @@
   .entrada-login .prime-login-cena .prime-login-arte {
     height:clamp(130px,25dvh,210px);width:min(250px,100%);
   }
-  .entrada-login .prime-login-cena .prime-book-spread {--book-scale:clamp(.65,.13dvh + .6,.9)}
+  .entrada-login .prime-login-cena .prime-book-spread {--book-scale:.82}
   .entrada-login .prime-login-cena>strong {font-size:clamp(1.1rem,2.1vw,1.5rem)}
   .entrada-login .prime-login-cena>p {font-size:.86rem;line-height:1.35}
   .entrada-login .prime-login-corpo {padding:clamp(.85rem,2.1vh,1.7rem) clamp(1.1rem,2.7vw,2rem);gap:clamp(.4rem,1.5vh,.85rem)}
