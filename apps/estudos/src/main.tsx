@@ -4,6 +4,7 @@ import App from './App'
 import './styles.css'
 import './escola/escola.css'
 import './prime-v2.css'
+import './experiencia-zelo.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
