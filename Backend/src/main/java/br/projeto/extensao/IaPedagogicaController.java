@@ -74,6 +74,7 @@ public class IaPedagogicaController {
     private final JdbcTemplate jdbc;
     private final UsuarioRepository usuarios;
     private final IaCotasService cotas;
+    private final IaExecucaoComCota execucao;
     private final SimuladosService simulados;
     private final RestClient client;
     private final JsonMapper json;
@@ -83,12 +84,12 @@ public class IaPedagogicaController {
     private final boolean alunosHabilitados;
 
     public IaPedagogicaController(JdbcTemplate jdbc,UsuarioRepository usuarios,
-            IaCotasService cotas,SimuladosService simulados,JsonMapper json,
+            IaCotasService cotas,IaExecucaoComCota execucao,SimuladosService simulados,JsonMapper json,
             @Value("${GROQ_API_KEY:}") String chave,
             @Value("${GROQ_MODEL:qwen/qwen3.8-27b}") String modelo,
             @Value("${EXTENSAO_IA_ENABLED:false}") boolean habilitada,
             @Value("${EXTENSAO_IA_ALUNOS_ENABLED:false}") boolean alunosHabilitados) {
-        this.jdbc=jdbc;this.usuarios=usuarios;this.cotas=cotas;this.simulados=simulados;
+        this.jdbc=jdbc;this.usuarios=usuarios;this.cotas=cotas;this.execucao=execucao;this.simulados=simulados;
         this.chave=chave;this.modelo=modelo;this.habilitada=habilitada;
         this.alunosHabilitados=alunosHabilitados;this.json=json;
         LOG.info("IA escolar: chaveConfigurada={}, modelo={}, professorHabilitado={}, alunoHabilitado={}",
@@ -300,7 +301,7 @@ public class IaPedagogicaController {
         autorizarProfessor(professor,pedido.turmaId(),pedido.disciplina());
         impedirDadosPessoais(pedido.tema(),pedido.contexto(),pedido.fonteTexto());
         exigirAtiva(Papel.PROFESSOR);
-        int restantes=cotas.reservar(professor.getId(),professor.getPapel());
+        return execucao.executar(professor.getId(),professor.getPapel(),restantes->{
         int quantidade=pedido.quantidade();
         String instrucoes="Você é um assistente pedagógico de ensino médio do Brasil. "+
             "Gere EXATAMENTE "+quantidade+" questões ORIGINAIS em português como RASCUNHO. "+
@@ -318,6 +319,7 @@ public class IaPedagogicaController {
         String bruto=chamar(instrucoes,entrada,true,3500);
         return ResponseEntity.ok().cacheControl(CacheControl.noStore())
             .body(new PacoteRascunho(lerPacote(bruto,quantidade),"RASCUNHO",ALERTA,restantes));
+        });
     }
 
     @PostMapping("/professor/ia/rascunho")
@@ -326,7 +328,7 @@ public class IaPedagogicaController {
         autorizarProfessor(professor,pedido);
         impedirDadosPessoais(pedido.tema(),pedido.contexto(),pedido.fonteTexto());
         exigirAtiva(Papel.PROFESSOR);
-        int restantes=cotas.reservar(professor.getId(),professor.getPapel());
+        return execucao.executar(professor.getId(),professor.getPapel(),restantes->{
         boolean quiz="QUIZ".equals(pedido.tipo());
         String instrucoes="Você é um assistente pedagógico de ensino médio brasileiro. "+
             "Gere apenas RASCUNHOS para conferência humana, em português. "+
@@ -354,6 +356,7 @@ public class IaPedagogicaController {
             "\nExplicação: "+quizGerado.explicacao();
         return ResponseEntity.ok().cacheControl(CacheControl.noStore())
             .body(new Rascunho(descricao,"RASCUNHO",ALERTA,quizGerado,restantes));
+        });
     }
     @PostMapping("/portal/provas/simulados")
     public ResponseEntity<SimuladosService.Detalhe> gerarSimulado(
@@ -362,7 +365,7 @@ public class IaPedagogicaController {
         autorizarAluno(aluno,new Duvida(pedido.turmaId(),pedido.disciplina(),"Simulado de estudo"));
         impedirDadosPessoais(pedido.tema(),pedido.fonteTexto());
         exigirAtiva(Papel.ALUNO);
-        cotas.reservar(aluno.getId(),aluno.getPapel());
+        return execucao.executar(aluno.getId(),aluno.getPapel(),restantes->{
         String dificuldade=switch(pedido.dificuldade()){
             case "FACIL"->"BÁSICA: memorização, conceitos e aplicação direta";
             case "MEDIO"->"INTERMEDIÁRIA: compreensão e resolução com duas etapas";
@@ -388,6 +391,7 @@ public class IaPedagogicaController {
         return ResponseEntity.status(HttpStatus.CREATED).cacheControl(CacheControl.noStore())
             .body(simulados.criar(aluno,pedido.turmaId(),pedido.disciplina(),
                 pedido.tema().trim(),pedido.dificuldade(),questoes));
+        });
     }
 
     @PostMapping("/portal/ia/explicar")
@@ -396,7 +400,7 @@ public class IaPedagogicaController {
         autorizarAluno(aluno,pedido);
         impedirDadosPessoais(pedido.pergunta());
         exigirAtiva(Papel.ALUNO);
-        int restantes=cotas.reservar(aluno.getId(),aluno.getPapel());
+        return execucao.executar(aluno.getId(),aluno.getPapel(),restantes->{
         String instrucoes="Você é tutor de aprendizagem de ensino médio, em português "+
             "do Brasil. Explique o conteúdo passo a passo, com um exemplo simples "+
             "e uma pergunta de compreensão no final. Ajude o estudante a pensar, "+
@@ -409,5 +413,6 @@ public class IaPedagogicaController {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(
             new Explicacao(texto,"Explicação gerada por IA. Confira com seu professor ou material didático.",
                 restantes));
+        });
     }
 }
