@@ -254,6 +254,60 @@ class TurmasEditaveisIntegracaoTest {
     }
 
     @Test
+    void iaValidaPacoteCompletoENaoAceitaDuplicatasOuGabaritoInvalido() {
+        String valido="""
+          {"questoes":[
+            {"titulo":"Revisão A","pergunta":"Quanto e 2 mais 2?","opcoes":["2","3","4","5"],
+             "correta":2,"explicacao":"Quatro."},
+            {"titulo":"Revisão B","pergunta":"Quanto e 3 mais 3?","opcoes":["4","5","6","7"],
+             "correta":2,"explicacao":"Seis."}
+          ]}
+          """;
+        var pacote=iaPedagogica.lerPacote(valido,2);
+        org.junit.jupiter.api.Assertions.assertEquals(2,pacote.size());
+        org.junit.jupiter.api.Assertions.assertEquals(2,pacote.get(1).correta());
+        org.junit.jupiter.api.Assertions.assertThrows(
+            org.springframework.web.server.ResponseStatusException.class,
+            ()->iaPedagogica.lerPacote(valido,3));
+        String duplicado=valido.replace("Quanto e 3 mais 3?","Quanto e 2 mais 2?");
+        org.junit.jupiter.api.Assertions.assertThrows(
+            org.springframework.web.server.ResponseStatusException.class,
+            ()->iaPedagogica.lerPacote(duplicado,2));
+        String gabaritoInvalido=valido.replace("\"correta\":2","\"correta\":9");
+        org.junit.jupiter.api.Assertions.assertThrows(
+            org.springframework.web.server.ResponseStatusException.class,
+            ()->iaPedagogica.lerPacote(gabaritoInvalido,2));
+    }
+    @Test
+    void iaPacoteProtegeDadosEValidacaoAntesDeChamadaExterna() throws Exception {
+        String pedido="""
+          {"turmaId":%d,"disciplina":"MATEMATICA","tema":"Frações",
+           "contexto":"Nível fácil","fonteTexto":"A metade de vinte é dez.","quantidade":3}
+          """.formatted(turma);
+        String rota="/api/professor/ia/pacote";
+        mvc.perform(post(rota).with(user("aluno-edit@escola.test").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(pedido))
+            .andExpect(status().isForbidden());
+        mvc.perform(post(rota).with(user("prof-edit-b@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(pedido))
+            .andExpect(status().isForbidden());
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .contentType(MediaType.APPLICATION_JSON).content(pedido))
+            .andExpect(status().isForbidden());
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(pedido))
+            .andExpect(status().isServiceUnavailable());
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content(pedido.replace("A metade de vinte é dez.","aluno@escola.com")))
+            .andExpect(status().isBadRequest());
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content(pedido.replace("\"quantidade\":3","\"quantidade\":7")))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void direcaoTransfereAlunoEntreTurmasDaMesmaEscolaMantendoHistorico() throws Exception {
         jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES(?,?,?,2026)",
             escolaA,"3B","Terceiro B");
