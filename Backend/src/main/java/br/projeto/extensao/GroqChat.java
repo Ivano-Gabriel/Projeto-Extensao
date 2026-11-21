@@ -10,13 +10,16 @@ public final class GroqChat {
     private GroqChat() {}
 
     public static Map<String,Object> requisicao(String modelo,String instrucoes,String entrada,boolean quiz) {
+        return requisicao(modelo,instrucoes,entrada,quiz,quiz?1150:700);
+    }
+    public static Map<String,Object> requisicao(String modelo,String instrucoes,String entrada,boolean quiz,int maxTokens) {
         Map<String,Object> pedido=new HashMap<>();
         pedido.put("model",modelo);
         pedido.put("messages",List.of(
             Map.of("role","system","content",instrucoes),
             Map.of("role","user","content",entrada)));
         pedido.put("temperature",0.3);
-        pedido.put("max_completion_tokens",quiz?1150:700);
+        pedido.put("max_completion_tokens",Math.min(3500,Math.max(200,maxTokens)));
         if(quiz)pedido.put("response_format",Map.of("type","json_object"));
         return pedido;
     }
