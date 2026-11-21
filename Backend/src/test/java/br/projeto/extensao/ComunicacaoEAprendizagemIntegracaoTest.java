@@ -94,6 +94,21 @@ class ComunicacaoEAprendizagemIntegracaoTest {
             .andExpect(jsonPath("$[0].acao").value("COMUNICADO_PUBLICADO"))
             .andExpect(jsonPath("$[1].acao").value("COMUNICADO_PUBLICADO"));
     }
+    @Test void diagnosticoIaSoDirecaoConsultaSemRevelarChave()throws Exception{
+        String rota="/api/gestao/ia/diagnostico";
+        mvc.perform(get(rota).with(user("dir-a@escola.test").roles("DIRECAO")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.chaveConfigurada").value(false))
+            .andExpect(jsonPath("$.professorHabilitado").value(false))
+            .andExpect(jsonPath("$.alunoHabilitado").value(false))
+            .andExpect(jsonPath("$.modelo").value("qwen/qwen3.8-27b"))
+            .andExpect(jsonPath("$.chave").doesNotExist())
+            .andExpect(jsonPath("$.token").doesNotExist());
+        mvc.perform(get(rota).with(user("prof-a@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isForbidden());
+        mvc.perform(get(rota).with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(status().isForbidden());
+    }
     @Test void assistenteCalculaPorcentagemEmPerguntaDireta()throws Exception{
         mvc.perform(post("/api/portal/assistente")
             .with(user("aluno-a@escola.test").roles("ALUNO")).with(csrf())
