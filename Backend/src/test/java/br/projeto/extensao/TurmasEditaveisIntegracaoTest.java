@@ -308,6 +308,30 @@ class TurmasEditaveisIntegracaoTest {
     }
 
     @Test
+    void resumoEPlanoDeAulaPodemUsarTextoDeApoioSemVazarDadosPessoais() throws Exception {
+        String base="""
+          {"turmaId":%d,"disciplina":"MATEMATICA","tema":"Frações",
+           "tipo":"RESUMO","contexto":"Linguagem simples",
+           "fonteTexto":"Frações representam partes de um inteiro."}
+          """.formatted(turma);
+        String rota="/api/professor/ia/rascunho";
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(base))
+            .andExpect(status().isServiceUnavailable());
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content(base.replace("Frações representam partes de um inteiro.","Contato prof@escola.com")))
+            .andExpect(status().isBadRequest());
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content(base.replace("RESUMO","PLANO_AULA")))
+            .andExpect(status().isServiceUnavailable());
+        mvc.perform(post(rota).with(user("aluno-edit@escola.test").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(base))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
     void pdfDoProfessorExtraiTextoSemPublicarArquivoNemConsultarIa() throws Exception {
         byte[] bytes;
         try(var pdf=new org.apache.pdfbox.pdmodel.PDDocument()){
