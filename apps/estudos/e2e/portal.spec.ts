@@ -134,6 +134,6 @@ test('login responsivo e acessível no Chromium mobile sem conta real',async({pa
   await page.goto('/')
   await expect(page.getByRole('heading',{name:'Bem-vindo ao zELO+'})).toBeVisible()
   await expect(page.getByLabel('E-mail')).toBeVisible()
-  await expect(page.getByLabel('Senha')).toBeVisible()
+  await expect(page.locator('#portal-senha')).toBeVisible()
   await expect(page.getByRole('button',{name:'Entrar'})).toBeVisible()
 })
