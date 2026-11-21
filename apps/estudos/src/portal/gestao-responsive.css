@@ -235,6 +235,7 @@
     overflow-y:auto;overscroll-behavior:contain;
     padding:1rem 1rem calc(1.2rem + env(safe-area-inset-bottom));
     background:#f8fbfe;border-radius:1.35rem 1.35rem 0 0;
+    animation:none;transform:none;box-sizing:border-box;
   }
   .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-mais-itens{
     display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem;
