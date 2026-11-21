@@ -29,6 +29,20 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Rodar testes reais de interface com dados sintéticos simulados
         run: npx playwright test --config=e2e/playwright.config.ts
+      - name: Conferir credenciais de contas QA e testar API real
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          QA_ALUNO_EMAIL: ${{ secrets.QA_ALUNO_EMAIL }}
+          QA_ALUNO_SENHA: ${{ secrets.QA_ALUNO_SENHA }}
+          QA_PROFESSOR_EMAIL: ${{ secrets.QA_PROFESSOR_EMAIL }}
+          QA_PROFESSOR_SENHA: ${{ secrets.QA_PROFESSOR_SENHA }}
+          QA_DIRECAO_EMAIL: ${{ secrets.QA_DIRECAO_EMAIL }}
+          QA_DIRECAO_SENHA: ${{ secrets.QA_DIRECAO_SENHA }}
+        run: |
+          test -n "$QA_ALUNO_EMAIL" && test -n "$QA_ALUNO_SENHA"
+          test -n "$QA_PROFESSOR_EMAIL" && test -n "$QA_PROFESSOR_SENHA"
+          test -n "$QA_DIRECAO_EMAIL" && test -n "$QA_DIRECAO_SENHA"
+          npx playwright test --config=e2e/playwright.staging.config.ts
       - name: Salvar rastros e capturas de falhas
         if: failure()
         uses: actions/upload-artifact@v4
