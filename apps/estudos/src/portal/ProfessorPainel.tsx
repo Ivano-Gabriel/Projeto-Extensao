@@ -3,10 +3,11 @@ import type { FormEvent } from 'react'
 import { ArrowRight, Bell, BookOpen, CalendarDays, CheckCircle2, ClipboardList, Download, Sparkles, Users } from 'lucide-react'
 import { apiEscolar } from './api'
 import type { AlunoResumo, AtividadeEscolar, AulaEscolar, Aviso, DesempenhoAluno, QuizGeradoIa, TurmaEscolar } from './api'
-import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
+import { Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
 import { CriarAviso, Mural } from './Avisos'
 import { acoesPorPerfil, opcoesProfessor } from './navegacao'
 import SalaDocente from './SalaDocente'
+import NavegacaoPortal from './NavegacaoPortal'
 import { baixarRelatorio } from './RelatorioCsv'
 import { materiais } from '../dados/materiais'
 import { questoes } from '../dados/questoes'
@@ -180,25 +181,28 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
   const respondidasDaTurma=desempenho.reduce((total,a)=>total+a.respondidas,0)
   const recarregarFeed=async()=>setAvisos(await apiEscolar.avisos())
   const temas=materiais.filter(m=>assuntoDe(m.materia)===disciplina)
-  return <div className="portal-paineis portal-mobile">
-    <Abas abas={acoesPorPerfil('PROFESSOR')} atual={aba} mudar={setAba}/>
+  return <div className="portal-paineis portal-mobile portal-ux-shell portal-ux-professor">
+    <NavegacaoPortal perfil="PROFESSOR" atual={aba} mudar={setAba}/>
+    <main className="portal-ux-workspace">
     <MensagemStatus estado={mensagem}/>
-    {!carregando&&<div className="portal-turma-barra">
-      <label htmlFor="prof-turma-ativa">Turma atual</label>
-      <select id="prof-turma-ativa" value={turma} onChange={e=>setTurma(Number(e.target.value))}>
-        {turmas.length===0&&<option value={0}>Sem turmas</option>}
-        {turmas.map(t=><option key={t.id} value={t.id}>{t.codigo} · {t.nome}</option>)}
-      </select>
-      {disciplina&&<span className="portal-chip">{disciplina}</span>}
-    </div>}
+    {!carregando&&<section className="portal-turma-barra portal-ux-turma-contexto" aria-label="Contexto da aula">
+      <div className="portal-ux-contexto-titulo">
+        <span className="portal-ux-eyebrow">TRABALHANDO AGORA</span>
+        <strong>Escolha a turma de hoje</strong>
+        <small>As ações e os alunos mudam conforme a turma selecionada.</small>
+      </div>
+      <div className="portal-ux-contexto-campo">
+        <label htmlFor="prof-turma-ativa">Turma atual</label>
+        <select id="prof-turma-ativa" value={turma} onChange={e=>setTurma(Number(e.target.value))}>
+          {turmas.length===0&&<option value={0}>Sem turmas</option>}
+          {turmas.map(t=><option key={t.id} value={t.id}>{t.codigo} · {t.nome}</option>)}
+        </select>
+        {disciplina&&<span className="portal-chip">{disciplina.replaceAll('_',' ')}</span>}
+      </div>
+    </section>}
     {carregando&&<Vazio texto="Carregando suas turmas..."/>}
     {!carregando&&aba==='inicio'&&<>
-      <div className="portal-metricas">
-        <Selo valor={turmas.length} legenda="Turmas"/>
-        <Selo valor={alunos.length} legenda="Alunos na turma"/>
-        <Selo valor={atividades.length} legenda="Atividades"/>
-      </div>
-      <Cartao titulo="Sua próxima ação">
+      <Cartao titulo="Sua próxima ação" classe="portal-ux-next">
         <p>{selecionada?`Você está na turma ${selecionada.codigo}.`:'Você ainda não foi vinculado a uma turma.'}</p>
         <div className="portal-acoes-rapidas">
           <button type="button" className="botao-principal" disabled={!turma||!disciplina}
@@ -209,6 +213,12 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
             <Bell size={18}/> Avisar turma</button>
         </div>
       </Cartao>
+      <div className="portal-metricas">
+        <Selo valor={turmas.length} legenda="Turmas"/>
+        <Selo valor={alunos.length} legenda="Alunos na turma"/>
+        <Selo valor={atividadesDaTurma.length} legenda="Atividades da turma"/>
+      </div>
+
       <Cartao titulo="Feed de turma · publicações recentes">
         <p>Seu perfil docente publica orientações e conteúdos somente nas turmas vinculadas.
           Os alunos veem o mesmo feed na conta deles.</p>
@@ -385,5 +395,6 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
         })}</div>}
       </Cartao>
     </>}
+    </main>
   </div>
 }
