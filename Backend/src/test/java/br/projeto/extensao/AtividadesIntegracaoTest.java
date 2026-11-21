@@ -29,6 +29,7 @@ class AtividadesIntegracaoTest {
 
     @BeforeEach
     void preparar(){
+        jdbc.update("DELETE FROM auditoria_escolar");
         jdbc.update("DELETE FROM respostas_atividade");
         jdbc.update("DELETE FROM questoes_atividade");
         jdbc.update("DELETE FROM atividades");
