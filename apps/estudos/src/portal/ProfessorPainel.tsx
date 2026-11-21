@@ -304,7 +304,8 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
         </div>):<Vazio texto="Nenhuma atividade publicada."/>}
       </Cartao>
     </>}
-    {!carregando&&aba==='materiais'&&<SalaDocente turmaId={turma} disciplina={disciplina} disciplinas={disciplinas} aoPrepararQuiz={prepararQuizIa}/>}
+    {!carregando&&aba==='materiais'&&<SalaDocente turmaId={turma} disciplina={disciplina} disciplinas={disciplinas} aoPrepararQuiz={prepararQuizIa}
+      aoPublicarPacote={async()=>setAtividades(await apiEscolar.atividades())}/>}
     {!carregando&&aba==='mural'&&<>
       <Cartao titulo="Postar aviso">
         <CriarAviso key={turma} turmaInicial={turma} turmas={turmas} como="PROFESSOR" enviado={async()=>setAvisos(await apiEscolar.avisos())}/>
