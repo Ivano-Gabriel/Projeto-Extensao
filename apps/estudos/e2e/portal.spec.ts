@@ -137,3 +137,40 @@ test('login responsivo e acessível no Chromium mobile sem conta real',async({pa
   await expect(page.locator('#portal-senha')).toBeVisible()
   await expect(page.getByRole('button',{name:'Entrar'})).toBeVisible()
 })
+
+
+test('login desktop cabe na altura normal sem barra de rolagem vertical',async({page})=>{
+  await page.setViewportSize({width:1366,height:768})
+  await page.route('**/api/me',route=>route.fulfill({
+    status:401,contentType:'application/json',body:JSON.stringify({message:'Faça login'})
+  }))
+  await page.goto('/')
+  await expect(page.getByRole('heading',{name:'Bem-vindo ao zELO+'})).toBeVisible()
+  await expect(page.getByRole('button',{name:'Entrar'})).toBeVisible()
+  await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollHeight-window.innerHeight)).toBeLessThan(3)
+})
+
+test('professor encontra próxima ação e navega por seções no painel',async({page})=>{
+  await portalSimulado(page,'PROFESSOR')
+  await page.setViewportSize({width:1366,height:850})
+  await page.goto('/')
+  const nav=page.getByRole('tablist',{name:'Navegação do professor'})
+  await expect(nav).toBeVisible()
+  await expect(page.getByRole('heading',{name:'Sua próxima ação'})).toBeVisible()
+  await expect(page.getByLabel('Turma atual')).toBeVisible()
+  await nav.getByRole('tab',{name:/Atividades/}).click()
+  await expect(nav.getByRole('tab',{name:/Atividades/})).toHaveAttribute('aria-selected','true')
+  await expect(page.getByRole('heading',{name:'Criar atividade da turma'})).toBeVisible()
+})
+
+test('direção navega com menu por áreas sem abrir todas as seções',async({page})=>{
+  await portalSimulado(page,'DIRECAO')
+  await page.setViewportSize({width:390,height:844})
+  await page.goto('/')
+  const nav=page.getByRole('tablist',{name:'Navegação da direção'})
+  await expect(nav).toBeVisible()
+  await expect(page.getByRole('heading',{name:'Sua próxima ação'})).toBeVisible()
+  await nav.getByRole('tab',{name:/Pessoas/}).click()
+  await expect(nav.getByRole('tab',{name:/Pessoas/})).toHaveAttribute('aria-selected','true')
+  await expect(page.getByRole('heading',{name:'Criar conta'})).toBeVisible()
+})
