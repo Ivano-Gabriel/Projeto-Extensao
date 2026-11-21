@@ -443,3 +443,107 @@
   .prime-menu-livro.aberto .prime-livro-capa-tampa {transform:rotateY(-145deg)}
   .prime-menu-livro.aberto .prime-livro-folha {transform:rotateY(-140deg)}
 }
+
+/* Aluno: cabeçalho e abas uniformes ao navegar para qualquer seção. */
+.portal-pagina--aluno .portal-hero {
+  display:grid;min-height:180px;align-content:center;gap:.65rem;
+  background:linear-gradient(118deg,#142f4f,#245c89 76%,#38719b);
+}
+.portal-pagina--aluno .portal-hero .zelo-marca-compacta>img {
+  width:clamp(3.05rem,5vw,4rem);height:clamp(3.05rem,5vw,4rem);
+}
+.portal-pagina--aluno .portal-hero .zelo-marca-compacta>span {
+  font-size:clamp(1.5rem,3.3vw,2.1rem);
+}
+.portal-pagina--aluno .portal-hero h1 {
+  font-size:clamp(1.75rem,4vw,2.6rem);
+}
+.portal-paineis.portal-mobile:not(.portal-ux-shell) {
+  display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;
+}
+.portal-paineis.portal-mobile:not(.portal-ux-shell)>.portal-abas {
+  grid-column:1/-1;display:flex;gap:.45rem;overflow-x:auto;
+  scroll-behavior:smooth;scroll-snap-type:x proximity;
+  max-width:100%;padding:.45rem;
+  border:1px solid #d6e5f0;border-radius:1rem;
+  background:linear-gradient(125deg,#edf5fc,#f9fcff);
+}
+.portal-paineis.portal-mobile:not(.portal-ux-shell)>.portal-abas button {
+  flex:0 0 auto;white-space:nowrap;scroll-snap-align:start;
+  padding:.7rem 1rem;min-height:3.05rem;
+  border:1px solid transparent;color:#395874;font-size:.85rem;
+}
+.portal-paineis.portal-mobile:not(.portal-ux-shell)>.portal-abas button.ativa {
+  background:#225683;color:#fff;border-color:#225683;
+  box-shadow:0 3px 12px #1f4c7629;
+}
+.portal-paineis.portal-mobile:not(.portal-ux-shell)>.portal-cartao {
+  grid-column:1/-1;border:1px solid #d6e4ef;
+  border-radius:1.25rem;
+  background:linear-gradient(155deg,#f9fcff,var(--sheet) 68%);
+  box-shadow:0 10px 30px #183f6010;
+}
+.portal-paineis.portal-mobile:not(.portal-ux-shell)>.portal-cartao h2 {
+  color:var(--ink);font-size:clamp(1.16rem,2.6vw,1.5rem);
+}
+.portal-paineis.portal-mobile:not(.portal-ux-shell)>.portal-metricas {
+  grid-column:1/-1;grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.portal-paineis.portal-mobile:not(.portal-ux-shell) .portal-metrica {
+  background:linear-gradient(120deg,#edf6ff,#fff);
+  border-color:#d4e4f0;
+}
+.prime-config-botao {
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:3rem;padding:.7rem .95rem;
+  color:#244f76;border:1px solid #bfd5e6;border-radius:.9rem;
+  background:linear-gradient(135deg,#f4f9fd,#e6f2fb);
+  box-shadow:0 3px 11px #173b6010;
+}
+.prime-config-botao:hover {background:#dcecf9}
+.prime-config-painel {
+  border:1px solid #d5e2ee;border-radius:1.1rem;
+  box-shadow:0 18px 45px #182b4b30;
+}
+@media(max-width:700px){
+  .portal-paineis.portal-mobile:not(.portal-ux-shell)>.portal-metricas {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .portal-pagina--aluno .portal-hero {min-height:175px;padding:1.1rem}
+  .prime-config-botao {min-height:2.8rem}
+}
+/* Acessibilidade: foco e contraste legíveis em temas escuros. */
+html[data-tema="escuro"] .portal-ux-shell .portal-metrica,
+html[data-tema="escuro"] .portal-paineis.portal-mobile:not(.portal-ux-shell) .portal-metrica {
+  background:linear-gradient(135deg,#283d56,#22354b);border-color:#48637c;
+}
+html[data-tema="escuro"] .portal-ux-shell .portal-metrica strong {color:#e4f2ff}
+html[data-tema="escuro"] .portal-ux-shell .portal-cartao>h2,
+html[data-tema="escuro"] .portal-paineis.portal-mobile:not(.portal-ux-shell)>.portal-cartao h2 {
+  color:#eff6ff;
+}
+html[data-tema="escuro"] .portal-paineis.portal-mobile:not(.portal-ux-shell)>.portal-cartao {
+  background:linear-gradient(155deg,#293a52,var(--sheet) 70%);border-color:#475f76;
+}
+html[data-tema="escuro"] .portal-ux-material {
+  background:linear-gradient(120deg,#293e57,#233449);border-color:#4c6980;
+}
+html[data-tema="escuro"] .portal-ux-material-resumo strong {color:#f2f7ff}
+html[data-tema="escuro"] .portal-ux-material-resumo small,
+html[data-tema="escuro"] .portal-ux-material-resumo>span {color:#c5d9ee}
+html[data-tema="escuro"] .portal-ux-material-leitura {background:#24374c;border-color:#4a637d;color:#eaf3ff}
+html[data-tema="escuro"] .portal-ux-material-leitura h3 {color:#f3f8ff}
+html[data-tema="escuro"] .portal-ux-filtros-materia button:not(.ativo){
+  background:#2b425c;color:#e2f1ff;border-color:#516c87;
+}
+html[data-tema="escuro"] .ux-pagina-materiais .cartao-material,
+html[data-tema="escuro"] .ux-pagina-revisao .quiz {
+  background:linear-gradient(135deg,#243b55,#1e2d43);border-color:#4c637b;color:#edf5ff;
+}
+html[data-tema="escuro"] .ux-pagina-materiais .cartao-material h3,
+html[data-tema="escuro"] .ux-pagina-revisao .quiz h2 {color:#e6f3ff}
+html[data-tema="escuro"] .ux-pagina-materiais .cartao-material p {color:#c7d6e7}
+@media(prefers-reduced-motion:reduce){
+  .portal-paineis.portal-mobile:not(.portal-ux-shell)>.portal-abas,
+  .portal-ux-filtros-materia {scroll-behavior:auto}
+}
