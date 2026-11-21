@@ -8,6 +8,7 @@ import { CriarAviso, Mural } from './Avisos'
 import { acoesPorPerfil } from './navegacao'
 import GestaoTurma from './GestaoTurma'
 import AuditoriaEscola from './AuditoriaEscola'
+import { prepararTransferencia, type TransferenciaPendente } from './transferencia'
 
 const disciplinas=['MATEMATICA','PORTUGUES','FISICA','HISTORIA','BIOLOGIA','QUIMICA','GEOGRAFIA','INGLES','SOCIOLOGIA','FILOSOFIA']
 export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
@@ -16,6 +17,7 @@ export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
   const [matriculas,setMatriculas]=useState<MatriculaResumo[]>([])
   const [alunoMover,setAlunoMover]=useState(0)
   const [destinoMover,setDestinoMover]=useState(0)
+  const [transferenciaPendente,setTransferenciaPendente]=useState<TransferenciaPendente|null>(null)
   const [usuarios,setUsuarios]=useState<UsuarioResumido[]>([])
   const [avisos,setAvisos]=useState<Aviso[]>([])
   const [turma,setTurma]=useState(0)
@@ -52,14 +54,22 @@ export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
       .catch(e=>{if(ativo)setMensagem({erro:falha(e)})})
     return()=>{ativo=false}
   },[turma])
-  const executar=async(acao:()=>Promise<unknown>,texto:string)=>{
-    if(enviando)return
+  const executar=async(acao:()=>Promise<unknown>,texto:string):Promise<boolean>=>{
+    if(enviando)return false
     setEnviando(true);setMensagem({})
-    try{await acao();await atualizar()
+    let alteracaoSalva=false
+    try{
+      await acao()
+      alteracaoSalva=true
+      await atualizar()
       if(turma)setVinculos(await apiEscolar.vinculos(turma))
       setMensagem({ok:texto})
-    }catch(e){setMensagem({erro:falha(e)})}
-    finally{setEnviando(false)}
+    }catch(e){
+      setMensagem({erro:alteracaoSalva
+        ? 'A alteração foi salva, mas a lista não atualizou. Recarregue a página para conferir.'
+        : falha(e)})
+    }finally{setEnviando(false)}
+    return alteracaoSalva
   }
   const criarTurma=async(e:FormEvent)=>{
     e.preventDefault()
@@ -84,14 +94,33 @@ export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
   const matriculaAtiva=matriculas.find(m=>m.alunoId===alunoMover)
   const opcoesDestino=turmas.filter(t=>t.id!==matriculaAtiva?.turmaId &&
     t.anoLetivo===matriculaAtiva?.anoLetivo)
+  const revisarTransferencia=()=>{
+    if(enviando)return
+    const destino=opcoesDestino.find(t=>t.id===destinoMover)
+    const revisao=prepararTransferencia(matriculaAtiva,destino)
+    if(!revisao){
+      setMensagem({erro:'Selecione uma matrícula e outra turma do mesmo ano letivo.'})
+      return
+    }
+    setMensagem({})
+    setTransferenciaPendente(revisao)
+  }
   const transferir=async()=>{
-    if(!matriculaAtiva||!destinoMover||enviando)return
-    const alvo=opcoesDestino.find(t=>t.id===destinoMover)
-    if(!alvo)return
-    if(!window.confirm(`Transferir ${matriculaAtiva.alunoNome} da turma ${matriculaAtiva.turmaCodigo} para ${alvo.codigo}?\n\nAs respostas anteriores não serão apagadas, mas o aluno deixará de acessar as atividades da turma de origem.`))return
-    await executar(()=>apiEscolar.transferirAluno(matriculaAtiva.turmaId,matriculaAtiva.alunoId,destinoMover),
-      'Aluno transferido para a nova turma. A movimentação foi registrada no banco.')
-    setDestinoMover(0)
+    const pendente=transferenciaPendente
+    if(!pendente||enviando)return
+    const origemAtual=matriculas.find(m=>m.alunoId===pendente.alunoId)
+    if(!origemAtual||origemAtual.turmaId!==pendente.origemTurmaId||
+      origemAtual.anoLetivo!==pendente.anoLetivo){
+      setTransferenciaPendente(null)
+      setMensagem({erro:'A matrícula mudou. Atualize a página e confira a turma atual.'})
+      return
+    }
+    setTransferenciaPendente(null)
+    const salva=await executar(
+      ()=>apiEscolar.transferirAluno(pendente.origemTurmaId,pendente.alunoId,pendente.destinoTurmaId),
+      'Aluno transferido para a nova turma. A movimentação foi registrada no banco.',
+    )
+    if(salva){setDestinoMover(0);setAlunoMover(0)}
   }
   const remover=async(v:Vinculo)=>{
     await executar(()=>apiEscolar.desvincular(turma,v.professorId,v.disciplina),
@@ -223,7 +252,7 @@ export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
           <div className="portal-form">
             <label htmlFor="dir-aluno-mover">Aluno matriculado</label>
             <select id="dir-aluno-mover" value={alunoMover}
-              onChange={e=>{setAlunoMover(Number(e.target.value));setDestinoMover(0)}}>
+              onChange={e=>{setAlunoMover(Number(e.target.value));setDestinoMover(0);setTransferenciaPendente(null)}}>
               <option value={0}>Selecione um aluno</option>
               {matriculas.map(m=><option key={m.alunoId+':'+m.anoLetivo} value={m.alunoId}>
                 {m.alunoNome} · {m.turmaCodigo} ({m.anoLetivo})</option>)}
@@ -235,12 +264,25 @@ export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
               </div>
               <label htmlFor="dir-destino-mover">Nova turma</label>
               <select id="dir-destino-mover" value={destinoMover}
-                onChange={e=>setDestinoMover(Number(e.target.value))}>
+                onChange={e=>{setDestinoMover(Number(e.target.value));setTransferenciaPendente(null)}}>
                 <option value={0}>Escolha outra turma do mesmo ano</option>
                 {opcoesDestino.map(t=><option key={t.id} value={t.id}>{t.codigo} · {t.nome}</option>)}
               </select>
               <button type="button" className="botao-principal" disabled={!destinoMover||enviando}
-                onClick={()=>void transferir()}><Users size={18}/> Confirmar transferência</button>
+                onClick={revisarTransferencia}><Users size={18}/> Revisar transferência</button>
+              {transferenciaPendente&&<div className="portal-aviso-discreto" role="group"
+                aria-label="Confirmar movimentação">
+                <p>Transferir <strong>{transferenciaPendente.alunoNome}</strong> de
+                  {' '}{transferenciaPendente.origemCodigo} para {transferenciaPendente.destinoCodigo}
+                  {' '}({transferenciaPendente.anoLetivo})? As respostas anteriores permanecem
+                  registradas, mas o aluno deixa de acessar as atividades da turma anterior.</p>
+                <div className="portal-acoes-rapidas">
+                  <button type="button" className="botao-principal" disabled={enviando}
+                    onClick={()=>void transferir()}>Confirmar movimentação</button>
+                  <button type="button" className="botao-secundario" disabled={enviando}
+                    onClick={()=>setTransferenciaPendente(null)}>Cancelar transferência</button>
+                </div>
+              </div>}
             </>}
           </div>}
         <div className="ext-matriculas-grid">
