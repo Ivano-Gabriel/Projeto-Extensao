@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import {prepararPublicacaoPacote} from '../src/portal/pacotes.ts'
-import {apiEscolar,requisitar} from '../src/portal/api.ts'
+import {apiEscolar,requisitar,extrairTextoPdf} from '../src/portal/api.ts'
 
 const questao=(titulo,pergunta)=>({
   titulo,pergunta,opcoes:['A','B','C','D'],correta:2,explicacao:'Justificativa.'
@@ -53,4 +53,29 @@ test('interface da sala docente exige revisão humana antes de publicar',()=>{
   assert.match(s,/Publicar pacote revisado/)
   assert.match(s,/prepararPublicacaoPacote/)
   assert.match(s,/fonteTexto/)
+})
+
+test('PDF é enviado como multipart com CSRF e não aciona IA automaticamente',async()=>{
+  const arquivo=new File(['%PDF-1.7\nQA'], 'aula.pdf', {type:'application/pdf'})
+  const chamadas=[]
+  const transport=async(url,opts)=>{
+    chamadas.push({url,opts})
+    return url==='/api/csrf'
+      ?{ok:true,status:200,headers:{get:()=> 'application/json'},
+         json:async()=>({token:'csrf-qa'})}
+      :{ok:true,status:200,headers:{get:()=> 'application/json'},
+         json:async()=>({texto:'Revisar este trecho',paginas:1,truncado:false})}
+  }
+  const resposta=await extrairTextoPdf(7,'MATEMATICA',arquivo,transport)
+  assert.equal(resposta.texto,'Revisar este trecho')
+  assert.deepEqual(chamadas.map(c=>c.url),['/api/csrf','/api/professor/ia/pdf-extrair'])
+  assert.equal(chamadas[1].opts.method,'POST')
+  assert.equal(chamadas[1].opts.credentials,'same-origin')
+  assert.equal(chamadas[1].opts.headers['X-XSRF-TOKEN'],'csrf-qa')
+  assert.equal(chamadas[1].opts.headers['Content-Type'],undefined)
+  assert.ok(chamadas[1].opts.body instanceof FormData)
+  assert.equal(chamadas[1].opts.body.get('disciplina'),'MATEMATICA')
+  assert.equal(chamadas[1].opts.body.get('arquivo').name,'aula.pdf')
+  assert.match(readFileSync(new URL('../src/portal/SalaDocente.tsx',import.meta.url),'utf8'),
+    /Ler PDF para revisão/)
 })
