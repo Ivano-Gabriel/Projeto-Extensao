@@ -36,6 +36,13 @@ public class IaCotasService {
         return Math.max(0,limite(papel)-(usadas==null?0:usadas));
     }
     @Transactional
+    public void devolver(Long usuarioId) {
+        Date hoje=Date.valueOf(LocalDate.now(ZoneOffset.UTC));
+        jdbc.update("UPDATE ia_uso_diario SET requisicoes=requisicoes-1 "+
+            "WHERE usuario_id=? AND dia_utc=? AND requisicoes>0",usuarioId,hoje);
+    }
+
+    @Transactional
     public int reservar(Long usuarioId,Papel papel){
         int limite=limite(papel);
         if(limite<1)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
