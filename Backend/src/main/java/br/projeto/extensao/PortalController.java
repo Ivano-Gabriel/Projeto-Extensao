@@ -122,6 +122,7 @@ public class PortalController {
             Long id=jdbc.queryForObject(
                 "SELECT id FROM turmas WHERE escola_id=? AND codigo=? AND ano_letivo=?",
                 Long.class,escolaId,dados.codigo(),dados.anoLetivo());
+            auditoria.registrar(escolaId,user.getId(),"TURMA_CRIADA","TURMA",id);
             return ResponseEntity.created(URI.create("/api/portal/turmas/"+id))
                 .body(new TurmaResumo(id,dados.codigo(),dados.nome().trim(),dados.anoLetivo()));
         }catch(DataIntegrityViolationException ex){
