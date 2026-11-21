@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, BookOpen, CheckCircle2, Flame, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowRight, BookOpen, CheckCircle2, ChevronDown, Flame, Search, ShieldCheck, Sparkles } from 'lucide-react'
 import { apiEscolar } from './api'
 import type { AtividadeEscolar, Aviso, FrequenciaEscolar, HorarioTurma, MaterialTurma, MeuDesempenho, RespostaSalva, TurmaConfiguracao, TurmaEscolar } from './api'
 import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
@@ -10,6 +10,8 @@ import { acoesPorPerfil } from './navegacao'
 
 export default function AlunoPainel(){
   const [aba,setAba]=useState('inicio')
+  const [buscaMaterial,setBuscaMaterial]=useState('')
+  const [filtroMaterial,setFiltroMaterial]=useState('Todas')
   const [turmas,setTurmas]=useState<TurmaEscolar[]>([])
   const [atividades,setAtividades]=useState<AtividadeEscolar[]>([])
   const [materiais,setMateriais]=useState<MaterialTurma[]>([])
@@ -66,11 +68,28 @@ export default function AlunoPainel(){
   }
   const pendentes=atividades.filter(a=>!respostas.some(r=>r.atividadeId===a.id))
   const importante=avisos.find(a=>a.importante)
+  const materiasPublicadas=[...new Set(materiais.map(m=>m.disciplina))].sort()
+  const materiaisFiltrados=materiais.filter(m=>
+    (filtroMaterial==='Todas'||m.disciplina===filtroMaterial)&&
+    (m.titulo+' '+m.disciplina+' '+m.conteudo).toLocaleLowerCase('pt-BR')
+      .includes(buscaMaterial.trim().toLocaleLowerCase('pt-BR')))
   return <div className="portal-paineis portal-mobile">
     <Abas abas={acoesPorPerfil('ALUNO')} atual={aba} mudar={setAba}/>
     <MensagemStatus estado={mensagem}/>
     {carregando&&<p className="portal-vazio">Carregando sua escola...</p>}
     {!carregando&&aba==='inicio'&&<>
+      <section className="portal-ux-aluno-boasvindas" aria-label="Comece por aqui">
+        <span className="portal-ux-eyebrow">SEU ESTUDO, SEU RITMO</span>
+        <h2>O próximo passo é seu.</h2>
+        <p>Abra uma atividade, estude o material da turma ou faça uma prova de treino.
+          Tudo organizado para você achar o que precisa.</p>
+        <div className="portal-acoes-rapidas">
+          <button type="button" className="botao-principal" onClick={()=>setAba('atividades')}>
+            <BookOpen size={18}/> Minhas atividades <ArrowRight size={17}/></button>
+          <button type="button" className="botao-secundario" onClick={()=>setAba('prova')}>
+            <Sparkles size={18}/> Treinar para a prova</button>
+        </div>
+      </section>
       <div className="portal-metricas">
         <Selo valor={turmas.length} legenda="Turmas"/>
         <Selo valor={pendentes.length} legenda="Para fazer"/>
@@ -126,11 +145,46 @@ export default function AlunoPainel(){
         <div><span className="sobretitulo">MINHA TURMA · {t.anoLetivo}</span><h2>{t.codigo} · {t.nome}</h2>
           <p>{t.descricao||'A direção ainda não cadastrou uma apresentação desta turma.'}</p></div>
       </div>)}
-      <Cartao titulo="Materiais publicados pelos professores">
-        {materiais.length===0?<Vazio texto="Nenhum material publicado por seus professores ainda."/>:
-          <div className="ext-registros">{materiais.map(m=><article className="ext-material-aluno" key={m.id}>
-            <small>{m.disciplina}</small><strong>{m.titulo}</strong><p>{m.conteudo}</p>
-          </article>)}</div>}
+      <Cartao titulo="Biblioteca da sua turma" classe="portal-ux-materiais">
+        <p>Encontre primeiro o assunto, depois toque para abrir a leitura completa.
+          O conteúdo é publicado pelos professores vinculados à sua turma.</p>
+        <div className="portal-ux-busca-material">
+          <label htmlFor="aluno-busca-material"><Search size={17}/> Buscar material</label>
+          <input id="aluno-busca-material" type="search" value={buscaMaterial}
+            onChange={e=>setBuscaMaterial(e.target.value)}
+            placeholder="Ex.: verbo To Be, biologia, frações..."/>
+        </div>
+        <div className="portal-ux-filtros-materia" role="group" aria-label="Filtrar materiais por disciplina">
+          {['Todas',...materiasPublicadas].map(d=><button type="button" key={d}
+            aria-pressed={filtroMaterial===d} className={filtroMaterial===d?'ativo':''}
+            onClick={()=>setFiltroMaterial(d)}>{d==='Todas'?'Tudo':d.replaceAll('_',' ')}</button>)}
+        </div>
+        <p className="portal-ux-contagem" role="status">
+          {materiaisFiltrados.length} {materiaisFiltrados.length===1?'material encontrado':'materiais encontrados'}
+        </p>
+        {materiaisFiltrados.length===0?
+          <Vazio texto={materiais.length===0?
+            'Nenhum material foi publicado pelos seus professores ainda.':
+            'Não encontramos esse assunto. Experimente outra palavra ou disciplina.'}/>:
+          <div className="portal-ux-lista-material">
+            {materiaisFiltrados.map(m=><details className="portal-ux-material" key={m.id}>
+              <summary>
+                <span className="portal-ux-material-icone"><BookOpen size={20} aria-hidden="true"/></span>
+                <span className="portal-ux-material-resumo">
+                  <small>{m.disciplina.replaceAll('_',' ')}</small>
+                  <strong>{m.titulo}</strong>
+                  <span>{m.conteudo.length>125?m.conteudo.slice(0,125).trim()+'…':m.conteudo}</span>
+                </span>
+                <ChevronDown size={20} className="portal-ux-material-seta" aria-hidden="true"/>
+              </summary>
+              <div className="portal-ux-material-leitura">
+                <span className="portal-ux-eyebrow">LEITURA COMPLETA</span>
+                <h3>{m.titulo}</h3>
+                <p>{m.conteudo}</p>
+                <span className="portal-ux-leitura-fim"><CheckCircle2 size={17}/> Fim do material</span>
+              </div>
+            </details>)}
+          </div>}
       </Cartao>
       <Cartao titulo="Horários da turma">
         {horarios.length===0?<Vazio texto="A direção ainda não cadastrou os horários."/>:
