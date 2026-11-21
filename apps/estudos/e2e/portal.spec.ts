@@ -198,3 +198,51 @@ test('cabeçalho de aluno tem foto editorial e logomarca grande no desktop',asyn
   await expect.poll(()=>hero.locator('.zelo-hero-fotografia').evaluate(node=>
     getComputedStyle(node).backgroundImage.includes('images.unsplash.com'))).toBe(true)
 })
+
+
+for (const perfil of ['DIRECAO','PROFESSOR'] as const){
+  test(perfil+' exibe sidebar de desktop e ações com contraste suficiente',async({page})=>{
+    await portalSimulado(page,perfil)
+    await page.setViewportSize({width:900,height:800})
+    await page.goto('/')
+    const painel=page.locator(perfil==='DIRECAO'?'.zelo-direcao':'.zelo-professor')
+    const nav=painel.locator('.zelo-nav-direta')
+    await expect(nav).toBeVisible()
+    await expect.poll(()=>nav.evaluate(el=>getComputedStyle(el).position)).toBe('sticky')
+    await expect(painel.getByRole('button',{name:'Mais áreas'})).toBeHidden()
+    await expect(painel.getByRole('tab',{name:perfil==='DIRECAO'?'Histórico':'Resultados'})).toBeVisible()
+    const layout=await painel.evaluate(el=>getComputedStyle(el).gridTemplateColumns)
+    expect(layout.trim().split(/\s+/).length).toBe(2)
+    const botoes=painel.locator('.zelo-destaque-tarefa .botao-principal, .zelo-destaque-tarefa .botao-secundario')
+    await expect(botoes.first()).toBeVisible()
+    for(let i=0;i<await botoes.count();i++){
+      const cores=await botoes.nth(i).evaluate(el=>{
+        const s=getComputedStyle(el)
+        return {fg:s.color,bg:s.backgroundColor}
+      })
+      const rgb=(s:string)=>s.match(/[\d.]+/g)?.slice(0,3).map(Number)??[0,0,0]
+      const L=(v:number)=>{const s=v/255;return s<=.04045?s/12.92:Math.pow((s+.055)/1.055,2.4)}
+      const luminancia=(s:string)=>rgb(s).reduce((acc,c,k)=>acc+c*0+(k===0?.2126:k===1?.7152:.0722)*L(c),0)
+      const a=luminancia(cores.fg),b=luminancia(cores.bg)
+      expect((Math.max(a,b)+.05)/(Math.min(a,b)+.05)).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+  test(perfil+' no celular mantém navegação fixa legível e modal sem cortes',async({page})=>{
+    await portalSimulado(page,perfil)
+    await page.setViewportSize({width:390,height:844})
+    await page.goto('/')
+    const painel=page.locator(perfil==='DIRECAO'?'.zelo-direcao':'.zelo-professor')
+    const nav=painel.locator('.zelo-nav-direta')
+    await expect(nav).toBeVisible()
+    await expect.poll(()=>nav.evaluate(el=>getComputedStyle(el).position)).toBe('fixed')
+    await expect(painel.getByRole('button',{name:'Mais áreas'})).toBeVisible()
+    await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth)).toBe(0)
+    await painel.getByRole('button',{name:'Mais áreas'}).click()
+    const modal=page.getByRole('dialog',{name:'Mais áreas do portal'})
+    await expect(modal).toBeVisible()
+    const bounds=await modal.boundingBox()
+    expect(bounds).not.toBeNull()
+    expect(bounds!.y).toBeGreaterThanOrEqual(0)
+    expect(bounds!.y+bounds!.height).toBeLessThanOrEqual(844)
+  })
+}
