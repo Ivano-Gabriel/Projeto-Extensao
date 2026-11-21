@@ -19,6 +19,9 @@ public final class GroqChat {
             Map.of("role","system","content",instrucoes),
             Map.of("role","user","content",entrada)));
         pedido.put("temperature",0.3);
+        pedido.put("store",false);
+        if(modelo.startsWith("qwen/qwen3.8-"))
+            pedido.put("reasoning_effort","none");
         pedido.put("max_completion_tokens",Math.min(3500,Math.max(200,maxTokens)));
         if(quiz)pedido.put("response_format",Map.of("type","json_object"));
         return pedido;
