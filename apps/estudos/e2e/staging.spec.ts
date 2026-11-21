@@ -8,7 +8,10 @@ async function entrar(page:Page,papel:Papel){
   await page.locator('#portal-email').fill(email)
   await page.locator('#portal-senha').fill(senha)
   await page.getByRole('button',{name:'Entrar',exact:true}).click()
-  await expect(page.locator('.portal-hero')).toBeVisible()
+  if(papel==='ALUNO')
+    await expect(page.getByRole('navigation',{name:'Navegação da ferramenta de estudos'})).toBeVisible()
+  else
+    await expect(page.locator('.portal-hero')).toBeVisible()
 }
 
 test('aluno QA ve sua prova e historico apos F5, sem acesso da direção',async({page})=>{
