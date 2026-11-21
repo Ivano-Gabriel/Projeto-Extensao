@@ -515,7 +515,7 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
   const reiniciarQuiz = () => { setEstado((atual) => ({ ...atual, respostas: [] })); setIndiceQuiz(0); setAviso('Quiz reiniciado! Bora tentar novamente') }
 
   return (
-    <div className="app-layout">
+    <div className={`app-layout ${tela==='portal'?'zelo-modo-portal':''}`}>
       <nav className="navegacao" aria-label="Navegação da ferramenta de estudos">
         <div className="navegacao-marca"><Marca /><p>Um lugar pra revisar e aprender do seu jeito</p></div>
         <div className="navegacao-itens">
@@ -591,7 +591,7 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
         </main>
         <footer className="rodape-app">zELO+ · Biblioteca demonstrativa · Registros escolares somente no portal</footer>
       </div>
-      <div className="prime-mobile-nav">
+      {tela!=='portal'&&<div className="prime-mobile-nav">
         {menuAberto&&<>
           <button type="button" className="prime-menu-sombra" aria-label="Fechar menu" onClick={()=>setMenuAberto(false)}/>
           <nav className="prime-menu-painel" aria-label="Todas as áreas de estudos" id="prime-menu-areas">
@@ -646,7 +646,7 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
           <button type="button" className={tela==='progresso'?'ativo':''} aria-current={tela==='progresso'?'page':undefined}
             onClick={()=>navegar('progresso')}><Target size={23}/><span>Progresso</span></button>
         </nav>
-      </div>
+      </div>}
       {aviso && <div className="aviso-flutuante" role="status">
         <span><Check size={18}/>{aviso}</span>
         <button type="button" onClick={() => setAviso('')} aria-label="Fechar aviso"><X size={20}/></button>
