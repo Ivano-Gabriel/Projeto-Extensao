@@ -707,4 +707,84 @@ class TurmasEditaveisIntegracaoTest {
             .andExpect(status().isForbidden());
     }
 
+    @Test
+    void gestaoRegistraAuditoriaDeUsuarioTurmaEHorariosSemGuardarDadosPessoais() throws Exception {
+        String novoUsuario="{\"nome\":\"Pessoa Ficticia\",\"email\":\"qa-hist@escola.test\","+
+            "\"senha\":\"SenhaDeTeste12345!\",\"papel\":\"ALUNO\"}";
+        mvc.perform(post("/api/gestao/usuarios")
+            .with(user("dir-edit@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(novoUsuario))
+            .andExpect(status().isCreated());
+        Long criado=jdbc.queryForObject(
+            "SELECT id FROM usuarios WHERE email='qa-hist@escola.test'",Long.class);
+        org.junit.jupiter.api.Assertions.assertEquals(1,jdbc.queryForObject(
+            "SELECT COUNT(*) FROM auditoria_escolar WHERE escola_id=? AND ator_id=? "+
+            "AND acao='USUARIO_CRIADO' AND entidade='USUARIO' AND entidade_id=?",
+            Integer.class,escolaA,direcao,criado));
+
+        String configuracao="{\"codigo\":\"3A\",\"nome\":\"Turma Validada\",\"anoLetivo\":2026,"+
+            "\"descricao\":\"Homologação\",\"cor\":\"#24527F\"}";
+        mvc.perform(put("/api/gestao/turmas/"+turma)
+            .with(user("dir-edit@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(configuracao))
+            .andExpect(status().isOk());
+        org.junit.jupiter.api.Assertions.assertEquals(1,jdbc.queryForObject(
+            "SELECT COUNT(*) FROM auditoria_escolar WHERE escola_id=? AND ator_id=? "+
+            "AND acao='TURMA_ATUALIZADA' AND entidade='TURMA' AND entidade_id=?",
+            Integer.class,escolaA,direcao,turma));
+
+        String novoHorario="{\"disciplina\":\"MATEMATICA\",\"diaSemana\":1,"+
+            "\"inicio\":\"07:00\",\"fim\":\"07:50\",\"professorId\":"+professor+"}";
+        mvc.perform(post("/api/gestao/turmas/"+turma+"/horarios")
+            .with(user("dir-edit@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(novoHorario))
+            .andExpect(status().isCreated());
+        Long horario=jdbc.queryForObject("SELECT id FROM horarios_turma WHERE turma_id=?",
+            Long.class,turma);
+        mvc.perform(delete("/api/gestao/turmas/"+turma+"/horarios/"+horario)
+            .with(user("dir-edit@escola.test").roles("DIRECAO")).with(csrf()))
+            .andExpect(status().isNoContent());
+        for(String acao:java.util.List.of("HORARIO_CRIADO","HORARIO_REMOVIDO")){
+            org.junit.jupiter.api.Assertions.assertEquals(1,jdbc.queryForObject(
+                "SELECT COUNT(*) FROM auditoria_escolar WHERE escola_id=? AND ator_id=? "+
+                "AND acao=? AND entidade='TURMA' AND entidade_id=?",
+                Integer.class,escolaA,direcao,acao,turma));
+        }
+        mvc.perform(get("/api/gestao/auditoria")
+            .with(user("dir-edit@escola.test").roles("DIRECAO")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].texto").doesNotExist())
+            .andExpect(jsonPath("$[0].senha").doesNotExist())
+            .andExpect(jsonPath("$[0].email").doesNotExist());
+    }
+
+    @Test
+    void professorAuditaCriacaoEdicaoEExclusaoDeMaterialSemAcessoExterno() throws Exception {
+        String criar="{\"disciplina\":\"MATEMATICA\",\"titulo\":\"Revisão\","+
+            "\"conteudo\":\"Questões de treino\",\"publicado\":false}";
+        mvc.perform(post("/api/professor/turmas/"+turma+"/materiais")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(criar))
+            .andExpect(status().isCreated());
+        Long id=jdbc.queryForObject("SELECT id FROM materiais_turma WHERE titulo='Revisão'",
+            Long.class);
+        mvc.perform(put("/api/professor/materiais/"+id)
+            .with(user("prof-edit-b@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(criar))
+            .andExpect(status().isNotFound());
+        mvc.perform(put("/api/professor/materiais/"+id)
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(criar.replace("false","true")))
+            .andExpect(status().isOk());
+        mvc.perform(delete("/api/professor/materiais/"+id)
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf()))
+            .andExpect(status().isNoContent());
+        for(String acao:java.util.List.of("MATERIAL_CRIADO","MATERIAL_EDITADO","MATERIAL_REMOVIDO")){
+            org.junit.jupiter.api.Assertions.assertEquals(1,jdbc.queryForObject(
+                "SELECT COUNT(*) FROM auditoria_escolar WHERE escola_id=? AND ator_id=? "+
+                "AND acao=? AND entidade='MATERIAL' AND entidade_id=?",
+                Integer.class,escolaA,professor,acao,id));
+        }
+    }
+
 }
