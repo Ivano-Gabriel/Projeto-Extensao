@@ -787,4 +787,64 @@ class TurmasEditaveisIntegracaoTest {
         }
     }
 
+
+    @Test
+    void matriculaGeraEventoAuditavelApenasAposCriacaoValida() throws Exception {
+        Long novoAluno=criar("qa-matricula@escola.test",Papel.ALUNO,escolaA);
+        Long alunoExterno=criar("qa-matricula-b@escola.test",Papel.ALUNO,escolaB);
+        String rota="/api/gestao/turmas/"+turma+"/matriculas";
+        String valido="{\"alunoId\":"+novoAluno+"}";
+        String externo="{\"alunoId\":"+alunoExterno+"}";
+        mvc.perform(post(rota).with(user("dir-edit@escola.test").roles("DIRECAO"))
+            .contentType(MediaType.APPLICATION_JSON).content(valido))
+            .andExpect(status().isForbidden());
+        mvc.perform(post(rota).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(valido))
+            .andExpect(status().isForbidden());
+        mvc.perform(post(rota).with(user("dir-edit@escola.test").roles("DIRECAO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(externo))
+            .andExpect(status().isForbidden());
+        mvc.perform(post(rota).with(user("dir-edit@escola.test").roles("DIRECAO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(valido))
+            .andExpect(status().isCreated());
+        mvc.perform(post(rota).with(user("dir-edit@escola.test").roles("DIRECAO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(valido))
+            .andExpect(status().isConflict());
+        org.junit.jupiter.api.Assertions.assertEquals(1,jdbc.queryForObject(
+            "SELECT COUNT(*) FROM auditoria_escolar WHERE escola_id=? AND ator_id=? "+
+            "AND acao='ALUNO_MATRICULADO' AND entidade='MATRICULA' AND entidade_id=?",
+            Integer.class,escolaA,direcao,novoAluno));
+        org.junit.jupiter.api.Assertions.assertEquals(0,jdbc.queryForObject(
+            "SELECT COUNT(*) FROM auditoria_escolar WHERE entidade_id=?",
+            Integer.class,alunoExterno));
+    }
+
+    @Test
+    void vinculoGeraEventoAuditavelSemVazarProfessorDaOutraEscola() throws Exception {
+        Long novoProfessor=criar("qa-vinculo@escola.test",Papel.PROFESSOR,escolaA);
+        String rota="/api/gestao/turmas/"+turma+"/professores";
+        String valido="{\"professorId\":"+novoProfessor+",\"disciplina\":\"HISTORIA\"}";
+        String externo="{\"professorId\":"+professorExterno+",\"disciplina\":\"HISTORIA\"}";
+        mvc.perform(post(rota).with(user("dir-edit@escola.test").roles("DIRECAO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(externo))
+            .andExpect(status().isForbidden());
+        mvc.perform(post(rota).with(user("aluno-edit@escola.test").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(valido))
+            .andExpect(status().isForbidden());
+        mvc.perform(post(rota).with(user("dir-edit@escola.test").roles("DIRECAO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(valido))
+            .andExpect(status().isCreated());
+        mvc.perform(post(rota).with(user("dir-edit@escola.test").roles("DIRECAO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(valido))
+            .andExpect(status().isConflict());
+        org.junit.jupiter.api.Assertions.assertEquals(1,jdbc.queryForObject(
+            "SELECT COUNT(*) FROM auditoria_escolar WHERE escola_id=? AND ator_id=? "+
+            "AND acao='PROFESSOR_VINCULADO' AND entidade='TURMA' AND entidade_id=?",
+            Integer.class,escolaA,direcao,turma));
+        mvc.perform(get("/api/gestao/auditoria").with(user("dir-edit@escola.test").roles("DIRECAO")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].acao").value("PROFESSOR_VINCULADO"))
+            .andExpect(jsonPath("$[0].entidadeId").value(turma));
+    }
+
 }
