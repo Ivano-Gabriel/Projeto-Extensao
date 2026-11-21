@@ -33,8 +33,9 @@ public class IaPedagogicaController {
         @NotNull Long turmaId,
         @NotBlank @jakarta.validation.constraints.Pattern(regexp="[A-Z_]{3,60}") String disciplina,
         @NotBlank @Size(max=300) String tema,
-        @NotNull @jakarta.validation.constraints.Pattern(regexp="QUIZ|EXPLICACAO|PLANO_AULA") String tipo,
-        @NotNull @Size(max=1200) String contexto) {}
+        @NotNull @jakarta.validation.constraints.Pattern(regexp="QUIZ|RESUMO|EXPLICACAO|PLANO_AULA") String tipo,
+        @NotNull @Size(max=1200) String contexto,
+        @Size(max=6000) String fonteTexto) {}
     public record PedidoPacote(
         @NotNull Long turmaId,
         @NotBlank @jakarta.validation.constraints.Pattern(regexp="[A-Z_]{3,60}") String disciplina,
@@ -288,7 +289,7 @@ public class IaPedagogicaController {
     public ResponseEntity<Rascunho> rascunho(@Valid @RequestBody Pedido pedido,Authentication auth){
         Usuario professor=usuario(auth);
         autorizarProfessor(professor,pedido);
-        impedirDadosPessoais(pedido.tema(),pedido.contexto());
+        impedirDadosPessoais(pedido.tema(),pedido.contexto(),pedido.fonteTexto());
         exigirAtiva(Papel.PROFESSOR);
         int restantes=cotas.reservar(professor.getId(),professor.getPapel());
         boolean quiz="QUIZ".equals(pedido.tipo());
@@ -301,11 +302,16 @@ public class IaPedagogicaController {
                 "opcoes (array de exatamente quatro strings), correta (índice de 0 a 3), "+
                 "explicacao (string). Crie questão original para revisão, "+
                 "com quatro alternativas e explicação pedagógica breve. ":
+                "RESUMO".equals(pedido.tipo())?
+                "Produza um resumo didático fiel ao texto de apoio quando houver. "+
+                "Organize em ideias centrais, termos importantes e exemplo curto. "+
+                "Não invente referências ou dados da escola. ":
                 "Produza um texto didático adequado ao tipo selecionado: explicação com "+
                 "exemplo e passos, ou plano de aula com objetivo, etapas e avaliação. ");
         String entrada="Tipo: "+pedido.tipo()+"\nDisciplina: "+pedido.disciplina()+
-            "\nTema: "+pedido.tema().trim()+"\nOrientação: "+pedido.contexto().trim();
-        String bruto=chamar(instrucoes,entrada,quiz);
+            "\nTema: "+pedido.tema().trim()+"\nOrientação: "+pedido.contexto().trim()+
+            "\nTexto de apoio: "+(pedido.fonteTexto()==null?"":pedido.fonteTexto().trim());
+        String bruto=chamar(instrucoes,entrada,quiz,"RESUMO".equals(pedido.tipo())?1200:quiz?1150:700);
         QuizGerado quizGerado=quiz?lerQuiz(bruto):null;
         String descricao=quizGerado==null?bruto:
             quizGerado.titulo()+"\n"+quizGerado.pergunta()+"\n"+
