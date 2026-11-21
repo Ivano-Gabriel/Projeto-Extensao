@@ -23,12 +23,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.json.JsonMapper;
 
 @RestController
 @RequestMapping("/api")
 public class IaPedagogicaController {
+    private static final Logger LOG=LoggerFactory.getLogger(IaPedagogicaController.class);
     public record Pedido(
         @NotNull Long turmaId,
         @NotBlank @jakarta.validation.constraints.Pattern(regexp="[A-Z_]{3,60}") String disciplina,
@@ -55,6 +58,8 @@ public class IaPedagogicaController {
     public record PacoteRascunho(List<QuizGerado> questoes,String status,String aviso,
                                  int restantesHoje) {}
     public record StatusIa(boolean habilitada,int restantesHoje,String mensagem) {}
+    public record DiagnosticoIa(boolean chaveConfigurada,boolean professorHabilitado,
+                               boolean alunoHabilitado,String modelo) {}
     public record TextoPdf(String texto,int paginas,boolean truncado) {}
     public record DisciplinaAluno(Long turmaId,String turmaNome,String disciplina) {}
     public record Duvida(
@@ -86,6 +91,9 @@ public class IaPedagogicaController {
         this.jdbc=jdbc;this.usuarios=usuarios;this.cotas=cotas;this.simulados=simulados;
         this.chave=chave;this.modelo=modelo;this.habilitada=habilitada;
         this.alunosHabilitados=alunosHabilitados;this.json=json;
+        LOG.info("IA escolar: chaveConfigurada={}, modelo={}, professorHabilitado={}, alunoHabilitado={}",
+            !chave.isBlank(),modelo,habilitada&&!chave.isBlank(),
+            habilitada&&alunosHabilitados&&!chave.isBlank());
         SimpleClientHttpRequestFactory factory=new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(Duration.ofSeconds(5));
         factory.setReadTimeout(Duration.ofSeconds(25));
@@ -131,6 +139,14 @@ public class IaPedagogicaController {
             "WHERE m.aluno_id=? AND t.escola_id=? AND t.id=? AND v.disciplina=?",
             Integer.class,aluno.getId(),aluno.getEscolaId(),pedido.turmaId(),pedido.disciplina());
         if(matriculas==0)throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+    }
+    @GetMapping("/gestao/ia/diagnostico")
+    public ResponseEntity<DiagnosticoIa> diagnostico(Authentication auth){
+        Usuario direcao=usuario(auth);
+        acessoBasico(direcao,Papel.DIRECAO);
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+            .body(new DiagnosticoIa(!chave.isBlank(),ativaPara(Papel.PROFESSOR),
+                ativaPara(Papel.ALUNO),modelo));
     }
     @GetMapping("/portal/ia/status")
     public ResponseEntity<StatusIa> status(Authentication auth){
