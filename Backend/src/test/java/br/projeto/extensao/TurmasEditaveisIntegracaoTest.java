@@ -308,6 +308,59 @@ class TurmasEditaveisIntegracaoTest {
     }
 
     @Test
+    void pdfDoProfessorExtraiTextoSemPublicarArquivoNemConsultarIa() throws Exception {
+        byte[] bytes;
+        try(var pdf=new org.apache.pdfbox.pdmodel.PDDocument()){
+            var page=new org.apache.pdfbox.pdmodel.PDPage();
+            pdf.addPage(page);
+            try(var cs=new org.apache.pdfbox.pdmodel.PDPageContentStream(pdf,page)){
+                cs.beginText();
+                cs.setFont(new org.apache.pdfbox.pdmodel.font.PDType1Font(
+                    org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.HELVETICA),12);
+                cs.newLineAtOffset(50,650);
+                cs.showText("Fractions describe parts of a whole.");
+                cs.endText();
+            }
+            var out=new java.io.ByteArrayOutputStream();
+            pdf.save(out);bytes=out.toByteArray();
+        }
+        var arquivo=new org.springframework.mock.web.MockMultipartFile(
+            "arquivo","conteudo.pdf","application/pdf",bytes);
+        String url="/api/professor/ia/pdf-extrair";
+        mvc.perform(multipart(url).file(arquivo)
+            .param("turmaId",turma.toString()).param("disciplina","MATEMATICA")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.texto",org.hamcrest.Matchers.containsString("Fractions describe")))
+            .andExpect(jsonPath("$.paginas").value(1))
+            .andExpect(jsonPath("$.truncado").value(false));
+        mvc.perform(multipart(url).file(arquivo)
+            .param("turmaId",turma.toString()).param("disciplina","MATEMATICA")
+            .with(user("aluno-edit@escola.test").roles("ALUNO")).with(csrf()))
+            .andExpect(status().isForbidden());
+        mvc.perform(multipart(url).file(arquivo)
+            .param("turmaId",turma.toString()).param("disciplina","MATEMATICA")
+            .with(user("prof-edit-b@escola.test").roles("PROFESSOR")).with(csrf()))
+            .andExpect(status().isForbidden());
+        mvc.perform(multipart(url).file(arquivo)
+            .param("turmaId",turma.toString()).param("disciplina","MATEMATICA")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isForbidden());
+        var falso=new org.springframework.mock.web.MockMultipartFile(
+            "arquivo","ata.pdf","application/pdf","sem PDF".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        mvc.perform(multipart(url).file(falso)
+            .param("turmaId",turma.toString()).param("disciplina","MATEMATICA")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf()))
+            .andExpect(status().isUnsupportedMediaType());
+        var grande=new org.springframework.mock.web.MockMultipartFile(
+            "arquivo","grande.pdf","application/pdf",new byte[2*1024*1024+1]);
+        mvc.perform(multipart(url).file(grande)
+            .param("turmaId",turma.toString()).param("disciplina","MATEMATICA")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf()))
+            .andExpect(status().isPayloadTooLarge());
+    }
+
+    @Test
     void direcaoTransfereAlunoEntreTurmasDaMesmaEscolaMantendoHistorico() throws Exception {
         jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES(?,?,?,2026)",
             escolaA,"3B","Terceiro B");
