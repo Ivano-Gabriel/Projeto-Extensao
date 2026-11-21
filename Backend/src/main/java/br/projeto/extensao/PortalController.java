@@ -141,6 +141,7 @@ public class PortalController {
         try{
             jdbc.update("INSERT INTO matriculas(turma_id,aluno_id,ano_letivo) VALUES (?,?,?)",
                 turmaId,dados.alunoId(),turma.anoLetivo());
+            auditoria.registrar(escolaId,user.getId(),"ALUNO_MATRICULADO","MATRICULA",dados.alunoId());
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }catch(DataIntegrityViolationException ex){
             throw new ResponseStatusException(HttpStatus.CONFLICT,"Aluno ja matriculado no ano informado.");
@@ -158,6 +159,7 @@ public class PortalController {
         try{
             jdbc.update("INSERT INTO vinculos_docentes(turma_id,professor_id,disciplina) VALUES (?,?,?)",
                 turmaId,dados.professorId(),dados.disciplina());
+            auditoria.registrar(escolaId,user.getId(),"PROFESSOR_VINCULADO","TURMA",turmaId);
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }catch(DataIntegrityViolationException ex){
             throw new ResponseStatusException(HttpStatus.CONFLICT,"Professor ja vinculado a disciplina.");
