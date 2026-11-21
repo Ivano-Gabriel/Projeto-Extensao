@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -33,10 +34,12 @@ public class UsuariosController {
 
     private final UsuarioRepository usuarios;
     private final PasswordEncoder encoder;
+    private final AuditoriaService auditoria;
 
-    public UsuariosController(UsuarioRepository usuarios, PasswordEncoder encoder) {
+    public UsuariosController(UsuarioRepository usuarios, PasswordEncoder encoder, AuditoriaService auditoria) {
         this.usuarios = usuarios;
         this.encoder = encoder;
+        this.auditoria = auditoria;
     }
 
     private Usuario direcao(Authentication auth) {
@@ -74,6 +77,7 @@ public class UsuariosController {
             usuarios.findByEscolaId(gestora.getEscolaId()).stream().map(UsuarioPublico::de).toList());
     }
 
+    @Transactional
     @PostMapping("/gestao/usuarios")
     public ResponseEntity<UsuarioPublico> cadastrar(@Valid @RequestBody NovoUsuario dados,Authentication auth) {
         Usuario gestora=direcao(auth);
@@ -86,6 +90,7 @@ public class UsuariosController {
             Usuario novo=new Usuario(dados.nome(),email,encoder.encode(dados.senha()),dados.papel());
             novo.vincularEscola(gestora.getEscolaId());
             Usuario salvo=usuarios.saveAndFlush(novo);
+            auditoria.registrar(gestora.getEscolaId(),gestora.getId(),"USUARIO_CRIADO","USUARIO",salvo.getId());
             return ResponseEntity.created(URI.create("/api/gestao/usuarios/"+salvo.getId()))
                 .body(UsuarioPublico.de(salvo));
         }catch(DataIntegrityViolationException ex) {

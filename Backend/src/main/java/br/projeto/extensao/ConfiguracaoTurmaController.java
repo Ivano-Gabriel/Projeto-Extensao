@@ -35,9 +35,11 @@ public class ConfiguracaoTurmaController {
 
     private final JdbcTemplate jdbc;
     private final UsuarioRepository usuarios;
-    public ConfiguracaoTurmaController(JdbcTemplate jdbc, UsuarioRepository usuarios) {
+    private final AuditoriaService auditoria;
+    public ConfiguracaoTurmaController(JdbcTemplate jdbc, UsuarioRepository usuarios, AuditoriaService auditoria) {
         this.jdbc=jdbc;
         this.usuarios=usuarios;
+        this.auditoria=auditoria;
     }
     private Usuario usuario(Authentication auth) {
         if(auth==null)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -102,6 +104,7 @@ public class ConfiguracaoTurmaController {
         } catch(DataIntegrityViolationException ex) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,"Codigo de turma em uso.");
         }
+        auditoria.registrar(gestora.getEscolaId(),gestora.getId(),"TURMA_ATUALIZADA","TURMA",turmaId);
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(turma(turmaId,gestora));
     }
     private Horario lerHorario(java.sql.ResultSet rs,int i)throws java.sql.SQLException {
@@ -145,6 +148,7 @@ public class ConfiguracaoTurmaController {
         }catch(DataIntegrityViolationException ex){
             throw new ResponseStatusException(HttpStatus.CONFLICT,"Horario ja ocupado nesta turma.");
         }
+        auditoria.registrar(user.getEscolaId(),user.getId(),"HORARIO_CRIADO","TURMA",turmaId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
     @Transactional
@@ -155,6 +159,7 @@ public class ConfiguracaoTurmaController {
         turma(turmaId,user);
         int alterados=jdbc.update("DELETE FROM horarios_turma WHERE turma_id=? AND id=?",turmaId,horarioId);
         if(alterados==0)throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        auditoria.registrar(user.getEscolaId(),user.getId(),"HORARIO_REMOVIDO","TURMA",turmaId);
         return ResponseEntity.noContent().build();
     }
 }

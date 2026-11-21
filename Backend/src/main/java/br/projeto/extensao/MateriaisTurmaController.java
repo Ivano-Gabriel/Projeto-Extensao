@@ -28,8 +28,9 @@ public class MateriaisTurmaController {
         boolean publicado) {}
     private final UsuarioRepository usuarios;
     private final JdbcTemplate jdbc;
-    public MateriaisTurmaController(UsuarioRepository usuarios,JdbcTemplate jdbc){
-        this.usuarios=usuarios;this.jdbc=jdbc;
+    private final AuditoriaService auditoria;
+    public MateriaisTurmaController(UsuarioRepository usuarios,JdbcTemplate jdbc,AuditoriaService auditoria){
+        this.usuarios=usuarios;this.jdbc=jdbc;this.auditoria=auditoria;
     }
     private Usuario usuario(Authentication auth){
         if(auth==null)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -101,6 +102,7 @@ public class MateriaisTurmaController {
             return stmt;
         },chave);
         long id=chave.getKey().longValue();
+        auditoria.registrar(user.getEscolaId(),user.getId(),"MATERIAL_CRIADO","MATERIAL",id);
         return ResponseEntity.created(URI.create("/api/portal/turmas/"+turmaId+"/materiais"))
             .body(new Material(id,turmaId,user.getId(),dados.disciplina(),
                 dados.titulo().trim(),dados.conteudo().trim(),dados.publicado()));
@@ -129,6 +131,7 @@ public class MateriaisTurmaController {
         jdbc.update("UPDATE materiais_turma SET titulo=?,conteudo=?,publicado=?,"+
             "atualizado_em=CURRENT_TIMESTAMP WHERE id=?",dados.titulo().trim(),
             dados.conteudo().trim(),dados.publicado(),materialId);
+        auditoria.registrar(user.getEscolaId(),user.getId(),"MATERIAL_EDITADO","MATERIAL",materialId);
         return ResponseEntity.ok().cacheControl(CacheControl.noStore())
             .body(new Material(materialId,material.turmaId(),user.getId(),dados.disciplina(),
                 dados.titulo().trim(),dados.conteudo().trim(),dados.publicado()));
@@ -139,6 +142,7 @@ public class MateriaisTurmaController {
         Usuario user=usuario(auth);
         proprio(materialId,user);
         jdbc.update("DELETE FROM materiais_turma WHERE id=?",materialId);
+        auditoria.registrar(user.getEscolaId(),user.getId(),"MATERIAL_REMOVIDO","MATERIAL",materialId);
         return ResponseEntity.noContent().build();
     }
 }

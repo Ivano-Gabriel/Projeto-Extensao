@@ -207,14 +207,20 @@ public class IaPedagogicaController {
                 ||titulo.isBlank()||titulo.length()>150
                 ||pergunta.isBlank()||pergunta.length()>500
                 ||explicacao.isBlank()||explicacao.length()>1000
+                ||!Double.isFinite(correta.doubleValue())
+                ||correta.doubleValue()!=correta.intValue()
                 ||correta.intValue()<0||correta.intValue()>3)
                 throw new IllegalArgumentException("Quiz gerado incompleto");
             List<String> opcoes=new ArrayList<>();
+            java.util.Set<String> unicas=new java.util.HashSet<>();
             for(Object item:alternativas){
                 if(!(item instanceof String alternativa)||
                     alternativa.isBlank()||alternativa.length()>200)
                     throw new IllegalArgumentException("Alternativa inválida");
-                opcoes.add(alternativa.trim());
+                String limpa=alternativa.trim();
+                if(!unicas.add(limpa.toLowerCase(java.util.Locale.ROOT)))
+                    throw new IllegalArgumentException("Alternativas repetidas");
+                opcoes.add(limpa);
             }
             return new QuizGerado(titulo.trim(),pergunta.trim(),opcoes,
                 correta.intValue(),explicacao.trim());
