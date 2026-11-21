@@ -19,3 +19,14 @@ As imagens são carregadas com `images.unsplash.com` e têm fallback de cor; nã
 - **Modo escuro**: depende de revisão visual com usuários; não declarar WCAG certificado.
 - **Proteção**: fotos não incluem registros escolares; nenhuma mudança de API, permissão, banco, login ou IA.
 - **Validação**: PR e preview separados de `main`. Avaliação visual pelo usuário antes de merge.
+
+## Revisão V3 — 21/11/2026 (aguardando avaliação)
+- `photo-1523240795612-9a054b0db644` — fotografia de estudantes/ambiente educacional exibida como capa editorial do login mobile, com degradê para legibilidade.
+- `photo-1516321318423-f06f85e504b3` — fotografia temática de tecnologia no cartão de segurança digital.
+- `photo-1460925895917-afdab827c52f` — fotografia temática de indicadores e negócios.
+- `photo-1495020689067-958852a7765e` — fotografia temática de notícias/pesquisa.
+- As fotos são ilustrativas, sem vínculo com alunos, professores ou escolas cadastradas.
+- A navegação do livro abre na direção oposta à proposta anterior, com estados finais mais definidos. A animação e as imagens ainda exigem inspeção visual em navegador real.
+- O azul do botão Entrar é `#24527F`. O login de desktop foi preservado, e a capa com fotografia foi introduzida no telefone.
+- Nenhuma alteração foi realizada em autenticação, banco de dados, permissões ou rotas do backend.
+- **Não declarar concluído** até CI de build e homologação mobile/desktop; o Vercel sinalizou limite de builds no plano em 21/11/2026.
