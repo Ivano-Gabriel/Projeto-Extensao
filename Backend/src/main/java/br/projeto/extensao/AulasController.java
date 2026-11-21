@@ -171,10 +171,10 @@ public class AulasController {
             "JOIN vinculos_docentes v ON v.turma_id=a.turma_id AND v.disciplina=a.disciplina "+
             "JOIN usuarios u ON u.id=p.aluno_id "+
             "WHERE p.aula_id=? AND p.aluno_id=? AND a.escola_id=? "+
-            "AND a.professor_id=? AND v.professor_id=? "+
+            "AND v.professor_id=? "+
             "AND u.escola_id=? AND u.papel='ALUNO'",
             (rs,i)->rs.getBoolean("presente"),aulaId,dados.alunoId(),escolaId,
-            professor.getId(),professor.getId(),escolaId);
+            professor.getId(),escolaId);
         if(anteriores.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         boolean anterior=anteriores.get(0);
         if(anterior==dados.presente())return ResponseEntity.noContent().build();
