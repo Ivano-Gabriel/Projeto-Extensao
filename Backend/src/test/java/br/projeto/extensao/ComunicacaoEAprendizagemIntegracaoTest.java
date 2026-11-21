@@ -276,6 +276,70 @@ class ComunicacaoEAprendizagemIntegracaoTest {
             .andExpect(status().isNotFound());
         mvc.perform(get(rota)).andExpect(status().isUnauthorized());
     }
+    @Test void docenteCorrigeChamadaSalvaComCsrfPermissaoAuditoriaESemDuplicar() throws Exception {
+        String aulaJson="""
+            {"turmaId":%d,"disciplina":"MATEMATICA","data":"2026-11-21","ordem":2,"tema":"Correção de chamada"}
+            """.formatted(turmaA);
+        mvc.perform(post("/api/professor/aulas")
+            .with(user("prof-a@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(aulaJson))
+            .andExpect(status().isCreated());
+        Long aula=jdbc.queryForObject(
+            "SELECT id FROM aulas_registradas WHERE turma_id=? AND tema='Correção de chamada'",
+            Long.class,turmaA);
+        String rota="/api/professor/aulas/"+aula+"/presencas";
+        String ausente="{\"alunoId\":"+alunoA+",\"presente\":false}";
+        String presente="{\"alunoId\":"+alunoA+",\"presente\":true}";
+        mvc.perform(post(rota).with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(ausente))
+            .andExpect(status().isCreated());
+        mvc.perform(get("/api/portal/minha-frequencia")
+            .with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(jsonPath("$.faltas").value(1));
+        mvc.perform(put(rota).with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .contentType(MediaType.APPLICATION_JSON).content(presente))
+            .andExpect(status().isForbidden());
+        mvc.perform(put(rota).with(user("aluno-a@escola.test").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(presente))
+            .andExpect(status().isForbidden());
+        mvc.perform(put(rota).with(user("prof-b@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(presente))
+            .andExpect(status().isNotFound());
+        mvc.perform(put(rota).with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"alunoId\":"+alunoB+",\"presente\":true}"))
+            .andExpect(status().isNotFound());
+        mvc.perform(put(rota).with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(presente))
+            .andExpect(status().isNoContent());
+        mvc.perform(get(rota).with(user("prof-a@escola.test").roles("PROFESSOR")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].alunoId").value(alunoA))
+            .andExpect(jsonPath("$[0].presente").value(true));
+        mvc.perform(get("/api/portal/minha-frequencia")
+            .with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(jsonPath("$.faltas").value(0))
+            .andExpect(jsonPath("$.presencas").value(1))
+            .andExpect(jsonPath("$.registrosDePresenca").value(1));
+        mvc.perform(get("/api/portal/minha-frequencia")
+            .with(user("aluno-b@escola.test").roles("ALUNO")))
+            .andExpect(jsonPath("$.presencas").value(0));
+        org.junit.jupiter.api.Assertions.assertEquals(1,jdbc.queryForObject(
+            "SELECT COUNT(*) FROM presencas_aula WHERE aula_id=? AND aluno_id=?",
+            Integer.class,aula,alunoA));
+        org.junit.jupiter.api.Assertions.assertEquals(1,jdbc.queryForObject(
+            "SELECT COUNT(*) FROM auditoria_escolar WHERE acao='PRESENCA_CORRIGIDA' "+
+            "AND escola_id=? AND ator_id=? AND entidade='AULA' AND entidade_id=?",
+            Integer.class,escolaA,professorA,aula));
+        mvc.perform(put(rota).with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(presente))
+            .andExpect(status().isNoContent());
+        org.junit.jupiter.api.Assertions.assertEquals(1,jdbc.queryForObject(
+            "SELECT COUNT(*) FROM auditoria_escolar WHERE acao='PRESENCA_CORRIGIDA' "+
+            "AND escola_id=? AND ator_id=? AND entidade='AULA' AND entidade_id=?",
+            Integer.class,escolaA,professorA,aula));
+    }
+
     @Test void professorDeOutraEscolaNaoRegistraNemLePresenca()throws Exception{
         mvc.perform(post("/api/professor/aulas").with(user("prof-b@escola.test").roles("PROFESSOR"))
             .with(csrf()).contentType(MediaType.APPLICATION_JSON)
