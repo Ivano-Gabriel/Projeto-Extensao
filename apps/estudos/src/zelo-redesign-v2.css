@@ -461,3 +461,20 @@ button,select,input,textarea{font-family:inherit}
  .prime-menu-livro.aberto .zelo-livro-pagina{transform:rotateY(-150deg)}
  .zelo-nav-item,.zelo-chevron-material{transition:none!important}
 }
+
+/* Portal escolar é um modo completo: não empilhar dois menus ou dois cabeçalhos. */
+@media(min-width:900px){
+  .zelo-modo-portal.app-layout{display:block;max-width:100%}
+  .zelo-modo-portal .navegacao{display:none!important}
+}
+.zelo-modo-portal .cabecalho-app.prime-header{display:none}
+.zelo-modo-portal .conteudo-principal{padding:clamp(.8rem,2.2vw,1.7rem) clamp(.65rem,2vw,1.2rem) 2rem;max-width:100%}
+.zelo-modo-portal .portal-pagina{margin:0 auto}
+.zelo-modo-portal .portal-pagina>.botao-voltar{
+  min-height:2.7rem;padding:.55rem .8rem;margin-bottom:.6rem;
+  color:#244f76;background:#e7f1f9;border:1px solid #c6dcea;
+  border-radius:.75rem;font-weight:850;
+}
+@media(max-width:999px){
+  .zelo-modo-portal .conteudo-principal{padding-bottom:calc(6.1rem + env(safe-area-inset-bottom))}
+}
