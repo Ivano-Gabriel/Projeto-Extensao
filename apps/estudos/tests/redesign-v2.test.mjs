@@ -64,3 +64,28 @@ test('login desktop cabe em viewport comum sem mexer no layout mobile aprovado',
   assert.match(css,/\.entrada-login\{height:100dvh/)
   assert.match(css,/@media\(min-width:760px\) and \(max-height:689px\)/)
 })
+
+
+test('regressão visual V3: login mobile mantém fotografia, acabamento azul e conteúdo visível',()=>{
+  const css=fonte('zelo-redesign-v2.css')
+  assert.match(css,/\.entrada-login \.prime-login-cena\{[\s\S]*?background-image:/)
+  assert.match(css,/\.entrada-login \.prime-login \.portal-form \.botao-principal\{[\s\S]*?background:/)
+  assert.match(css,/\.entrada-login \.prime-login-cena \.prime-login-arte\{[\s\S]*?transform:/)
+})
+test('regressão visual V3: livro abre no sentido direito e o menu permanece centralizado',()=>{
+  const css=fonte('zelo-redesign-v2.css')
+  assert.match(css,/@keyframes zeloPaginaParaDireita/)
+  assert.match(css,/\.prime-menu-livro\.aberto \.zelo-livro-direita\{transform:rotateY\(158deg\)/)
+  assert.match(css,/\.zelo-livro-cenario\{[\s\S]*?perspective:/)
+})
+test('regressão visual V3: revisão, progresso e desafios têm cabeçalhos claros e hierarquia',()=>{
+  const css=fonte('zelo-redesign-v2.css')
+  const app=fonte('App.tsx')
+  const jogo=fonte('jogo/Jogo.tsx')
+  assert.match(app,/className="pagina zelo-revisao-pagina"/)
+  assert.match(css,/\.zelo-revisao-pagina \.quiz-topo/)
+  assert.match(css,/\.zelo-progresso-pagina \.progresso-layout/)
+  assert.match(jogo,/className="missao-card-foto"/)
+  assert.match(jogo,/Casos para resolver/)
+  assert.doesNotMatch(app,/materiais,\s*materiais/)
+})
