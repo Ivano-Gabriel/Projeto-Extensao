@@ -338,6 +338,29 @@ class ComunicacaoEAprendizagemIntegracaoTest {
             "SELECT COUNT(*) FROM auditoria_escolar WHERE acao='PRESENCA_CORRIGIDA' "+
             "AND escola_id=? AND ator_id=? AND entidade='AULA' AND entidade_id=?",
             Integer.class,escolaA,professorA,aula));
+
+        jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES (?,'3C','Turma Destino',2026)",escolaA);
+        Long destino=jdbc.queryForObject(
+            "SELECT id FROM turmas WHERE escola_id=? AND codigo='3C'",Long.class,escolaA);
+        mvc.perform(post("/api/gestao/turmas/"+turmaA+"/transferencias")
+            .with(user("dir-a@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\\"alunoId\\":"+alunoA+",\\"destinoTurmaId\\":"+destino+"}"))
+            .andExpect(status().isNoContent());
+        mvc.perform(put(rota).with(user("prof-a@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(ausente))
+            .andExpect(status().isNoContent());
+        mvc.perform(get("/api/portal/minha-frequencia")
+            .with(user("aluno-a@escola.test").roles("ALUNO")))
+            .andExpect(jsonPath("$.aulasRegistradas").value(1))
+            .andExpect(jsonPath("$.faltas").value(1))
+            .andExpect(jsonPath("$.presencas").value(0));
+        org.junit.jupiter.api.Assertions.assertEquals(destino,jdbc.queryForObject(
+            "SELECT turma_id FROM matriculas WHERE aluno_id=?",Long.class,alunoA));
+        org.junit.jupiter.api.Assertions.assertEquals(2,jdbc.queryForObject(
+            "SELECT COUNT(*) FROM auditoria_escolar WHERE acao='PRESENCA_CORRIGIDA' "+
+            "AND escola_id=? AND ator_id=? AND entidade='AULA' AND entidade_id=?",
+            Integer.class,escolaA,professorA,aula));
     }
 
     @Test void professorDeOutraEscolaNaoRegistraNemLePresenca()throws Exception{
