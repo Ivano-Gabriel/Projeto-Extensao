@@ -156,6 +156,85 @@ class SimuladosIntegracaoTest {
         org.junit.jupiter.api.Assertions.assertNull(jdbc.queryForObject(
             "SELECT nota FROM simulados_estudo WHERE id=?",Integer.class,id));
     }
+    @Test void simuladoSobreviveTransferenciaDaTurmaESemNotaOficial()throws Exception{
+        long id=salvarSimulado();
+        long diretor=criar("dir-prova-a@escola.test",Papel.DIRECAO,escolaA);
+        jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES (?,'3C','Turma C',2026)",escolaA);
+        long destino=jdbc.queryForObject(
+            "SELECT id FROM turmas WHERE escola_id=? AND codigo='3C'",Long.class,escolaA);
+        String transferir="{\"alunoId\":"+alunoA+",\"destinoTurmaId\":"+destino+"}";
+        mvc.perform(post("/api/gestao/turmas/"+turmaA+"/transferencias")
+            .with(user("dir-prova-a@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(transferir))
+            .andExpect(status().isNoContent());
+        int[] q=questoes(id);
+        String url="/api/portal/provas/simulados/"+id;
+        mvc.perform(get(url).with(user("aluno-prova-a@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.questoes.length()").value(5));
+        mvc.perform(post(url+"/respostas")
+            .with(user("aluno-prova-a@escola.test").roles("ALUNO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(respostas(id,q,new int[]{2,2,2,2,2})))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.nota").value(10))
+            .andExpect(jsonPath("$.acertos").value(5));
+        org.junit.jupiter.api.Assertions.assertEquals(destino,
+            jdbc.queryForObject("SELECT turma_id FROM matriculas WHERE aluno_id=?",Long.class,alunoA));
+        org.junit.jupiter.api.Assertions.assertEquals(0,
+            jdbc.queryForObject("SELECT COUNT(*) FROM atividades",Integer.class));
+        org.junit.jupiter.api.Assertions.assertEquals(0,
+            jdbc.queryForObject("SELECT COUNT(*) FROM respostas_atividade",Integer.class));
+    }
+    @Test void simuladoPodeTerminarComNotaZeroSemAlterarHistoricoDaEscola()throws Exception{
+        long id=salvarSimulado();
+        int[] q=questoes(id);
+        mvc.perform(post("/api/portal/provas/simulados/"+id+"/respostas")
+            .with(user("aluno-prova-a@escola.test").roles("ALUNO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(respostas(id,q,new int[]{0,0,0,0,0})))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.nota").value(0))
+            .andExpect(jsonPath("$.acertos").value(0));
+        mvc.perform(get("/api/portal/provas/simulados/"+id)
+            .with(user("aluno-prova-a@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.nota").value(0));
+    }
+    @Test void estudanteExtraiPdfTextualMasOutroPerfilNaoConsegue() throws Exception {
+        byte[] bytes;
+        try(var pdf=new org.apache.pdfbox.pdmodel.PDDocument()){
+            var pagina=new org.apache.pdfbox.pdmodel.PDPage();
+            pdf.addPage(pagina);
+            try(var cs=new org.apache.pdfbox.pdmodel.PDPageContentStream(pdf,pagina)){
+                cs.beginText();
+                cs.setFont(new org.apache.pdfbox.pdmodel.font.PDType1Font(
+                    org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.HELVETICA),12);
+                cs.newLineAtOffset(50,650);
+                cs.showText("Mathematics uses fractions to describe quantities.");
+                cs.endText();
+            }
+            var out=new java.io.ByteArrayOutputStream();
+            pdf.save(out);bytes=out.toByteArray();
+        }
+        var arquivo=new org.springframework.mock.web.MockMultipartFile(
+            "arquivo","matematica.pdf","application/pdf",bytes);
+        String url="/api/portal/provas/pdf-extrair";
+        mvc.perform(multipart(url).file(arquivo).param("turmaId",String.valueOf(turmaA))
+            .param("disciplina","MATEMATICA")
+            .with(user("aluno-prova-a@escola.test").roles("ALUNO")).with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.texto",org.hamcrest.Matchers.containsString("fractions")))
+            .andExpect(jsonPath("$.paginas").value(1));
+        mvc.perform(multipart(url).file(arquivo).param("turmaId",String.valueOf(turmaA))
+            .param("disciplina","MATEMATICA")
+            .with(user("aluno-prova-b@escola.test").roles("ALUNO")).with(csrf()))
+            .andExpect(status().isForbidden());
+        mvc.perform(multipart(url).file(arquivo).param("turmaId",String.valueOf(turmaA))
+            .param("disciplina","MATEMATICA")
+            .with(user("prof-prova-a@escola.test").roles("PROFESSOR")).with(csrf()))
+            .andExpect(status().isForbidden());
+        mvc.perform(multipart(url).file(arquivo).param("turmaId",String.valueOf(turmaA))
+            .param("disciplina","MATEMATICA")
+            .with(user("aluno-prova-a@escola.test").roles("ALUNO")))
+            .andExpect(status().isForbidden());
+    }
+
     @Test void geracaoRealExigeMatriculaDisciplinaPrivacidadeCotaEProvedor()throws Exception{
         String url="/api/portal/provas/simulados";
         String base="{\"turmaId\":"+turmaA+",\"disciplina\":\"MATEMATICA\",\"tema\":\"Frações\","
