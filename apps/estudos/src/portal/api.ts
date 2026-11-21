@@ -17,6 +17,8 @@ export type MaterialFormulario = Pick<MaterialTurma,'disciplina'|'titulo'|'conte
 export type TipoRascunho = 'QUIZ'|'EXPLICACAO'|'PLANO_AULA'
 export type QuizGeradoIa = {titulo:string;pergunta:string;opcoes:string[];correta:number;explicacao:string}
 export type RespostaIa = {texto:string;status:'RASCUNHO';aviso:string;quiz:QuizGeradoIa|null;restantesHoje:number}
+export type PacoteRascunhoIa = {questoes:QuizGeradoIa[];status:'RASCUNHO';aviso:string;restantesHoje:number}
+export type PacotePedidoIa = {turmaId:number;disciplina:string;tema:string;contexto:string;fonteTexto:string;quantidade:number}
 export type StatusIa = {habilitada:boolean;restantesHoje:number;mensagem:string}
 export type DisciplinaIaAluno = {turmaId:number;turmaNome:string;disciplina:string}
 export type ExplicacaoIa = {texto:string;aviso:string;restantesHoje:number}
@@ -113,6 +115,10 @@ export const apiEscolar={
     requisitar<ExplicacaoIa>('POST','/api/portal/ia/explicar',body),
   gerarRascunho:(body:{turmaId:number;disciplina:string;tema:string;tipo:TipoRascunho;contexto:string})=>
     requisitar<RespostaIa>('POST','/api/professor/ia/rascunho',body),
+  gerarPacote:(body:PacotePedidoIa)=>
+    requisitar<PacoteRascunhoIa>('POST','/api/professor/ia/pacote',body),
+  publicarLote:(body:{atividades:AtividadeFormulario[]})=>
+    requisitar<AtividadeEscolar[]>('POST','/api/professor/atividades/lote',body),
   login:(email:string,senha:string)=>requisitar<UsuarioEscolar>('POST','/api/login',{email,senha}),
   logout:()=>requisitar<void>('POST','/api/logout'),
   trocarSenha:(senhaAtual:string,novaSenha:string)=>
