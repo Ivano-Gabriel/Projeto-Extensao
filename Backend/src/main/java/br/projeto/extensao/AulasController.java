@@ -166,13 +166,14 @@ public class AulasController {
             "COUNT(DISTINCT p.aula_id) AS registros, "+
             "COALESCE(SUM(CASE WHEN p.presente=TRUE THEN 1 ELSE 0 END),0) AS presencas, "+
             "COALESCE(SUM(CASE WHEN p.presente=FALSE THEN 1 ELSE 0 END),0) AS faltas "+
-            "FROM matriculas m JOIN turmas t ON t.id=m.turma_id "+
-            "JOIN aulas_registradas a ON a.turma_id=t.id AND a.escola_id=? "+
+            "FROM aulas_registradas a "+
             "LEFT JOIN presencas_aula p ON p.aula_id=a.id AND p.aluno_id=? "+
-            "WHERE m.aluno_id=? AND t.escola_id=?",
+            "WHERE a.escola_id=? AND (p.aluno_id IS NOT NULL OR EXISTS ("+
+            "SELECT 1 FROM matriculas m JOIN turmas t ON t.id=m.turma_id "+
+            "WHERE m.aluno_id=? AND m.turma_id=a.turma_id AND t.escola_id=?))",
             (rs,i)->new MinhaFrequencia(rs.getInt("aulas"),rs.getInt("registros"),
                 rs.getInt("presencas"),rs.getInt("faltas")),
-            escolaId,aluno.getId(),aluno.getId(),escolaId);
+            aluno.getId(),escolaId,aluno.getId(),escolaId);
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(dados);
     }
 }
