@@ -93,7 +93,7 @@ test('aluno responde cinco questões no navegador, sem ver gabarito antes da ent
   await page.getByRole('button',{name:'Finalizar prova'}).click()
   await page.getByRole('button',{name:'Confirmar entrega'}).click()
   await expect(page.getByText('Nota de treino: 6/10').first()).toBeVisible()
-  await expect(page.getByText('Gabarito:')).toHaveCount(0)
+  await expect(page.getByText(/Gabarito:/).first()).toBeVisible()
   await expect(page.getByText('Revisar o conceito com o professor.').first()).toBeVisible()
   expect(mock.resultado()).toEqual({gerado:true,concluido:true})
   expect(mock.requests).toContain('POST /api/portal/provas/simulados/99/respostas')
