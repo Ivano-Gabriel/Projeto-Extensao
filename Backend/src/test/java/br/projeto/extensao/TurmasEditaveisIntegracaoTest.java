@@ -283,6 +283,71 @@ class TurmasEditaveisIntegracaoTest {
             .andExpect(status().isConflict());
     }
     @Test
+    void alunoTransferidoMantemFrequenciaRegistradaNaTurmaDeOrigemSemContarAulasPosteriores() throws Exception {
+        String origem="/api/professor/aulas";
+        String antiga="""
+            {"turmaId":%d,"disciplina":"MATEMATICA","data":"2026-11-17","ordem":1,"tema":"Aula anterior"}
+            """.formatted(turma);
+        mvc.perform(post(origem).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(antiga))
+            .andExpect(status().isCreated());
+        Long aulaAntiga=jdbc.queryForObject(
+            "SELECT id FROM aulas_registradas WHERE turma_id=?",Long.class,turma);
+        mvc.perform(post("/api/professor/aulas/"+aulaAntiga+"/presencas")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"alunoId\":"+aluno+",\"presente\":true}"))
+            .andExpect(status().isCreated());
+        jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES (?,'3B','Terceiro B',2026)",escolaA);
+        Long destino=jdbc.queryForObject(
+            "SELECT id FROM turmas WHERE escola_id=? AND codigo='3B'",Long.class,escolaA);
+        jdbc.update("INSERT INTO vinculos_docentes(turma_id,professor_id,disciplina) VALUES(?,?,'MATEMATICA')",
+            destino,professor);
+        String nova="""
+            {"turmaId":%d,"disciplina":"MATEMATICA","data":"2026-11-18","ordem":1,"tema":"Aula nova"}
+            """.formatted(destino);
+        mvc.perform(post(origem).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(nova))
+            .andExpect(status().isCreated());
+        Long aulaNova=jdbc.queryForObject(
+            "SELECT id FROM aulas_registradas WHERE turma_id=?",Long.class,destino);
+        mvc.perform(post("/api/gestao/turmas/"+turma+"/transferencias")
+            .with(user("dir-edit@escola.test").roles("DIRECAO")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"alunoId\":"+aluno+",\"destinoTurmaId\":"+destino+"}"))
+            .andExpect(status().isNoContent());
+
+        String frequencia="/api/portal/minha-frequencia";
+        mvc.perform(get(frequencia).with(user("aluno-edit@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.aulasRegistradas").value(2))
+            .andExpect(jsonPath("$.registrosDePresenca").value(1))
+            .andExpect(jsonPath("$.presencas").value(1))
+            .andExpect(jsonPath("$.faltas").value(0));
+        mvc.perform(post("/api/professor/aulas/"+aulaNova+"/presencas")
+            .with(user("prof-edit@escola.test").roles("PROFESSOR")).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"alunoId\":"+aluno+",\"presente\":false}"))
+            .andExpect(status().isCreated());
+        mvc.perform(get(frequencia).with(user("aluno-edit@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.aulasRegistradas").value(2))
+            .andExpect(jsonPath("$.registrosDePresenca").value(2))
+            .andExpect(jsonPath("$.presencas").value(1))
+            .andExpect(jsonPath("$.faltas").value(1));
+        String novaNaAntiga="""
+            {"turmaId":%d,"disciplina":"MATEMATICA","data":"2026-11-19","ordem":1,"tema":"Aula depois da saida"}
+            """.formatted(turma);
+        mvc.perform(post(origem).with(user("prof-edit@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(novaNaAntiga))
+            .andExpect(status().isCreated());
+        mvc.perform(get(frequencia).with(user("aluno-edit@escola.test").roles("ALUNO")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.aulasRegistradas").value(2))
+            .andExpect(jsonPath("$.presencas").value(1))
+            .andExpect(jsonPath("$.faltas").value(1));
+    }
+    @Test
     void transferenciaRejeitaOutroAnoEOuOutraEscola() throws Exception {
         jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES(?,?,?,2027)",
             escolaA,"3D","Outro ano");
