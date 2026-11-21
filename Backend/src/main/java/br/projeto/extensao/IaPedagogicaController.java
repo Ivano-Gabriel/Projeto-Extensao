@@ -2,6 +2,8 @@ package br.projeto.extensao;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +12,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -42,6 +48,7 @@ public class IaPedagogicaController {
     public record PacoteRascunho(List<QuizGerado> questoes,String status,String aviso,
                                  int restantesHoje) {}
     public record StatusIa(boolean habilitada,int restantesHoje,String mensagem) {}
+    public record TextoPdf(String texto,int paginas,boolean truncado) {}
     public record DisciplinaAluno(Long turmaId,String turmaNome,String disciplina) {}
     public record Duvida(
         @NotNull Long turmaId,
@@ -214,6 +221,42 @@ public class IaPedagogicaController {
                 "Pacote de questões incompleto ou inválido. Não foi publicado.");
         }
     }
+    @PostMapping(path="/professor/ia/pdf-extrair",consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<TextoPdf> extrairPdf(
+            @RequestParam Long turmaId,@RequestParam String disciplina,
+            @RequestPart("arquivo") MultipartFile arquivo,Authentication auth){
+        Usuario professor=usuario(auth);
+        autorizarProfessor(professor,turmaId,disciplina);
+        if(arquivo.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Selecione um PDF com texto.");
+        if(arquivo.getSize()>2L*1024*1024)
+            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,"PDF acima de 2 MB.");
+        if(!"application/pdf".equalsIgnoreCase(arquivo.getContentType()))
+            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,"Envie apenas PDF.");
+        try{
+            byte[] bytes=arquivo.getBytes();
+            if(bytes.length<5||!new String(bytes,0,5,StandardCharsets.US_ASCII).equals("%PDF-"))
+                throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,"Arquivo não é PDF.");
+            try(PDDocument pdf=Loader.loadPDF(bytes)){
+                int paginas=pdf.getNumberOfPages();
+                if(pdf.isEncrypted()||paginas<1||paginas>12)
+                    throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                        "Use PDF sem senha, com até 12 páginas.");
+                String texto=new PDFTextStripper().getText(pdf).trim();
+                if(texto.isBlank())
+                    throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                        "PDF sem texto selecionável. PDFs escaneados requerem transcrição.");
+                boolean truncado=texto.length()>6000;
+                if(truncado)texto=texto.substring(0,6000);
+                return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                    .body(new TextoPdf(texto,paginas,truncado));
+            }
+        }catch(IOException ex){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Não foi possível interpretar o PDF.",ex);
+        }
+    }
+
     @PostMapping("/professor/ia/pacote")
     public ResponseEntity<PacoteRascunho> gerarPacote(
             @Valid @RequestBody PedidoPacote pedido,Authentication auth){
