@@ -121,7 +121,7 @@ test('histórico da prova persiste depois de recarregar a interface',async({page
 test('um professor e um diretor não recebem a aba Prova no portal',async({page})=>{
   await portalSimulado(page,'PROFESSOR')
   await page.goto('/')
-  await expect(page.getByRole('heading',{name:/Olá, QA!/})).toBeVisible()
+  await expect(page.getByRole('heading',{name:/Tudo pronto, QA\./})).toBeVisible()
   await expect(page.getByRole('tab',{name:'Prova'})).toHaveCount(0)
   await expect(page.getByRole('tab',{name:'Atividades'})).toBeVisible()
 })
@@ -136,4 +136,62 @@ test('login responsivo e acessível no Chromium mobile sem conta real',async({pa
   await expect(page.getByLabel('E-mail')).toBeVisible()
   await expect(page.locator('#portal-senha')).toBeVisible()
   await expect(page.getByRole('button',{name:'Entrar'})).toBeVisible()
+})
+
+
+test('mobile 390px sem rolagem horizontal, quatro destinos visíveis e Mais',async({page})=>{
+  await page.setViewportSize({width:390,height:844})
+  await portalSimulado(page,'ALUNO')
+  await page.goto('/')
+  await page.getByRole('navigation',{name:'Navegação da ferramenta de estudos'})
+    .getByRole('button',{name:'Minha turma'}).click()
+  const tabs=page.getByRole('tablist',{name:'Seções do portal'})
+  await expect(tabs.getByRole('tab',{name:'Hoje'})).toBeVisible()
+  await expect(tabs.getByRole('tab',{name:'Prova'})).toBeVisible()
+  await expect(page.getByRole('button',{name:'Mais áreas'})).toBeVisible()
+  await expect.poll(()=>page.evaluate(()=>({
+    total:document.documentElement.scrollWidth,
+    viewport:window.innerWidth,
+  }))).toMatchObject({total:390,viewport:390})
+  await page.getByRole('button',{name:'Mais áreas'}).click()
+  await expect(page.getByRole('dialog',{name:'Mais áreas do portal'})).toBeVisible()
+  await page.getByRole('dialog').getByRole('button',{name:'Assistente'}).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(page.getByRole('button',{name:'Mais áreas'})).toHaveAttribute('aria-expanded','false')
+})
+
+test('menu do livro abre áreas com páginas articuladas e fecha novamente',async({page})=>{
+  await portalSimulado(page,'ALUNO')
+  await page.setViewportSize({width:390,height:844})
+  await page.goto('/')
+  const livro=page.getByRole('button',{name:'Abrir menu de áreas'})
+  await expect(livro).toBeVisible()
+  await livro.click()
+  await expect(page.getByRole('navigation',{name:'Todas as áreas de estudos'})).toBeVisible()
+  await expect(page.locator('.zelo-livro-pagina')).toHaveCount(3)
+  await expect(page.getByRole('button',{name:'Fechar menu de áreas'})).toHaveAttribute('aria-expanded','true')
+  await page.getByRole('button',{name:'Fechar menu de áreas'}).click()
+  await expect(page.getByRole('navigation',{name:'Todas as áreas de estudos'})).toHaveCount(0)
+})
+
+test('direção no mobile encontra vínculos direto e histórico em Mais',async({page})=>{
+  await portalSimulado(page,'DIRECAO')
+  await page.setViewportSize({width:390,height:844})
+  await page.goto('/')
+  await expect(page.getByRole('tab',{name:'Vínculos'})).toBeVisible()
+  await expect(page.getByRole('tab',{name:'Histórico'})).toBeHidden()
+  await page.getByRole('button',{name:'Mais áreas'}).click()
+  await expect(page.getByRole('dialog').getByRole('button',{name:'Histórico'})).toBeVisible()
+})
+
+test('cabeçalho de aluno tem foto editorial e logomarca grande no desktop',async({page})=>{
+  await portalSimulado(page,'ALUNO')
+  await page.setViewportSize({width:1366,height:768})
+  await page.goto('/')
+  await expect(page.getByRole('heading',{name:/Bom te ver, QA\./})).toBeVisible()
+  const hero=page.locator('.zelo-hero-portal')
+  await expect(hero).toBeVisible()
+  await expect(hero.locator('.zelo-hero-fotografia')).toBeAttached()
+  await expect.poll(()=>hero.locator('.zelo-hero-fotografia').evaluate(node=>
+    getComputedStyle(node).backgroundImage.includes('images.unsplash.com'))).toBe(true)
 })
