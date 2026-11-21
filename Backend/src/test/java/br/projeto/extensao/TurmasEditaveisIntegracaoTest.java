@@ -61,6 +61,32 @@ class TurmasEditaveisIntegracaoTest {
         return usuarios.saveAndFlush(usuario).getId();
     }
     @Test
+    void direcaoCriaTurmaComAuditoriaSomenteDaEscolaAutorizada() throws Exception {
+        String dados="""
+            {"codigo":"QA27A","nome":"Turma de teste 2027","anoLetivo":2027}
+            """;
+        mvc.perform(post("/api/gestao/turmas").with(user("aluno-edit@escola.test").roles("ALUNO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(dados))
+            .andExpect(status().isForbidden());
+        mvc.perform(post("/api/gestao/turmas").with(user("dir-edit@escola.test").roles("DIRECAO"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(dados))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.codigo").value("QA27A"));
+        Long novaTurma=jdbc.queryForObject(
+            "SELECT id FROM turmas WHERE escola_id=? AND codigo='QA27A' AND ano_letivo=2027",
+            Long.class,escolaA);
+        org.junit.jupiter.api.Assertions.assertEquals(1,jdbc.queryForObject(
+            "SELECT COUNT(*) FROM auditoria_escolar WHERE escola_id=? AND ator_id=? "+
+            "AND acao='TURMA_CRIADA' AND entidade='TURMA' AND entidade_id=?",
+            Integer.class,escolaA,direcao,novaTurma));
+        mvc.perform(get("/api/gestao/auditoria").with(user("dir-edit@escola.test").roles("DIRECAO")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].acao").value("TURMA_CRIADA"))
+            .andExpect(jsonPath("$[0].entidadeId").value(novaTurma));
+        Long outroDiretor=criar("dir-edit-b@escola.test",Papel.DIRECAO,escolaB);
+        mvc.perform(get("/api/gestao/auditoria").with(user("dir-edit-b@escola.test").roles("DIRECAO")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
+    }
+    @Test
     void direcaoEditaTurmaAlunoVeConfiguracaoEProfessorNaoEdita() throws Exception {
         String rota="/api/gestao/turmas/"+turma;
         String corpo="{\"codigo\":\"3B\",\"nome\":\"Terceiro B\",\"anoLetivo\":2026,\"descricao\":\"Revisao semanal\",\"cor\":\"#2867A8\"}";
