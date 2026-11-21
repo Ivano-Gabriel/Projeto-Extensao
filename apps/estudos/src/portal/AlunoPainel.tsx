@@ -1,6 +1,6 @@
 import NavegacaoDireta from './NavegacaoDireta'
 import { useEffect, useState } from 'react'
-import { ArrowRight, BookOpen, CheckCircle2, Flame, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowRight, BookOpen, CheckCircle2, ChevronDown, Flame, Search, ShieldCheck, Sparkles } from 'lucide-react'
 import { apiEscolar } from './api'
 import type { AtividadeEscolar, Aviso, FrequenciaEscolar, HorarioTurma, MaterialTurma, MeuDesempenho, RespostaSalva, TurmaConfiguracao, TurmaEscolar } from './api'
 import { Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
@@ -10,6 +10,8 @@ import ProvaAluno from './ProvaAluno'
 
 export default function AlunoPainel(){
   const [aba,setAba]=useState('inicio')
+  const [buscaMaterial,setBuscaMaterial]=useState('')
+  const [filtroDisciplina,setFiltroDisciplina]=useState('Todas')
   const [turmas,setTurmas]=useState<TurmaEscolar[]>([])
   const [atividades,setAtividades]=useState<AtividadeEscolar[]>([])
   const [materiais,setMateriais]=useState<MaterialTurma[]>([])
@@ -66,6 +68,11 @@ export default function AlunoPainel(){
   }
   const pendentes=atividades.filter(a=>!respostas.some(r=>r.atividadeId===a.id))
   const importante=avisos.find(a=>a.importante)
+  const materiasDisponiveis=[...new Set(materiais.map(m=>m.disciplina))].sort()
+  const materiaisFiltrados=materiais.filter(m=>
+    (filtroDisciplina==='Todas'||m.disciplina===filtroDisciplina)&&
+    (m.titulo+' '+m.disciplina+' '+m.conteudo).toLocaleLowerCase('pt-BR')
+      .includes(buscaMaterial.trim().toLocaleLowerCase('pt-BR')))
   return <div className="portal-paineis portal-mobile zelo-layout zelo-aluno">
     <NavegacaoDireta perfil="ALUNO" atual={aba} mudar={setAba}/>
     <MensagemStatus estado={mensagem}/>
@@ -139,12 +146,50 @@ export default function AlunoPainel(){
         <div><span className="sobretitulo">MINHA TURMA · {t.anoLetivo}</span><h2>{t.codigo} · {t.nome}</h2>
           <p>{t.descricao||'A direção ainda não cadastrou uma apresentação desta turma.'}</p></div>
       </div>)}
-      <Cartao titulo="Materiais publicados pelos professores">
-        {materiais.length===0?<Vazio texto="Nenhum material publicado por seus professores ainda."/>:
-          <div className="ext-registros">{materiais.map(m=><article className="ext-material-aluno" key={m.id}>
-            <small>{m.disciplina}</small><strong>{m.titulo}</strong><p>{m.conteudo}</p>
-          </article>)}</div>}
-      </Cartao>
+      <section className="zelo-biblioteca-real" aria-label="Biblioteca da sua turma">
+        <div className="zelo-biblioteca-topo">
+          <span className="zelo-kicker">BIBLIOTECA DA TURMA</span>
+          <h2>Seu material. Do seu jeito.</h2>
+          <p>Pesquise um assunto e abra só o que deseja ler. Conteúdo publicado pelo professor.</p>
+        </div>
+        <div className="zelo-biblioteca-filtros">
+          <label htmlFor="zelo-material-busca"><Search size={17}/> Buscar material</label>
+          <input id="zelo-material-busca" type="search" value={buscaMaterial}
+            placeholder="Assunto, título ou palavra-chave"
+            onChange={e=>setBuscaMaterial(e.target.value)}/>
+          <label htmlFor="zelo-material-disciplina">Disciplina</label>
+          <select id="zelo-material-disciplina" value={filtroDisciplina}
+            onChange={e=>setFiltroDisciplina(e.target.value)}>
+            <option value="Todas">Todas as disciplinas</option>
+            {materiasDisponiveis.map(nome=><option key={nome} value={nome}>
+              {nome.replaceAll('_',' ')}</option>)}
+          </select>
+          <span role="status" className="zelo-biblioteca-contagem">{materiaisFiltrados.length}
+            {materiaisFiltrados.length===1?' material encontrado':' materiais encontrados'}</span>
+        </div>
+        {materiaisFiltrados.length===0?<Vazio texto={
+          materiais.length===0?'Seus professores ainda não publicaram materiais nesta turma.':
+          'Não encontramos esse assunto. Tente outra palavra.'}/>:
+          <div className="zelo-lista-materiais">
+            {materiaisFiltrados.map((m,index)=><details className="zelo-material-leitor" key={m.id}>
+              <summary>
+                <span className={'zelo-foto-livro zelo-foto-livro-'+(index%3+1)} aria-hidden="true"/>
+                <span className="zelo-material-dados">
+                  <small>{m.disciplina.replaceAll('_',' ')}</small>
+                  <strong>{m.titulo}</strong>
+                  <span>{m.conteudo.length>135?m.conteudo.slice(0,135).trim()+'…':m.conteudo}</span>
+                </span>
+                <ChevronDown size={20} className="zelo-chevron-material" aria-hidden="true"/>
+              </summary>
+              <div className="zelo-material-completo">
+                <span className="zelo-kicker">HORA DE ESTUDAR</span>
+                <h3>{m.titulo}</h3>
+                <p>{m.conteudo}</p>
+                <span className="zelo-fim-leitura"><CheckCircle2 size={16}/> Material completo</span>
+              </div>
+            </details>)}
+          </div>}
+      </section>
       <Cartao titulo="Horários da turma">
         {horarios.length===0?<Vazio texto="A direção ainda não cadastrou os horários."/>:
           <div className="ext-registros">{horarios.map(h=><div key={h.id} className="ext-registro">
