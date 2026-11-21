@@ -18,6 +18,8 @@ class GroqChatTest {
         assertFalse(body.containsKey("metadata"));
         assertFalse(body.containsKey("response_format"));
         assertEquals(2,((List<?>)body.get("messages")).size());
+        assertEquals(false,body.get("store"));
+        assertEquals("none",body.get("reasoning_effort"));
     }
     @Test
     void quizSolicitaJsonEValidaRetornoCompleto(){
