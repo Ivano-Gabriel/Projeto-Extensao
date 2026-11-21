@@ -1,0 +1,52 @@
+name: Navegador Chromium E2E (Playwright)
+on:
+  pull_request:
+    paths:
+      - 'apps/estudos/**'
+      - '.github/workflows/estudos-playwright.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/estudos
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/estudos/package-lock.json
+      - name: Instalar app e teste de navegador
+        run: |
+          npm ci
+          npm install --no-save --package-lock=false @playwright/test@1.58.1
+      - name: Instalar navegador gratuito Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Rodar testes reais de interface com dados sintéticos simulados
+        run: npx playwright test --config=e2e/playwright.config.ts
+      - name: Conferir credenciais de contas QA e testar API real
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          QA_ALUNO_EMAIL: ${{ secrets.QA_ALUNO_EMAIL }}
+          QA_ALUNO_SENHA: ${{ secrets.QA_ALUNO_SENHA }}
+          QA_PROFESSOR_EMAIL: ${{ secrets.QA_PROFESSOR_EMAIL }}
+          QA_PROFESSOR_SENHA: ${{ secrets.QA_PROFESSOR_SENHA }}
+          QA_DIRECAO_EMAIL: ${{ secrets.QA_DIRECAO_EMAIL }}
+          QA_DIRECAO_SENHA: ${{ secrets.QA_DIRECAO_SENHA }}
+        run: |
+          test -n "$QA_ALUNO_EMAIL" && test -n "$QA_ALUNO_SENHA"
+          test -n "$QA_PROFESSOR_EMAIL" && test -n "$QA_PROFESSOR_SENHA"
+          test -n "$QA_DIRECAO_EMAIL" && test -n "$QA_DIRECAO_SENHA"
+          npx playwright test --config=e2e/playwright.staging.config.ts
+      - name: Salvar rastros e capturas de falhas
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-qa
+          path: test-results/
+          retention-days: 3

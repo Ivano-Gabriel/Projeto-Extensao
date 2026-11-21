@@ -14,10 +14,11 @@ class GroqChatTest {
         assertEquals("qwen/qwen3.8-27b",body.get("model"));
         assertEquals(700,body.get("max_completion_tokens"));
         assertFalse(body.containsKey("user"));
-        assertFalse(body.containsKey("store"));
+        assertEquals(false,body.get("store"));
         assertFalse(body.containsKey("metadata"));
         assertFalse(body.containsKey("response_format"));
         assertEquals(2,((List<?>)body.get("messages")).size());
+        assertEquals("none",body.get("reasoning_effort"));
     }
     @Test
     void quizSolicitaJsonEValidaRetornoCompleto(){
