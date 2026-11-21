@@ -488,3 +488,224 @@ button,select,input,textarea{font-family:inherit}
 .zelo-area-conteudo>.portal-feedback,.zelo-area-conteudo>.portal-turma-barra,
 .zelo-area-conteudo>.zelo-aluno-bemvindo,.zelo-area-conteudo>.ext-turma-cabecalho{
   grid-column:1;min-width:0}
+
+
+/* zELO+ V3 — correções da homologação visual, preservando home e materiais aprovados. */
+.zelo-revisao-pagina .quiz-topo{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  gap:.6rem;color:#24527f;font-size:.77rem;font-weight:900;letter-spacing:.035em}
+.zelo-revisao-pagina .quiz-topo>span:last-child{
+  background:#e8f2f9;color:#24527f;border-radius:999px;padding:.36rem .7rem}
+.zelo-revisao-pagina .revisao-layout{gap:1rem;align-items:start;min-width:0}
+.zelo-revisao-pagina .quiz{
+  padding:clamp(1rem,3vw,2rem);border-radius:1.2rem;
+  box-shadow:0 9px 32px #15395513;min-width:0}
+.zelo-revisao-pagina .quiz h2{
+  font-size:clamp(1.25rem,3.3vw,1.8rem);line-height:1.3;letter-spacing:-.025em}
+.zelo-revisao-pagina .quiz-barra{height:.45rem;border-radius:999px;overflow:hidden;background:#e5edf4}
+.zelo-revisao-pagina .quiz-barra>span{background:#24527f;border-radius:inherit}
+.zelo-revisao-pagina .alternativas{display:grid;gap:.65rem;min-width:0}
+.zelo-revisao-pagina .alternativa{
+  min-width:0;min-height:3.9rem;border-radius:.85rem;padding:.8rem .9rem;
+  background:#f8fbfd;border:1px solid #d5e2eb;text-align:left;
+  line-height:1.45;white-space:normal}
+.zelo-revisao-pagina .alternativa:focus-visible{
+  outline:3px solid #f0b941;outline-offset:2px}
+.zelo-revisao-pagina .quiz-ajuda{border-radius:1.1rem;color:#f5fbff}
+.zelo-revisao-pagina .quiz-ajuda h3{color:#fff}
+.zelo-revisao-pagina .quiz-ajuda p{color:#e0ebf5}
+.zelo-revisao-pagina .quiz-ajuda .quiz-estatistica strong{color:#fff}
+.zelo-revisao-orientacao{
+  display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+  flex-wrap:wrap;padding:.85rem 1rem;border-radius:.9rem;
+  color:#254e70;background:#e7f1f8;border:1px solid #d0e0ec}
+.zelo-revisao-orientacao>span{display:flex;align-items:center;gap:.5rem;font-size:.85rem;font-weight:900}
+.zelo-revisao-orientacao>strong{font-size:.8rem;color:#3d6682}
+.zelo-progresso-pagina>.cabecalho-secao{
+  margin:0;padding:1.35rem 1.5rem;border-radius:1.1rem;
+  background:#f0f6fa;border:1px solid #d7e5ef}
+.zelo-progresso-pagina .progresso-layout{gap:1rem;align-items:stretch}
+.zelo-progresso-pagina .progresso-destaque,
+.zelo-progresso-pagina .progresso-quiz{
+  border:1px solid #cfdfe9;border-radius:1.15rem;
+  box-shadow:0 7px 24px #1c456011}
+.zelo-progresso-pagina .progresso-destaque{background:linear-gradient(135deg,#e7f2fc,#f9fcff)}
+.zelo-progresso-pagina .progresso-numero strong{color:#194e7a;font-size:clamp(2.7rem,6vw,4.2rem)}
+.zelo-progresso-pagina .progresso-quiz{background:#fff}
+.zelo-progresso-pagina .materias-progresso{border-radius:1.1rem;border:1px solid #d7e4ec;background:#fff}
+.zelo-progresso-pagina .linha-materia{min-width:0;gap:.75rem}
+.zelo-progresso-pagina .barra-progresso{min-width:0}
+.zelo-progresso-pagina .barra-progresso>span{background:#2478aa}
+.zelo-progresso-pagina .plano-progresso-atalho{border-radius:1.1rem}
+
+/* Login: mesma fotografia em telefone e desktop, botão no azul institucional. */
+.entrada-login .prime-login .portal-form .botao-principal{
+  background:#24527f;color:#fff;border-color:#24527f;
+  box-shadow:0 4px 0 #173a5b}
+.entrada-login .prime-login .portal-form .botao-principal:hover:not(:disabled){
+  background:#1c4268;border-color:#1c4268}
+.entrada-login .prime-login .portal-form .botao-principal:focus-visible{
+  outline:3px solid #f7bf61;outline-offset:2px}
+@media(max-width:639px){
+  .entrada-login{max-width:100%;padding-inline:.6rem;overflow-x:clip}
+  .entrada-login>.portal-login.prime-login{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:clamp(195px,25svh,235px) minmax(0,1fr);
+    width:min(100%,460px);max-width:100%;min-width:0}
+  .entrada-login .prime-login-cena{
+    display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;
+    gap:.35rem;padding:1.05rem 1.15rem 1rem;min-height:0;
+    background-color:#173f62;
+    background-image:linear-gradient(90deg,#0a2b47e8 2%,#0c3458ad 54%,#15395652),
+      url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=82');
+    background-position:center,center 50%;background-size:cover,cover}
+  .entrada-login .prime-login-cena:before{opacity:.18}
+  .entrada-login .prime-login-cena .prime-login-arte{
+    display:none;transform:none;pointer-events:none}
+  .entrada-login .prime-login-cena > .zelo-login-cena-marca{
+    display:block;flex:none;align-self:flex-start;
+    width:min(164px,50vw);height:auto;max-height:49px;object-fit:contain;
+    margin:0 0 auto;filter:drop-shadow(0 3px 7px #041d3599)}
+  .entrada-login .prime-login-cena>strong{
+    margin:0;color:#fff;text-shadow:0 2px 9px #061a2d8c;
+    font-size:clamp(1.1rem,4.6vw,1.32rem);text-align:left;line-height:1.24}
+  .entrada-login .prime-login-cena>p{
+    display:block;margin:0;color:#e9f4fb;max-width:31ch;
+    font-size:.79rem;text-align:left;text-shadow:0 1px 5px #081f32}
+  .entrada-login .prime-login-corpo{
+    box-sizing:border-box;min-width:0;min-height:0;
+    padding:clamp(.75rem,2.4svh,1.15rem) 1rem;
+    gap:clamp(.42rem,1.1svh,.72rem);overflow:visible}
+  .entrada-login .prime-login .portal-form .botao-principal{
+    background:#24527f;color:#fff;border-color:#24527f;box-shadow:0 4px 0 #173a5b}
+  .entrada-login .prime-login .portal-form input{width:100%;max-width:100%;min-width:0}
+  .entrada-login .prime-login .portal-perfis{min-width:0}
+  .entrada-login .prime-login .portal-perfis button{min-width:0}
+  .entrada-login .prime-login .portal-login-seguranca{overflow-wrap:anywhere}
+}
+@media(max-width:639px) and (max-height:650px){
+  .entrada-login{height:auto;min-height:100svh;overflow-y:auto}
+  .entrada-login>.portal-login.prime-login{
+    height:auto;grid-template-rows:minmax(155px,auto) auto}
+  .entrada-login .prime-login-cena{min-height:165px}
+  .entrada-login .prime-login-corpo{height:auto}
+}
+
+/* Livro do rodapé: abre agora para a direita, com verso e lombada alinhados. */
+@media(max-width:899px){
+  .prime-bottom-nav{width:100%;max-width:100%;box-sizing:border-box}
+  .prime-bottom-nav>button{min-width:0}
+  .prime-bottom-nav>button>span{overflow-wrap:normal}
+  .zelo-livro-cenario{
+    position:relative;width:3.46rem;height:3.08rem;
+    perspective:900px;transform-style:preserve-3d;filter:drop-shadow(0 3px 4px #0b284455)}
+  .zelo-livro-esquerda{
+    left:1.75rem;z-index:1;transform-origin:left center;
+    border-radius:2px 8px 8px 2px;
+    background:repeating-linear-gradient(to bottom,#fffdf4 0 7px,#c6d9e3 8px,#fffdf4 9px)}
+  .zelo-livro-esquerda:after{background:transparent}
+  .zelo-livro-direita{
+    left:.04rem;z-index:7;transform-origin:right center;
+    border-radius:8px 2px 2px 8px;
+    background:linear-gradient(125deg,#174a73,#0f2d4a);
+    border:1px solid #7aabc8;backface-visibility:visible;
+    -webkit-backface-visibility:visible;transform-style:preserve-3d}
+  .zelo-livro-direita>svg{backface-visibility:hidden;-webkit-backface-visibility:hidden;color:#e9f3fa}
+  .zelo-livro-direita:after{
+    content:"";position:absolute;inset:2px;z-index:-1;
+    border-radius:2px 7px 7px 2px;
+    background:repeating-linear-gradient(to bottom,#fff9eb 0 7px,#bed2df 8px,#fff9eb 9px);
+    transform:rotateY(180deg) translateZ(1px);
+    backface-visibility:hidden;-webkit-backface-visibility:hidden}
+  .zelo-livro-pagina{
+    left:.08rem;transform-origin:right center;
+    backface-visibility:visible;-webkit-backface-visibility:visible;
+    border-color:#b9cbd6;box-shadow:0 2px 3px #0d2b4160;
+    transition:transform .48s ease-in-out}
+  .zelo-livro-espinha{
+    left:1.70rem;top:.43rem;bottom:.46rem;width:3px;z-index:9;
+    background:linear-gradient(90deg,#315979,#c8d7dd,#507b97)}
+  .prime-menu-livro.aberto .zelo-livro-direita{transform:rotateY(158deg)}
+  .prime-menu-livro.aberto .zelo-livro-pagina-1{animation:zeloPaginaParaDireita .62s .1s ease-in-out both}
+  .prime-menu-livro.aberto .zelo-livro-pagina-2{animation:zeloPaginaParaDireita .67s .2s ease-in-out both}
+  .prime-menu-livro.aberto .zelo-livro-pagina-3{animation:zeloPaginaParaDireita .72s .3s ease-in-out both}
+  @keyframes zeloPaginaParaDireita{
+    0%{transform:rotateY(0)}
+    65%{transform:rotateY(163deg)}
+    100%{transform:rotateY(155deg)}
+  }
+  .prime-menu-livro:not(.aberto) .zelo-livro-pagina{animation:none}
+  .prime-menu-painel{overflow-y:auto;overflow-x:hidden}
+  .prime-menu-destaque,.prime-menu-secundarios button{overflow-wrap:anywhere}
+}
+@media(prefers-reduced-motion:reduce){
+  .prime-menu-livro.aberto .zelo-livro-pagina{
+    animation:none!important;transform:rotateY(155deg)}
+  .prime-menu-livro .zelo-livro-direita,
+  .prime-menu-livro .zelo-livro-cenario{transition:none!important}
+}
+
+/* Desafios: fotos funcionais, hierarquia de leitura e linguagem menos infantil. */
+.arcade-pagina{max-width:1060px;gap:1rem}
+.arcade-pagina .arcade-cabecalho,.memoria-pagina .memoria-cabecalho{
+  position:relative;isolation:isolate;overflow:hidden;
+  padding:clamp(1.25rem,3vw,2rem);border-radius:1.15rem;
+  background:#183d60;color:#fff}
+.arcade-pagina .arcade-cabecalho:before,.memoria-pagina .memoria-cabecalho:before{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(90deg,#0d2b49f5,#1c496bbd 65%,#28455b66),
+    url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1200&q=80') center/cover}
+.arcade-pagina .arcade-cabecalho h1,.memoria-pagina .memoria-cabecalho h1{
+  max-width:26ch;color:#fff;font-size:clamp(1.65rem,4vw,2.65rem)}
+.arcade-pagina .arcade-cabecalho p,.memoria-pagina .memoria-cabecalho p{
+  max-width:56ch;color:#e5f1fa;font-size:.92rem}
+.arcade-pagina .arcade-cabecalho .sobretitulo,
+.memoria-pagina .memoria-cabecalho .sobretitulo{color:#f5d18c}
+.arcade-pagina .missao-grade{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.arcade-pagina .missao-card{
+  position:relative;display:grid;grid-template-columns:minmax(0,1fr);
+  justify-items:start;align-content:start;gap:.48rem;min-width:0;
+  min-height:0;padding:.75rem 1rem 1.1rem;
+  border:1px solid #d5e2ec;border-radius:1.1rem;background:#fff;
+  color:#203a52;text-align:left}
+.arcade-pagina .missao-card-foto{
+  display:block;width:100%;height:132px;border-radius:.75rem;
+  background-position:center;background-size:cover;
+  background-color:#9eb4c5;
+  background-image:url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=76')}
+.arcade-pagina .missao-amarelo .missao-card-foto{
+  background-image:url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=76')}
+.arcade-pagina .missao-verde .missao-card-foto{
+  background-image:url('https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=800&q=76')}
+.arcade-pagina .missao-memoria .missao-card-foto{
+  background-image:url('https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=76')}
+.arcade-pagina .missao-card .missao-icon{
+  position:absolute;left:1.35rem;top:6.45rem;
+  border:3px solid #fff;background:#e8f2fa;color:#24527f;
+  box-shadow:0 4px 12px #1c425a30}
+.arcade-pagina .missao-card .sobretitulo{
+  margin-top:.75rem;color:#3c7392;font-size:.67rem;font-weight:900}
+.arcade-pagina .missao-card strong{font-size:clamp(1.1rem,2vw,1.35rem);line-height:1.2}
+.arcade-pagina .missao-card small{font-size:.85rem;color:#567085;line-height:1.5}
+.arcade-pagina .missao-cta{margin-top:.2rem;font-size:.8rem;color:#24527f}
+.memoria-pagina .memoria-areas button{
+  min-width:0;border-radius:1rem;background:#f8fbfd;
+  border:1px solid #d4e2ed;text-align:left}
+.memoria-pagina .memoria-grid button{
+  min-width:0;border-radius:.95rem;border:1px solid #789fbe;
+  background:#174568;color:#fff;overflow-wrap:anywhere}
+.memoria-pagina .memoria-grid button.virada{
+  background:#f7fbfe;color:#183e5f}
+.memoria-pagina .memoria-grid button.encontrada{
+  background:#e1f6ec;color:#14634c;border-color:#5cb18e}
+@media(max-width:700px){
+  .zelo-revisao-pagina .revisao-layout{display:grid;grid-template-columns:minmax(0,1fr)}
+  .zelo-revisao-pagina .quiz-ajuda{order:2}
+  .zelo-revisao-pagina .quiz-acoes{display:flex;flex-wrap:wrap;gap:.6rem}
+  .zelo-progresso-pagina .progresso-layout{grid-template-columns:minmax(0,1fr)}
+  .arcade-pagina .missao-grade{grid-template-columns:minmax(0,1fr)}
+  .arcade-pagina .missao-card-foto{height:115px}
+  .arcade-pagina .missao-card{padding:.75rem .9rem 1rem}
+  .arcade-pagina .missao-card .missao-icon{top:5.4rem;left:1.25rem}
+}
