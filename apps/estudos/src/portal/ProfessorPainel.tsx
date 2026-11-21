@@ -183,6 +183,7 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
   const temas=materiais.filter(m=>assuntoDe(m.materia)===disciplina)
   return <div className="portal-paineis portal-mobile zelo-layout zelo-professor">
     <NavegacaoDireta perfil="PROFESSOR" atual={aba} mudar={setAba}/>
+    <main className="zelo-area-conteudo">
     <MensagemStatus estado={mensagem}/>
     {!carregando&&<div className="portal-turma-barra zelo-contexto-turma">
       <label htmlFor="prof-turma-ativa">Turma atual</label>
@@ -387,5 +388,6 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
         })}</div>}
       </Cartao>
     </>}
+    </main>
   </div>
 }
