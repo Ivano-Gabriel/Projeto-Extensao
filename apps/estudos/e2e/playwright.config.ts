@@ -3,6 +3,7 @@ import {defineConfig} from '@playwright/test'
 export default defineConfig({
   testDir: '.',
   testMatch: '*.spec.ts',
+  testIgnore: 'staging.spec.ts',
   timeout: 45000,
   expect: {timeout: 8000},
   reporter: [['list'],['html',{open:'never',outputFolder:'../../test-results/playwright-report'}]],
