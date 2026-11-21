@@ -68,7 +68,7 @@ export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQu
         setPacote(r.questoes)
         setStatusIa(prev=>prev?{...prev,restantesHoje:r.restantesHoje}:prev)
       }else{
-        const r=await apiEscolar.gerarRascunho({turmaId,disciplina,tema,tipo,contexto})
+        const r=await apiEscolar.gerarRascunho({turmaId,disciplina,tema,tipo,contexto,fonteTexto})
         setResposta(r)
         setStatusIa(prev=>prev?{...prev,restantesHoje:r.restantesHoje}:prev)
       }
@@ -148,6 +148,7 @@ export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQu
           <label htmlFor="ia-tipo">Tipo de rascunho</label>
           <select id="ia-tipo" value={tipo} onChange={e=>{setTipo(e.target.value as TipoRascunho|'PACOTE');setPacote(null);setResposta(null)}}>
             <option value="QUIZ">Questão de múltipla escolha</option>
+            <option value="RESUMO">Resumo do conteúdo</option>
             <option value="PACOTE">Gerar pacote de questões (2 a 6)</option>
             <option value="EXPLICACAO">Explicação didática</option>
             <option value="PLANO_AULA">Plano de aula</option>
@@ -164,20 +165,20 @@ export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQu
             <select id="ia-quantidade" value={quantidade} onChange={e=>setQuantidade(Number(e.target.value))}>
               {[2,3,4,5,6].map(n=><option key={n} value={n}>{n} questões</option>)}
             </select>
-            <label htmlFor="ia-pdf">Importar PDF de texto (opcional)</label>
-            <input id="ia-pdf" type="file" accept=".pdf,application/pdf"
-              onChange={e=>setArquivoPdf(e.target.files?.[0]||null)}/>
-            <button type="button" className="botao-secundario" disabled={!arquivoPdf||lendoPdf||gerando}
-              onClick={()=>void lerPdf()}>
-              {lendoPdf?'Lendo PDF...':'Ler PDF para revisão'}
-            </button>
-            <small>Somente PDFs com texto selecionável, sem senha, até 2 MB e 12 páginas. Não há OCR e o arquivo não é armazenado.</small>
-            <label htmlFor="ia-fonte">Texto do professor (opcional)</label>
-            <textarea id="ia-fonte" rows={6} maxLength={6000} value={fonteTexto}
-              onChange={e=>setFonteTexto(e.target.value)}
-              placeholder="Cole um trecho do material da aula, resumo ou referências. Palavras-chave também podem ir no campo Tema."/>
-            <small>O texto será enviado ao provedor de IA. Não insira informações pessoais dos alunos.</small>
           </>}
+          <label htmlFor="ia-pdf">Importar PDF com texto (opcional)</label>
+          <input id="ia-pdf" type="file" accept=".pdf,application/pdf"
+            onChange={e=>setArquivoPdf(e.target.files?.[0]||null)}/>
+          <button type="button" className="botao-secundario" disabled={!arquivoPdf||lendoPdf||gerando}
+            onClick={()=>void lerPdf()}>
+            {lendoPdf?'Lendo PDF...':'Ler PDF para revisão'}
+          </button>
+          <small>PDF com texto selecionável, sem senha, até 2 MB e 12 páginas. Sem OCR e sem guardar o arquivo.</small>
+          <label htmlFor="ia-fonte">Texto do professor (opcional)</label>
+          <textarea id="ia-fonte" rows={6} maxLength={6000} value={fonteTexto}
+            onChange={e=>setFonteTexto(e.target.value)}
+            placeholder="Cole textos, resumos ou trechos da aula; palavras-chave também podem ir no campo Tema."/>
+          <small>O texto será enviado ao provedor de IA somente ao clicar em Gerar. Remova dados pessoais.</small>
           <p className="ext-aviso-ia">Não envie dados pessoais de alunos. Revise toda resposta antes de utilizar.</p>
           <button type="submit" className="botao-principal" disabled={!disciplina||gerando||!statusIa?.habilitada||statusIa.restantesHoje===0}>
             <Sparkles size={18}/>{gerando?'Gerando...':tipo==='PACOTE'?'Gerar pacote de questões':'Gerar rascunho com IA'}</button>
