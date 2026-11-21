@@ -141,8 +141,16 @@ function Inicio({estado,dataDesafio,respostaDesafio,responderDesafio,abrirMateri
       </div>
     </section>
     <div className="prime-atalhos" aria-label="Acesso rápido">
-      <button type="button" onClick={irMateriais}><BookOpen size={23}/><span>Materiais</span><ArrowRight size={18}/></button>
-      <button type="button" onClick={irRevisao}><Brain size={23}/><span>Revisar</span><ArrowRight size={18}/></button>
+      <button type="button" onClick={irMateriais}>
+        <span className="prime-atalho-icone"><BookOpen size={25}/></span>
+        <span className="prime-atalho-texto"><strong>Materiais</strong><small>Encontre o que estudar</small></span>
+        <ArrowRight size={20}/>
+      </button>
+      <button type="button" onClick={irRevisao}>
+        <span className="prime-atalho-icone"><Brain size={25}/></span>
+        <span className="prime-atalho-texto"><strong>Revisar</strong><small>Treine e entenda seus erros</small></span>
+        <ArrowRight size={20}/>
+      </button>
     </div>
     <p className="prime-demo-nota"><Info size={15}/> Resumos e quizzes desta área são conteúdos demonstrativos, não notas da escola.</p>
     <DesafioDia data={dataDesafio} resposta={respostaDesafio} responder={responderDesafio}
@@ -180,7 +188,7 @@ function MateriaisPagina({ estado, busca, setBusca, materia, setMateria, abrirMa
 }) {
   const encontrados = useMemo(() => buscarMateriais(materiais, busca, materia), [busca, materia])
   return (
-    <div className="pagina">
+    <div className="pagina ux-pagina-materiais">
       <CabecalhoSecao etiqueta="BIBLIOTECA DE ESTUDOS" titulo="Materiais pra revisar"
         descricao="Encontre um assunto, leia o resumo e marque quando terminar de estudar" />
       <section className="painel-busca" aria-label="Busca e filtros de materiais">
@@ -220,7 +228,7 @@ function LerMaterial({ material, revisado, onVoltar, onAlternar, irRevisao }: {
   irRevisao: () => void
 }) {
   return (
-    <div className="pagina">
+    <div className="pagina ux-pagina-leitura">
       <button type="button" className="botao-voltar" onClick={onVoltar}><ArrowLeft size={18}/> Voltar aos materiais</button>
       <div className="artigo-layout">
         <article className="artigo" aria-labelledby="artigo-titulo">
@@ -272,7 +280,7 @@ function QuizPagina({ estado, indice, setIndice, responder, irMateriais, reinici
   const resumo = resumirRespostas(questoes, estado.respostas)
   if (indice >= questoes.length) {
     return (
-      <div className="pagina">
+      <div className="pagina ux-pagina-revisao">
         <CabecalhoSecao etiqueta="RESULTADO DA REVISÃO" titulo="Mandou bem por ter tentado!"
           descricao="O mais importante é entender os erros e continuar revisando, no seu ritmo" />
         <div className="resultado-quiz">
@@ -292,7 +300,7 @@ function QuizPagina({ estado, indice, setIndice, responder, irMateriais, reinici
   const resposta = estado.respostas.find((item) => item.questaoId === questao.id)
   const acertou = resposta?.opcao === questao.correta
   return (
-    <div className="pagina">
+    <div className="pagina ux-pagina-revisao">
       <CabecalhoSecao etiqueta="HORA DE PRATICAR" titulo="Vamos testar o que ficou?"
         descricao="Responda com calma e veja a explicação antes de ir pra próxima pergunta" />
       <div className="revisao-layout">
@@ -353,7 +361,7 @@ function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, li
   const resumo = resumoEstudos(materiais, estado.revisados, estado.respostas)
   const quiz = resumirRespostas(questoes, estado.respostas)
   return (
-    <div className="pagina">
+    <div className="pagina ux-pagina-progresso">
       <CabecalhoSecao etiqueta="NO SEU RITMO" titulo="Meu progresso"
         descricao="Veja o que você já revisou e quais assuntos ainda pode explorar" />
       <div className="progresso-layout">
@@ -598,15 +606,19 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
                 <button type="button" key={id} className="prime-menu-destaque"
                   onClick={()=>navegar(id)}>
                   <span className="prime-menu-destaque-icon"><Icone size={27}/></span>
-                  <span>{nome}</span><ArrowRight size={18}/>
+                  <span className="prime-menu-destaque-texto"><strong>{nome}</strong>
+                    <small>{id==='portal'?'Aulas e professores':'Explore novos assuntos'}</small>
+                  </span><ArrowRight size={18}/>
                 </button>)}
               <button type="button" className="prime-menu-destaque" onClick={()=>navegar('plano')}>
                 <span className="prime-menu-destaque-icon"><ListChecks size={27}/></span>
-                <span>Meu plano</span><ArrowRight size={18}/>
+                <span className="prime-menu-destaque-texto"><strong>Meu plano</strong>
+                  <small>Organize seus próximos dias</small></span><ArrowRight size={18}/>
               </button>
               <button type="button" className="prime-menu-destaque" onClick={()=>navegar('jogo')}>
                 <span className="prime-menu-destaque-icon"><Sparkles size={27}/></span>
-                <span>Missões do Futuro</span><ArrowRight size={18}/>
+                <span className="prime-menu-destaque-texto"><strong>Missões do Futuro</strong>
+                  <small>Aprenda com desafios</small></span><ArrowRight size={18}/>
               </button>
             </div>
             <span className="prime-menu-subtitulo">Acesso rápido</span>
@@ -627,7 +639,14 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
           <button type="button" className={'prime-menu-livro '+(menuAberto?'aberto':'')}
             aria-label={menuAberto?'Fechar menu de áreas':'Abrir menu de áreas'} aria-expanded={menuAberto}
             aria-controls="prime-menu-areas" onClick={()=>setMenuAberto(x=>!x)}>
-            <span className="prime-livro-nucleo"><BookOpenCheck size={30}/><i aria-hidden="true"/></span>
+            <span className="prime-livro-nucleo" aria-hidden="true">
+              <span className="prime-livro-miolo">
+                <span className="prime-livro-pagina prime-livro-folha prime-livro-folha-um"/>
+                <span className="prime-livro-pagina prime-livro-folha prime-livro-folha-dois"/>
+                <span className="prime-livro-pagina prime-livro-folha prime-livro-folha-tres"/>
+                <span className="prime-livro-capa-tampa"><BookOpenCheck size={27}/></span>
+              </span>
+            </span>
           </button>
           <button type="button" className={tela==='revisao'?'ativo':''} aria-current={tela==='revisao'?'page':undefined}
             onClick={()=>navegar('revisao')}><Brain size={23}/><span>Revisão</span></button>
