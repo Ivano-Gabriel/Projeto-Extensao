@@ -47,6 +47,7 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
   const [carregandoChamada,setCarregandoChamada]=useState(false)
   const [chamadaPronta,setChamadaPronta]=useState(false)
   const [registrandoPresenca,setRegistrandoPresenca]=useState<number|null>(null)
+  const [corrigindoPresenca,setCorrigindoPresenca]=useState<string|null>(null)
   const [recargaChamada,setRecargaChamada]=useState(0)
   const atualizar=async()=>{
     const [t,a,v]=await Promise.all([apiEscolar.turmas(),apiEscolar.atividades(),apiEscolar.avisos()])
@@ -76,6 +77,7 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
   useEffect(()=>{
     let ativo=true
     setMarcadas({})
+    setCorrigindoPresenca(null)
     setChamadaPronta(false)
     if(!aulaSelecionada){setCarregandoChamada(false);return}
     setCarregandoChamada(true)
@@ -156,6 +158,20 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
       setMarcadas(prev=>({...prev,[`${aulaSelecionada}:${alunoId}`]:presente}))
       setMensagem({ok:'Presença registrada.'})}
     catch(e){setMensagem({erro:falha(e)})}
+    finally{setRegistrandoPresenca(null)}
+  }
+  const corrigir=async(alunoId:number)=>{
+    const chave=`${aulaSelecionada}:${alunoId}`
+    if(!aulaSelecionada||!chamadaPronta||registrandoPresenca!==null||
+      !Object.hasOwn(marcadas,chave)||corrigindoPresenca!==chave)return
+    setMensagem({});setRegistrandoPresenca(alunoId)
+    const presente=!marcadas[chave]
+    try{
+      await apiEscolar.corrigirPresenca(aulaSelecionada,{alunoId,presente})
+      setMarcadas(prev=>({...prev,[chave]:presente}))
+      setCorrigindoPresenca(null)
+      setMensagem({ok:'Presença corrigida. A alteração ficou registrada no histórico.'})
+    }catch(e){setMensagem({erro:falha(e)})}
     finally{setRegistrandoPresenca(null)}
   }
   const selecionada=turmas.find(t=>t.id===turma)
@@ -347,7 +363,19 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
           return <div className="portal-chamada-linha" key={aluno.id}>
             <strong>{aluno.nome}</strong>
             {Object.hasOwn(marcadas,chave)?
-              <span className="portal-situacao"><CheckCircle2 size={16}/>{marcadas[chave]?'Presente':'Ausente'} anotado</span>:
+              <div className="portal-chamada-botoes">
+                <span className="portal-situacao"><CheckCircle2 size={16}/>{marcadas[chave]?'Presente':'Ausente'} anotado</span>
+                {corrigindoPresenca===chave?
+                  <div className="portal-acoes-rapidas" role="group" aria-label="Revisar correção de chamada">
+                    <span>Alterar para {marcadas[chave]?'Ausente':'Presente'}?</span>
+                    <button type="button" disabled={registrandoPresenca!==null}
+                      onClick={()=>void corrigir(aluno.id)}>Confirmar correção</button>
+                    <button type="button" disabled={registrandoPresenca!==null}
+                      onClick={()=>setCorrigindoPresenca(null)}>Cancelar correção</button>
+                  </div>:
+                  <button type="button" disabled={registrandoPresenca!==null}
+                    onClick={()=>setCorrigindoPresenca(chave)}>Corrigir registro</button>}
+              </div>:
               <div className="portal-chamada-botoes">
                 <button type="button" disabled={registrandoPresenca!==null} onClick={()=>void marcar(aluno.id,true)}>Presente</button>
                 <button type="button" disabled={registrandoPresenca!==null} onClick={()=>void marcar(aluno.id,false)}>Ausente</button>

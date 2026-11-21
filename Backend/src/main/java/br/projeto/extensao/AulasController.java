@@ -32,8 +32,9 @@ public class AulasController {
     public record MinhaFrequencia(int aulasRegistradas,int registrosDePresenca,int presencas,int faltas) {}
     private final JdbcTemplate jdbc;
     private final UsuarioRepository usuarios;
-    public AulasController(JdbcTemplate jdbc,UsuarioRepository usuarios){
-        this.jdbc=jdbc;this.usuarios=usuarios;
+    private final AuditoriaService auditoria;
+    public AulasController(JdbcTemplate jdbc,UsuarioRepository usuarios,AuditoriaService auditoria){
+        this.jdbc=jdbc;this.usuarios=usuarios;this.auditoria=auditoria;
     }
     private Usuario atual(Authentication auth){
         if(auth==null)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -156,6 +157,38 @@ public class AulasController {
         }
         return ResponseEntity.created(URI.create("/api/portal/minha-frequencia")).build();
     }
+    @Transactional
+    @PutMapping("/professor/aulas/{aulaId}/presencas")
+    public ResponseEntity<Void> corrigir(@PathVariable Long aulaId,
+            @Valid @RequestBody NovaPresenca dados,Authentication auth){
+        Usuario professor=atual(auth);
+        long escolaId=escola(professor);
+        if(professor.getPapel()!=Papel.PROFESSOR)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        List<Boolean> anteriores=jdbc.query(
+            "SELECT p.presente FROM presencas_aula p "+
+            "JOIN aulas_registradas a ON a.id=p.aula_id "+
+            "JOIN vinculos_docentes v ON v.turma_id=a.turma_id AND v.disciplina=a.disciplina "+
+            "JOIN usuarios u ON u.id=p.aluno_id "+
+            "WHERE p.aula_id=? AND p.aluno_id=? AND a.escola_id=? "+
+            "AND a.professor_id=? AND v.professor_id=? "+
+            "AND u.escola_id=? AND u.papel='ALUNO'",
+            (rs,i)->rs.getBoolean("presente"),aulaId,dados.alunoId(),escolaId,
+            professor.getId(),professor.getId(),escolaId);
+        if(anteriores.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        boolean anterior=anteriores.get(0);
+        if(anterior==dados.presente())return ResponseEntity.noContent().build();
+        int alteradas=jdbc.update(
+            "UPDATE presencas_aula SET presente=? "+
+            "WHERE aula_id=? AND aluno_id=? AND presente=?",
+            dados.presente(),aulaId,dados.alunoId(),anterior);
+        if(alteradas!=1)
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "A chamada foi modificada. Recarregue e tente novamente.");
+        auditoria.registrar(escolaId,professor.getId(),"PRESENCA_CORRIGIDA","AULA",aulaId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/portal/minha-frequencia")
     public ResponseEntity<MinhaFrequencia> minhaFrequencia(Authentication auth){
         Usuario aluno=atual(auth);
