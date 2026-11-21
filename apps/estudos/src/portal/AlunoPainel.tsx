@@ -5,6 +5,7 @@ import type { AtividadeEscolar, Aviso, FrequenciaEscolar, HorarioTurma, Material
 import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
 import { Mural } from './Avisos'
 import AssistenteEscolar from './AssistenteEscolar'
+import ProvaAluno from './ProvaAluno'
 import { acoesPorPerfil } from './navegacao'
 
 export default function AlunoPainel(){
@@ -91,6 +92,7 @@ export default function AlunoPainel(){
           <Sparkles size={18}/> Perguntar ao assistente <ArrowRight size={18}/></button>
       </Cartao>
     </>}
+    {!carregando&&aba==='prova'&&<ProvaAluno/>}
     {!carregando&&aba==='atividades'&&<Cartao titulo="Atividades da turma">
       <p className="portal-aviso-discreto">Aqui aparecem apenas atividades publicadas pelos professores vinculados à sua turma. São registradas no banco, não quizzes demonstrativos.</p>
       {atividades.length===0&&<Vazio texto="Nenhuma atividade publicada ainda."/>}

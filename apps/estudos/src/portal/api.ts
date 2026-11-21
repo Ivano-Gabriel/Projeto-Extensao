@@ -20,6 +20,11 @@ export type RespostaIa = {texto:string;status:'RASCUNHO';aviso:string;quiz:QuizG
 export type TextoPdf = {texto:string;paginas:number;truncado:boolean}
 export type PacoteRascunhoIa = {questoes:QuizGeradoIa[];status:'RASCUNHO';aviso:string;restantesHoje:number}
 export type PacotePedidoIa = {turmaId:number;disciplina:string;tema:string;contexto:string;fonteTexto:string;quantidade:number}
+export type SimuladoResumo = {id:number;turmaId:number;disciplina:string;tema:string;dificuldade:'FACIL'|'MEDIO'|'DIFICIL';nota:number|null;criadoEm:string}
+export type SimuladoQuestao = {id:number;ordem:number;titulo:string;pergunta:string;opcoes:string[];correta?:number;explicacao?:string;opcaoMarcada?:number;acertou?:boolean}
+export type SimuladoDetalhe = SimuladoResumo & {acertos:number|null;questoes:SimuladoQuestao[];aviso:string}
+export type PedidoSimulado = {turmaId:number;disciplina:string;tema:string;dificuldade:'FACIL'|'MEDIO'|'DIFICIL';fonteTexto:string}
+export type RespostaSimulado = {questaoId:number;opcao:number}
 export type StatusIa = {habilitada:boolean;restantesHoje:number;mensagem:string}
 export type DisciplinaIaAluno = {turmaId:number;turmaNome:string;disciplina:string}
 export type ExplicacaoIa = {texto:string;aviso:string;restantesHoje:number}
@@ -95,7 +100,8 @@ export async function requisitar<T>(
   return jsonSeguro<T>(resposta)
 }
 export async function extrairTextoPdf(
-  turmaId:number,disciplina:string,arquivo:File,transport:typeof fetch=fetch
+  turmaId:number,disciplina:string,arquivo:File,transport:typeof fetch=fetch,
+  rota:'/api/professor/ia/pdf-extrair'|'/api/portal/provas/pdf-extrair'='/api/professor/ia/pdf-extrair'
 ):Promise<TextoPdf>{
   if(!Number.isInteger(turmaId)||turmaId<=0||!disciplina)
     throw new Error('Selecione a turma e a disciplina.')
@@ -113,7 +119,7 @@ export async function extrairTextoPdf(
   form.append('turmaId',String(turmaId))
   form.append('disciplina',disciplina)
   form.append('arquivo',arquivo,arquivo.name)
-  const resposta=await transport('/api/professor/ia/pdf-extrair',{
+  const resposta=await transport(rota,{
     method:'POST',credentials:'same-origin',cache:'no-store',redirect:'error',
     headers:{Accept:'application/json','X-XSRF-TOKEN':dados.token},
     body:form,
@@ -127,6 +133,10 @@ export async function extrairTextoPdf(
   }
   return jsonSeguro<TextoPdf>(resposta)
 }
+
+export const extrairTextoPdfAluno=(
+  turmaId:number,disciplina:string,arquivo:File,transport:typeof fetch=fetch
+):Promise<TextoPdf>=>extrairTextoPdf(turmaId,disciplina,arquivo,transport,'/api/portal/provas/pdf-extrair')
 
 export const apiEscolar={
   me:()=>requisitar<UsuarioEscolar>('GET','/api/me'),
@@ -145,6 +155,13 @@ export const apiEscolar={
     requisitar<MaterialTurma>('PUT',`/api/professor/materiais/${id}`,body),
   apagarMaterial:(id:number)=>requisitar<void>('DELETE',`/api/professor/materiais/${id}`),
   statusIa:()=>requisitar<StatusIa>('GET','/api/portal/ia/status'),
+  listarSimulados:()=>requisitar<SimuladoResumo[]>('GET','/api/portal/provas/simulados'),
+  detalharSimulado:(id:number)=>requisitar<SimuladoDetalhe>('GET',`/api/portal/provas/simulados/${id}`),
+  gerarSimulado:(body:PedidoSimulado)=>
+    requisitar<SimuladoDetalhe>('POST','/api/portal/provas/simulados',body),
+  responderSimulado:(id:number,respostas:RespostaSimulado[])=>
+    requisitar<SimuladoDetalhe>('POST',`/api/portal/provas/simulados/${id}/respostas`,{respostas}),
+  extrairPdfAluno:extrairTextoPdfAluno,
   disciplinasIaAluno:()=>requisitar<DisciplinaIaAluno[]>('GET','/api/portal/ia/disciplinas'),
   explicarIa:(body:{turmaId:number;disciplina:string;pergunta:string})=>
     requisitar<ExplicacaoIa>('POST','/api/portal/ia/explicar',body),
