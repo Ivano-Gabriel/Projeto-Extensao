@@ -17,6 +17,8 @@ export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQu
   const [tema,setTema]=useState('')
   const [tipo,setTipo]=useState<TipoRascunho|'PACOTE'>('QUIZ')
   const [fonteTexto,setFonteTexto]=useState('')
+  const [arquivoPdf,setArquivoPdf]=useState<File|null>(null)
+  const [lendoPdf,setLendoPdf]=useState(false)
   const [quantidade,setQuantidade]=useState(4)
   const [prazoPacote,setPrazoPacote]=useState('')
   const [pacote,setPacote]=useState<QuizGeradoIa[]|null>(null)
@@ -32,6 +34,7 @@ export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQu
     if(!turmaId)return
     let ativo=true
     setErro('');setForm({...vazio,disciplina});setEditando(null);setPacote(null)
+    setFonteTexto('');setArquivoPdf(null)
     Promise.all([apiEscolar.materiaisTurma(turmaId),apiEscolar.me(),apiEscolar.statusIa()])
       .then(([m,eu,si])=>{if(ativo){setMateriais(m);setUsuarioId(eu.id);setStatusIa(si)}})
       .catch(e=>{if(ativo)setErro(falha(e))})
@@ -70,6 +73,16 @@ export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQu
         setStatusIa(prev=>prev?{...prev,restantesHoje:r.restantesHoje}:prev)
       }
     }catch(e){setErro(falha(e))}finally{setGerando(false)}
+  }
+  const lerPdf=async()=>{
+    if(!arquivoPdf||lendoPdf)return
+    setErro('');setSucesso('');setLendoPdf(true)
+    try{
+      const r=await apiEscolar.extrairPdf(turmaId,disciplina,arquivoPdf)
+      setFonteTexto(r.texto)
+      setSucesso('Texto extraído de '+r.paginas+' página(s). Revise o conteúdo antes de pedir à IA.'+
+        (r.truncado?' Foram usados apenas os primeiros 6.000 caracteres.':''))
+    }catch(e){setErro(falha(e))}finally{setLendoPdf(false)}
   }
   const editarQuestao=(indice:number,alteracoes:Partial<QuizGeradoIa>)=>{
     setPacote(atual=>atual?.map((q,i)=>i===indice?{...q,...alteracoes}:q)||null)
@@ -151,6 +164,14 @@ export default function SalaDocente({turmaId,disciplina,disciplinas,aoPrepararQu
             <select id="ia-quantidade" value={quantidade} onChange={e=>setQuantidade(Number(e.target.value))}>
               {[2,3,4,5,6].map(n=><option key={n} value={n}>{n} questões</option>)}
             </select>
+            <label htmlFor="ia-pdf">Importar PDF de texto (opcional)</label>
+            <input id="ia-pdf" type="file" accept=".pdf,application/pdf"
+              onChange={e=>setArquivoPdf(e.target.files?.[0]||null)}/>
+            <button type="button" className="botao-secundario" disabled={!arquivoPdf||lendoPdf||gerando}
+              onClick={()=>void lerPdf()}>
+              {lendoPdf?'Lendo PDF...':'Ler PDF para revisão'}
+            </button>
+            <small>Somente PDFs com texto selecionável, sem senha, até 2 MB e 12 páginas. Não há OCR e o arquivo não é armazenado.</small>
             <label htmlFor="ia-fonte">Texto do professor (opcional)</label>
             <textarea id="ia-fonte" rows={6} maxLength={6000} value={fonteTexto}
               onChange={e=>setFonteTexto(e.target.value)}
