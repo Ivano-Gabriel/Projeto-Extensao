@@ -342,10 +342,12 @@ class ComunicacaoEAprendizagemIntegracaoTest {
         jdbc.update("INSERT INTO turmas(escola_id,codigo,nome,ano_letivo) VALUES (?,'3C','Turma Destino',2026)",escolaA);
         Long destino=jdbc.queryForObject(
             "SELECT id FROM turmas WHERE escola_id=? AND codigo='3C'",Long.class,escolaA);
+        String transferenciaJson="""
+            {"alunoId":%d,"destinoTurmaId":%d}
+            """.formatted(alunoA,destino);
         mvc.perform(post("/api/gestao/turmas/"+turmaA+"/transferencias")
             .with(user("dir-a@escola.test").roles("DIRECAO")).with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("{\\"alunoId\\":"+alunoA+",\\"destinoTurmaId\\":"+destino+"}"))
+            .contentType(MediaType.APPLICATION_JSON).content(transferenciaJson))
             .andExpect(status().isNoContent());
         mvc.perform(put(rota).with(user("prof-a@escola.test").roles("PROFESSOR"))
             .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(ausente))
