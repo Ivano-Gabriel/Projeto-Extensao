@@ -14,7 +14,7 @@ export type TurmaConfiguracao = TurmaEscolar & {descricao:string;cor:string}
 export type HorarioTurma = {id:number;turmaId:number;disciplina:string;diaSemana:number;inicio:string;fim:string;professorId:number|null;professorNome:string|null}
 export type MaterialTurma = {id:number;turmaId:number;professorId:number;disciplina:string;titulo:string;conteudo:string;publicado:boolean}
 export type MaterialFormulario = Pick<MaterialTurma,'disciplina'|'titulo'|'conteudo'|'publicado'>
-export type TipoRascunho = 'QUIZ'|'EXPLICACAO'|'PLANO_AULA'
+export type TipoRascunho = 'QUIZ'|'RESUMO'|'EXPLICACAO'|'PLANO_AULA'
 export type QuizGeradoIa = {titulo:string;pergunta:string;opcoes:string[];correta:number;explicacao:string}
 export type RespostaIa = {texto:string;status:'RASCUNHO';aviso:string;quiz:QuizGeradoIa|null;restantesHoje:number}
 export type TextoPdf = {texto:string;paginas:number;truncado:boolean}
@@ -148,7 +148,7 @@ export const apiEscolar={
   disciplinasIaAluno:()=>requisitar<DisciplinaIaAluno[]>('GET','/api/portal/ia/disciplinas'),
   explicarIa:(body:{turmaId:number;disciplina:string;pergunta:string})=>
     requisitar<ExplicacaoIa>('POST','/api/portal/ia/explicar',body),
-  gerarRascunho:(body:{turmaId:number;disciplina:string;tema:string;tipo:TipoRascunho;contexto:string})=>
+  gerarRascunho:(body:{turmaId:number;disciplina:string;tema:string;tipo:TipoRascunho;contexto:string;fonteTexto?:string})=>
     requisitar<RespostaIa>('POST','/api/professor/ia/rascunho',body),
   extrairPdf:extrairTextoPdf,
   gerarPacote:(body:PacotePedidoIa)=>
