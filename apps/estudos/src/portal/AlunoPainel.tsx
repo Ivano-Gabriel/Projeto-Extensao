@@ -1,12 +1,12 @@
+import NavegacaoDireta from './NavegacaoDireta'
 import { useEffect, useState } from 'react'
 import { ArrowRight, BookOpen, CheckCircle2, Flame, ShieldCheck, Sparkles } from 'lucide-react'
 import { apiEscolar } from './api'
 import type { AtividadeEscolar, Aviso, FrequenciaEscolar, HorarioTurma, MaterialTurma, MeuDesempenho, RespostaSalva, TurmaConfiguracao, TurmaEscolar } from './api'
-import { Abas, Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
+import { Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
 import { Mural } from './Avisos'
 import AssistenteEscolar from './AssistenteEscolar'
 import ProvaAluno from './ProvaAluno'
-import { acoesPorPerfil } from './navegacao'
 
 export default function AlunoPainel(){
   const [aba,setAba]=useState('inicio')
@@ -66,11 +66,24 @@ export default function AlunoPainel(){
   }
   const pendentes=atividades.filter(a=>!respostas.some(r=>r.atividadeId===a.id))
   const importante=avisos.find(a=>a.importante)
-  return <div className="portal-paineis portal-mobile">
-    <Abas abas={acoesPorPerfil('ALUNO')} atual={aba} mudar={setAba}/>
+  return <div className="portal-paineis portal-mobile zelo-layout zelo-aluno">
+    <NavegacaoDireta perfil="ALUNO" atual={aba} mudar={setAba}/>
     <MensagemStatus estado={mensagem}/>
     {carregando&&<p className="portal-vazio">Carregando sua escola...</p>}
     {!carregando&&aba==='inicio'&&<>
+      <section className="zelo-aluno-bemvindo">
+        <div><span className="zelo-kicker">AGORA É COM VOCÊ</span>
+        <h2>Um passo por vez. Você chega lá.</h2>
+        <p>Resolva uma atividade, prepare uma prova ou encontre seus materiais.</p></div>
+        <div className="zelo-aluno-bemvindo-acoes">
+          <button type="button" className="botao-principal" onClick={()=>setAba('atividades')}>
+            <BookOpen size={18}/> Atividades
+          </button>
+          <button type="button" className="botao-secundario" onClick={()=>setAba('prova')}>
+            <Sparkles size={18}/> Simulado
+          </button>
+        </div>
+      </section>
       <div className="portal-metricas">
         <Selo valor={turmas.length} legenda="Turmas"/>
         <Selo valor={pendentes.length} legenda="Para fazer"/>
