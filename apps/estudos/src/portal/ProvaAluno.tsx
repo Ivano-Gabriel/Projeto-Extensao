@@ -63,9 +63,10 @@ export default function ProvaAluno(){
         turmaId:materia.turmaId,disciplina:materia.disciplina,tema:tema.trim(),
         dificuldade:nivel,fonteTexto:texto})
       setProva(r);setEscolhas({})
-      setHistorico(await apiEscolar.listarSimulados())
       setIa(atual=>atual?{...atual,restantesHoje:Math.max(0,atual.restantesHoje-1)}:atual)
       setOk('Prova gerada. Responda às cinco questões.')
+      try{setHistorico(await apiEscolar.listarSimulados())}
+      catch{setErro('A prova foi criada, mas o histórico não atualizou. Recarregue para conferir.')}
     }catch(e){setErro(falha(e))}
     finally{setOcupado(false)}
   }
@@ -83,8 +84,10 @@ export default function ProvaAluno(){
     try{
       const respostas=prova.questoes.map(q=>({questaoId:q.id,opcao:escolhas[q.id]}))
       const resultado=await apiEscolar.responderSimulado(prova.id,respostas)
-      setProva(resultado);setHistorico(await apiEscolar.listarSimulados())
+      setProva(resultado)
       setOk('Simulado corrigido. Confira as explicações.')
+      try{setHistorico(await apiEscolar.listarSimulados())}
+      catch{setErro('Sua nota foi salva, mas o histórico não atualizou. Recarregue para conferir.')}
     }catch(e){setErro(falha(e)+' Se a entrega foi salva, reabra pelo histórico.')}
     finally{setOcupado(false)}
   }
