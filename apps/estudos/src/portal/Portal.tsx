@@ -26,12 +26,14 @@ export default function Portal({usuario,onSair,voltar}:Props){
     setErro('');setSaindo(true)
     try{await onSair()}catch(e){setErro(falha(e));setSaindo(false)}
   }
-  return <div className="pagina portal-pagina">
+  return <div className={`pagina portal-pagina portal-pagina--${area.toLowerCase()}`}>
     {voltar&&<button type="button" className="botao-voltar" onClick={voltar}>
       <ArrowLeft size={18}/> Voltar aos estudos
     </button>}
     <header className="portal-hero">
-      <span className="portal-hero-marca"><ZeloMarca variante="compacta" clara/> <span>PORTAL ESCOLAR</span></span>
+      <span className="portal-hero-marca"><ZeloMarca variante="compacta" clara/>
+        <span>{area==='ALUNO'?'MEUS ESTUDOS':area==='PROFESSOR'?'ÁREA DO PROFESSOR':
+          area==='DIRECAO'?'GESTÃO ESCOLAR':'ADMINISTRAÇÃO'}</span></span>
       <h1>Olá, {usuario.nome.split(' ')[0]}!</h1>
       <div className="portal-acesso">
         <span><ShieldCheck size={17}/>{papel}</span>
