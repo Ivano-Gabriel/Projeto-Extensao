@@ -5,6 +5,7 @@ const abas={
   ALUNO:[
     {id:'inicio',titulo:'Hoje',icone:'home'},
     {id:'atividades',titulo:'Atividades',icone:'book'},
+    {id:'prova',titulo:'Prova',icone:'clipboard'},
     {id:'materiais',titulo:'Materiais da turma',icone:'book'},
     {id:'avisos',titulo:'Avisos',icone:'bell'},
     {id:'assistente',titulo:'Assistente',icone:'sparkles'},
