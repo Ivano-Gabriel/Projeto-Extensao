@@ -387,6 +387,12 @@ class ComunicacaoEAprendizagemIntegracaoTest {
         mvc.perform(get(rota).with(user("prof-co@escola.test").roles("PROFESSOR")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].presente").value(false));
+        Long professorDeOutraDisciplina=criar("prof-port@escola.test",Papel.PROFESSOR,escolaA);
+        jdbc.update("INSERT INTO vinculos_docentes(turma_id,professor_id,disciplina) "+
+            "VALUES(?,?,'PORTUGUES')",turmaA,professorDeOutraDisciplina);
+        mvc.perform(put(rota).with(user("prof-port@escola.test").roles("PROFESSOR"))
+            .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(presente))
+            .andExpect(status().isNotFound());
         mvc.perform(put(rota).with(user("prof-co@escola.test").roles("PROFESSOR"))
             .with(csrf()).contentType(MediaType.APPLICATION_JSON).content(presente))
             .andExpect(status().isNoContent());
