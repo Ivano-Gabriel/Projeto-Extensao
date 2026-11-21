@@ -4,7 +4,7 @@ import {
   ChevronRight, Clock3, Home, Info, Settings2,
   Lightbulb, ListChecks, RotateCcw, Search, Sparkles, Target, X, School, Moon, Sun, LogOut,
 } from 'lucide-react'
-import { materiais, materias, type Material, type Materia } from './dados/materiais'
+import { materiais, type Material, type Materia } from './dados/materiais'
 import { questoes, type Questao } from './dados/questoes'
 import { alternarRevisado, buscarMateriais, resumoEstudos } from './logica/estudos'
 import { responderQuestao, resumirRespostas } from './logica/revisao'
@@ -297,9 +297,13 @@ function QuizPagina({ estado, indice, setIndice, responder, irMateriais, reinici
   const resposta = estado.respostas.find((item) => item.questaoId === questao.id)
   const acertou = resposta?.opcao === questao.correta
   return (
-    <div className="pagina">
+    <div className="pagina zelo-revisao-pagina">
       <CabecalhoSecao etiqueta="HORA DE PRATICAR" titulo="Vamos testar o que ficou?"
         descricao="Responda com calma e veja a explicação antes de ir pra próxima pergunta" />
+      <div className="zelo-revisao-orientacao">
+        <span><Brain size={19} aria-hidden="true"/> Revisão guiada</span>
+        <strong>{resumo.respondidas} de {resumo.total} respostas registradas</strong>
+      </div>
       <div className="revisao-layout">
         <section className="quiz" aria-labelledby="pergunta-atual">
           <div className="quiz-topo">
@@ -366,7 +370,7 @@ function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, li
           <span className="sobretitulo">MATERIAIS REVISADOS</span>
           <div className="progresso-numero"><strong>{resumo.percentual}%</strong><span>{resumo.revisados} de {resumo.materiais} materiais</span></div>
           <Barrinha valor={resumo.percentual} />
-          <p>Seus avanços nos materiais de estudo da biblioteca.</p>
+          <p>{resumo.percentual===100?'Biblioteca concluída! Revise suas respostas quando quiser.':resumo.revisados===0?'Comece por um material e acompanhe seu avanço aqui.':'Bom progresso. Continue com o próximo material no seu ritmo.'}</p>
           <button type="button" className="botao-principal" onClick={irMateriais}>Continuar estudando <ArrowRight size={18}/></button>
         </section>
         <section className="progresso-quiz">
