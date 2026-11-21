@@ -35,6 +35,8 @@ public class AtividadesController {
         @NotNull @Size(min=4,max=4) List<@NotBlank @Size(max=200) String> opcoes,
         @NotNull @Min(0) @Max(3) Integer correta,
         @NotBlank @Size(max=1000) String explicacao,LocalDate prazoEntrega) {}
+    public record LoteAtividades(@NotNull @Size(min=2,max=6)
+        List<@NotNull @Valid NovaAtividade> atividades) {}
     public record AtividadeResumo(
         Long id,Long turmaId,String disciplina,String titulo,String pergunta,List<String> opcoes,LocalDate prazoEntrega) {}
     public record NovaResposta(@NotNull @Min(0) @Max(3) Integer opcao) {}
@@ -80,6 +82,26 @@ public class AtividadesController {
         return chave.getKey().longValue();
     }
 
+    @Transactional
+    @PostMapping("/professor/atividades/lote")
+    public ResponseEntity<List<AtividadeResumo>> publicarLote(
+            @Valid @RequestBody LoteAtividades lote,Authentication auth){
+        Usuario professor=usuario(auth);
+        if(professor.getPapel()!=Papel.PROFESSOR)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        Long turmaId=lote.atividades().get(0).turmaId();
+        String disciplina=lote.atividades().get(0).disciplina();
+        for(NovaAtividade item:lote.atividades()){
+            if(!turmaId.equals(item.turmaId())||!disciplina.equals(item.disciplina()))
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Todas as questões do pacote devem pertencer à mesma turma e disciplina.");
+        }
+        List<AtividadeResumo> publicadas=new java.util.ArrayList<>();
+        for(NovaAtividade item:lote.atividades())
+            publicadas.add(publicar(item,auth).getBody());
+        return ResponseEntity.status(HttpStatus.CREATED).cacheControl(CacheControl.noStore())
+            .body(publicadas);
+    }
     @Transactional
     @PostMapping("/professor/atividades")
     public ResponseEntity<AtividadeResumo> publicar(@Valid @RequestBody NovaAtividade dados,Authentication auth){
