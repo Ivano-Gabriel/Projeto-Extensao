@@ -1,0 +1,445 @@
+/* zELO+ — experiência responsiva. Camada sobre a base, sem alterar contratos. */
+:root {
+  --ux-navy:#152b46;
+  --ux-ink:#172d48;
+  --ux-blue:#235988;
+  --ux-gold:#f4c66a;
+  --ux-fog:#e8f0f8;
+  --ux-border:#d9e4ef;
+}
+.portal-ux-shell.portal-paineis.portal-mobile {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:1rem;
+  align-items:start;
+  min-width:0;
+}
+.portal-ux-workspace {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  align-content:start;
+  gap:1rem;
+  min-width:0;
+}
+.portal-ux-workspace>.portal-feedback,
+.portal-ux-workspace>.portal-metricas,
+.portal-ux-workspace>.portal-cartao,
+.portal-ux-workspace>.ext-docente,
+.portal-ux-workspace>.portal-turma-barra,
+.portal-ux-workspace>.ext-aviso-atividade-real {
+  min-width:0;
+  grid-column:1/-1;
+}
+.portal-ux-navegacao {
+  display:grid;
+  gap:1rem;
+  min-width:0;
+  padding:1.1rem;
+  border-radius:1.25rem;
+  background:linear-gradient(165deg,#142f4d,#203f60 65%,#10283f);
+  border:1px solid #375572;
+  box-shadow:0 16px 36px #1024402a;
+  color:#fff;
+}
+.portal-ux-direcao .portal-ux-navegacao {
+  background:linear-gradient(150deg,#192c49,#304f6b 68%,#15334e);
+}
+.portal-ux-navegacao-cabecalho {display:grid;gap:.35rem;padding:.55rem .45rem .6rem}
+.portal-ux-navegacao-cabecalho>span,
+.portal-ux-eyebrow {font-size:.69rem;font-weight:900;letter-spacing:.11em}
+.portal-ux-navegacao-cabecalho>span {color:#fbd78d}
+.portal-ux-navegacao-cabecalho strong {
+  font:900 clamp(1.28rem,2vw,1.6rem)/1.14 var(--font-display);
+  letter-spacing:-.025em;color:#fff;
+}
+.portal-ux-navegacao-cabecalho p {margin:0;font-size:.79rem;color:#d5e3f0;line-height:1.55}
+.portal-ux-trilhas {display:grid;gap:.3rem;min-width:0}
+.portal-ux-trilhas button {
+  display:flex;align-items:center;gap:.7rem;min-width:0;min-height:3.85rem;
+  padding:.55rem .65rem;border:1px solid transparent;border-radius:.87rem;
+  background:transparent;color:#d9e6f5;text-align:left;cursor:pointer;
+  transition:background-color .22s ease,transform .22s ease,border-color .22s ease;
+}
+.portal-ux-trilhas button:hover {background:#ffffff18;transform:translateX(2px)}
+.portal-ux-trilhas button.ativa {
+  color:#173049;background:#fff;border-color:#fff;box-shadow:0 8px 22px #0c192e25;
+}
+.portal-ux-trilha-icone {
+  display:grid;place-items:center;flex:0 0 2.5rem;height:2.5rem;
+  border-radius:.73rem;background:#ffffff14;color:#d6e9fa;
+}
+.portal-ux-trilhas button.ativa .portal-ux-trilha-icone {
+  background:#e4effb;color:#245785;
+}
+.portal-ux-trilha-texto {display:grid;gap:.18rem;min-width:0;flex:1}
+.portal-ux-trilha-texto strong {font-size:.88rem;line-height:1.15}
+.portal-ux-trilha-texto small {color:inherit;font-size:.69rem;opacity:.8;line-height:1.3}
+.portal-ux-trilha-seta {flex:none;opacity:.65}
+.portal-ux-navegacao-rodape {
+  display:flex;align-items:center;gap:.5rem;margin:.15rem .45rem;
+  font-size:.71rem;line-height:1.45;color:#c1d6ed;
+}
+.portal-ux-shell .portal-cartao {
+  border-radius:1.25rem;
+  border:1px solid var(--ux-border);
+  box-shadow:0 8px 30px #152b460e;
+  padding:clamp(1rem,2.5vw,1.5rem);
+}
+.portal-ux-shell .portal-cartao>h2 {
+  font-size:clamp(1.15rem,2.6vw,1.55rem);
+  color:var(--ink);letter-spacing:-.025em;
+}
+.portal-ux-shell .portal-metricas {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}
+.portal-ux-shell .portal-metrica {background:linear-gradient(135deg,#eef5fb,#fff);border-color:#d6e3f0;padding:1.05rem}
+.portal-ux-shell .portal-metrica strong {color:#173b62}
+.portal-ux-shell .portal-metrica span {font-size:.75rem}
+.portal-ux-shell .portal-ux-next {
+  background:linear-gradient(125deg,#163957 0%,#275c87 75%,#376a92);
+  border-color:#27547c;color:#fff;
+  box-shadow:0 16px 38px #163d602a;
+  padding:clamp(1.15rem,3vw,1.7rem);
+}
+.portal-ux-direcao .portal-ux-next {background:linear-gradient(120deg,#263b60,#36577d 85%)}
+.portal-ux-shell .portal-ux-next>h2 {color:#fff;font-size:clamp(1.35rem,3vw,1.85rem)}
+.portal-ux-shell .portal-ux-next>p {color:#e5eff9;max-width:62ch;font-size:.95rem;line-height:1.6}
+.portal-ux-next .portal-acoes-rapidas {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}
+.portal-ux-next .portal-acoes-rapidas button {
+  display:flex;justify-content:flex-start;min-width:0;min-height:3.45rem;
+  padding:.85rem 1rem;border-radius:.85rem;line-height:1.25;
+  transition:transform .2s ease,background-color .2s ease;
+}
+.portal-ux-next .portal-acoes-rapidas button.botao-principal {
+  background:#ffe2a4!important;color:#17314d;border-color:#ffe2a4;
+}
+.portal-ux-next .portal-acoes-rapidas button.botao-secundario {
+  background:#ffffff18!important;color:#fff;border-color:#ffffff65;
+}
+.portal-ux-next .portal-acoes-rapidas button:hover:not(:disabled) {transform:translateY(-2px)}
+.portal-ux-turma-contexto.portal-turma-barra {
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,.72fr);
+  gap:1rem;align-items:center;
+  padding:1.1rem 1.25rem;border-radius:1.1rem;
+  border:1px solid #c8dbeb;
+  background:linear-gradient(115deg,#e5f2fc 0%,#f5f9ff 65%,#edf4fc);
+}
+.portal-ux-contexto-titulo {display:grid;gap:.25rem;min-width:0}
+.portal-ux-contexto-titulo .portal-ux-eyebrow {color:#305d83}
+.portal-ux-contexto-titulo strong {
+  font:900 clamp(1.15rem,2.5vw,1.4rem)/1.25 var(--font-display);
+  color:#173553;
+}
+.portal-ux-contexto-titulo small {font-size:.78rem;line-height:1.5;color:#516981}
+.portal-ux-contexto-campo {display:grid;gap:.4rem;min-width:0}
+.portal-ux-contexto-campo label {color:#254a70;font-size:.76rem;font-weight:900}
+.portal-ux-contexto-campo select {
+  display:block;width:100%;min-width:0;max-width:none;min-height:3.3rem;
+  padding:.7rem 2rem .7rem .9rem;color:#193e62;background:#fff;
+  border:1px solid #afc9dc;border-radius:.75rem;font-weight:800;font-size:.95rem;
+}
+.portal-ux-contexto-campo .portal-chip {justify-self:start;border-radius:2rem;background:#d3e8f2;color:#194d68}
+.portal-ux-shell .portal-form {max-width:100%}
+.portal-ux-shell .portal-form input,.portal-ux-shell .portal-form select,
+.portal-ux-shell .portal-form textarea {
+  border-color:#cbdbe7;background:var(--sheet);
+  font-size:.94rem;border-radius:.75rem;line-height:1.5;
+}
+.portal-ux-shell .portal-form label {font-size:.83rem}
+.portal-ux-shell .portal-form input:focus-visible,
+.portal-ux-shell .portal-form select:focus-visible,
+.portal-ux-shell .portal-form textarea:focus-visible,
+.portal-ux-trilhas button:focus-visible {
+  outline:3px solid #efbf58;outline-offset:3px;
+}
+/* Portal do aluno: mais contraste, leitura expansível e navegação amigável. */
+.portal-hero {isolation:isolate}
+.portal-pagina:has(.portal-aluno-inicio) .portal-hero,
+.portal-pagina:has(.portal-ux-aluno-boasvindas) .portal-hero {
+  background:linear-gradient(112deg,#142d4b,#245b86 68%,#326c93);
+}
+.portal-pagina:has(.portal-ux-aluno-boasvindas) .portal-hero .zelo-marca-compacta>img {
+  width:clamp(3rem,5vw,4rem);height:clamp(3rem,5vw,4rem);
+}
+.portal-pagina:has(.portal-ux-aluno-boasvindas) .portal-hero .zelo-marca-compacta>span {font-size:clamp(1.5rem,3vw,2rem)}
+.portal-ux-aluno-boasvindas {
+  display:grid;gap:.75rem;grid-column:1/-1;
+  padding:clamp(1.1rem,3vw,1.8rem);
+  border-radius:1.3rem;color:#fff;
+  background:linear-gradient(125deg,#183b5e,#245c8b);
+  box-shadow:0 14px 36px #1c487326;
+}
+.portal-ux-aluno-boasvindas .portal-ux-eyebrow {color:#f6d58c}
+.portal-ux-aluno-boasvindas h2 {
+  margin:0;color:#fff;font:900 clamp(1.65rem,4vw,2.5rem)/1.12 var(--font-display);
+}
+.portal-ux-aluno-boasvindas p {margin:0;max-width:60ch;font-size:.91rem;line-height:1.6;color:#e2eef9}
+.portal-ux-aluno-boasvindas .portal-acoes-rapidas .botao-principal {background:#ffdc8b;color:#142c47;border-color:#ffdc8b}
+.portal-ux-aluno-boasvindas .portal-acoes-rapidas .botao-secundario {background:#ffffff16;color:#fff;border-color:#ffffff75}
+.portal-ux-materiais .portal-ux-busca-material {display:grid;gap:.45rem}
+.portal-ux-busca-material label {display:flex;align-items:center;gap:.5rem;font-size:.84rem;font-weight:900;color:var(--ink)}
+.portal-ux-busca-material input {
+  width:100%;min-height:3.35rem;padding:.75rem .95rem;
+  border:1px solid #bfd3e4;border-radius:.85rem;
+  color:var(--ink);background:var(--sheet);font:inherit;font-size:.94rem;
+}
+.portal-ux-filtros-materia {
+  display:flex;gap:.45rem;min-width:0;overflow-x:auto;padding:.1rem .1rem .5rem;
+  scroll-behavior:smooth;scroll-snap-type:x proximity;
+}
+.portal-ux-filtros-materia button {
+  flex:none;min-height:2.7rem;padding:.6rem .85rem;border-radius:2rem;
+  color:#35577b;background:#edf4fb;border:1px solid #d4e1eb;
+  font-size:.78rem;font-weight:850;scroll-snap-align:start;
+}
+.portal-ux-filtros-materia button.ativo {background:#214e77;color:#fff;border-color:#214e77}
+.portal-ux-contagem {margin:0;font-size:.76rem;color:var(--muted);font-weight:800}
+.portal-ux-lista-material {display:grid;gap:.65rem}
+.portal-ux-material {
+  min-width:0;overflow:hidden;border:1px solid #cbdbe9;border-radius:1rem;
+  background:linear-gradient(125deg,#f6faff,#fff);
+  transition:border-color .18s,box-shadow .18s;
+}
+.portal-ux-material[open] {border-color:#8fb2d2;box-shadow:0 8px 26px #1e528118}
+.portal-ux-material summary {
+  display:flex;align-items:center;gap:.85rem;min-height:6.6rem;
+  padding:.9rem 1rem;list-style:none;cursor:pointer;
+}
+.portal-ux-material summary::-webkit-details-marker{display:none}
+.portal-ux-material summary:focus-visible {outline:3px solid #e2a83e;outline-offset:-3px}
+.portal-ux-material-icone {
+  display:grid;place-items:center;flex:0 0 3.15rem;height:3.15rem;
+  border-radius:.9rem;background:#dcebf9;color:#235b88;
+}
+.portal-ux-material-resumo {display:grid;gap:.25rem;flex:1;min-width:0}
+.portal-ux-material-resumo small {color:#436889;font-size:.69rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.portal-ux-material-resumo strong {color:#153c5f;font-size:1rem;line-height:1.25;overflow-wrap:anywhere}
+.portal-ux-material-resumo>span {color:#5b6e82;font-size:.78rem;line-height:1.4;overflow-wrap:anywhere}
+.portal-ux-material-seta {flex:none;color:#375d7c;transition:transform .22s ease}
+.portal-ux-material[open] .portal-ux-material-seta {transform:rotate(180deg)}
+.portal-ux-material-leitura {
+  display:grid;gap:.8rem;margin:0 .8rem .8rem;
+  padding:clamp(1rem,2.5vw,1.5rem);border:1px solid #dfebf4;border-radius:.85rem;
+  background:#fff;color:#23394f;
+}
+.portal-ux-material-leitura h3 {font:900 1.27rem/1.25 var(--font-display);margin:0;color:#173d64}
+.portal-ux-material-leitura p {white-space:pre-wrap;font-size:1rem;line-height:1.85;max-width:76ch;margin:0;overflow-wrap:anywhere}
+.portal-ux-leitura-fim {display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:#327058;font-weight:850}
+/* Biblioteca demonstrativa e revisão: espaços de concentração, não paredes brancas. */
+.ux-pagina-materiais,.ux-pagina-revisao,.ux-pagina-leitura,.ux-pagina-progresso {display:grid;gap:1rem}
+.ux-pagina-materiais>.cabecalho-secao,.ux-pagina-revisao>.cabecalho-secao,
+.ux-pagina-leitura .artigo-cabecalho {
+  padding:clamp(1.15rem,3vw,1.75rem);border-radius:1.15rem;
+  background:linear-gradient(125deg,#183b61,#275c8e);
+  color:#fff;
+}
+.ux-pagina-materiais .cabecalho-secao .sobretitulo,
+.ux-pagina-revisao .cabecalho-secao .sobretitulo {color:#ffdb8d}
+.ux-pagina-materiais .cabecalho-secao h1,.ux-pagina-revisao .cabecalho-secao h1{color:#fff}
+.ux-pagina-materiais .cabecalho-secao p,.ux-pagina-revisao .cabecalho-secao p {color:#e4eef9;max-width:70ch}
+.ux-pagina-materiais .painel-busca {
+  padding:1.1rem;background:#f0f6fc;border:1px solid #d4e4f1;
+  border-radius:1.1rem;
+}
+.ux-pagina-materiais .painel-busca .campo-busca {background:#fff;border-radius:.85rem}
+.ux-pagina-materiais .filtros {
+  display:flex;overflow-x:auto;gap:.45rem;scroll-behavior:smooth;
+  scroll-snap-type:x proximity;padding:.3rem .1rem .5rem;
+}
+.ux-pagina-materiais .filtros .chip {flex:none;scroll-snap-align:start;min-height:2.65rem;border-radius:2rem}
+.ux-pagina-materiais .grade-materiais {grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem}
+.ux-pagina-materiais .cartao-material {
+  position:relative;min-height:160px;display:flex;align-items:flex-start;
+  padding:1.15rem;border-radius:1.1rem;background:linear-gradient(135deg,#f5faff,#fff 72%);
+  border:1px solid #d5e5f1;box-shadow:0 6px 22px #1c47710b;
+  transition:border-color .2s,transform .2s,box-shadow .2s;
+}
+.ux-pagina-materiais .cartao-material:hover,
+.ux-pagina-materiais .cartao-material:focus-within{
+  border-color:#7faacc;transform:translateY(-2px);box-shadow:0 13px 28px #1c47711d;
+}
+.ux-pagina-materiais .cartao-material h3 {color:#193e63;font-size:1.18rem;line-height:1.28}
+.ux-pagina-materiais .cartao-material p {color:#53687e;font-size:.87rem}
+.ux-pagina-materiais .cartao-material .icone-materia {flex-basis:3rem;height:3rem;border-radius:.9rem}
+.ux-pagina-materiais .cartao-material .abrir-material {background:#e2edf8;color:#1b527e}
+.ux-pagina-materiais .cartao-material .abrir-material:after {content:"";position:absolute;inset:0;cursor:pointer}
+.ux-pagina-revisao .quiz,.ux-pagina-revisao .resultado-quiz {
+  background:linear-gradient(145deg,#f6faff,#fff 65%);
+  border:1px solid #d6e3f1;box-shadow:0 8px 28px #183d640e;
+}
+.ux-pagina-revisao .quiz-topo {font-size:.83rem}
+.ux-pagina-revisao .quiz h2 {color:#183d61;line-height:1.35}
+.ux-pagina-revisao .alternativa {
+  min-height:4rem;border-color:#cbdde9;background:#fff;
+  transition:background-color .2s,transform .2s,border-color .2s;
+}
+.ux-pagina-revisao .alternativa:not(:disabled):hover {background:#ebf4fc;transform:translateX(3px)}
+.ux-pagina-revisao .quiz-ajuda {background:linear-gradient(160deg,#193d61,#2b5982)}
+.ux-pagina-progresso .progresso-destaque,
+.ux-pagina-progresso .materias-progresso {background:linear-gradient(135deg,#f2f8fd,#fff);border-color:#d8e6ef}
+.ux-pagina-progresso .progresso-quiz {background:linear-gradient(125deg,#182f51,#345b83)}
+.ux-pagina-leitura .artigo {border-radius:1.2rem;border-color:#cfdfea;background:linear-gradient(150deg,#fbfdff,#fff)}
+.ux-pagina-leitura .artigo-cabecalho h1,.ux-pagina-leitura .artigo-cabecalho p {color:#fff}
+.ux-pagina-leitura .artigo-secao p {font-size:1.02rem;line-height:1.9;max-width:72ch}
+.ux-pagina-leitura .coluna-estudo {background:linear-gradient(160deg,#183d62,#284f75)}
+/* Atalhos com função clara e ícones legíveis. */
+.prime-atalhos {gap:.8rem}
+.prime-atalhos button {
+  display:flex;align-items:center;gap:.8rem;
+  padding:1rem;min-height:6.6rem;text-align:left;
+  border:1px solid #d3e2ef;border-radius:1.15rem;
+  background:linear-gradient(120deg,#ecf5fc,#fff);
+  box-shadow:0 7px 20px #173c6111;
+}
+.prime-atalhos button:nth-child(2) {background:linear-gradient(120deg,#fef3df,#fff);border-color:#e9d8b8}
+.prime-atalhos .prime-atalho-icone {
+  display:grid;place-items:center;flex:0 0 3.1rem;height:3.1rem;
+  border-radius:1rem;background:#285e89;color:#fff;
+}
+.prime-atalhos button:nth-child(2) .prime-atalho-icone {background:#be8737}
+.prime-atalho-texto {display:grid;gap:.25rem;flex:1;min-width:0}
+.prime-atalho-texto strong {color:#173c62;font-size:1.06rem}
+.prime-atalho-texto small {font-size:.76rem;line-height:1.35;color:#56708b}
+.prime-atalhos button>svg:last-child {color:#315a83;flex:none}
+/* Livro central com capa, miolo e três folhas articuladas. */
+@media(max-width:899px){
+  .prime-menu-livro .prime-livro-nucleo {transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .3s}
+  .prime-menu-livro.aberto .prime-livro-nucleo {transform:translateY(-.95rem) rotate(-3deg) scale(1.1)}
+  .prime-livro-miolo {
+    position:relative;display:block;width:3.2rem;height:3rem;
+    transform-style:preserve-3d;perspective:400px;
+    transform:rotate(-10deg);
+  }
+  .prime-livro-capa-tampa {
+    position:absolute;z-index:5;left:1.52rem;top:.24rem;
+    width:1.55rem;height:2.62rem;display:grid;place-items:center;
+    color:#183d5c;border-radius:.1rem .48rem .4rem .1rem;
+    background:linear-gradient(135deg,#ffe0a0,#dba32d);
+    border:2px solid #a77a23;transform-origin:left center;transform:rotateY(-5deg);
+    box-shadow:2px 3px 6px #71480c4a;
+    transition:transform .7s cubic-bezier(.27,.8,.2,1);
+    backface-visibility:hidden;
+  }
+  .prime-livro-capa-tampa svg {width:1.05rem;height:1.05rem}
+  .prime-menu-livro.aberto .prime-livro-capa-tampa {transform:rotateY(-154deg)}
+  .prime-livro-pagina {
+    position:absolute;z-index:3;top:.32rem;left:1.55rem;
+    width:1.45rem;height:2.48rem;border-radius:.1rem .38rem .3rem .1rem;
+    background:repeating-linear-gradient(to bottom,#fffdf2 0,#fffdf2 7px,#c9d8df 8px,#fffdf2 9px);
+    border:1px solid #d0ae6a;transform-origin:left center;transform:rotateY(-4deg);
+    backface-visibility:hidden;box-shadow:2px 2px 3px #72591b24;
+  }
+  .prime-livro-folha-um {z-index:4}
+  .prime-livro-folha-dois {z-index:3}
+  .prime-livro-folha-tres {z-index:2}
+  .prime-menu-livro.aberto .prime-livro-folha-um {animation:zeloFolhear .68s .1s both}
+  .prime-menu-livro.aberto .prime-livro-folha-dois {animation:zeloFolhear .74s .22s both}
+  .prime-menu-livro.aberto .prime-livro-folha-tres {animation:zeloFolhear .77s .35s both}
+  @keyframes zeloFolhear {
+    0% {transform:rotateY(-4deg)}
+    65% {transform:rotateY(-168deg)}
+    100% {transform:rotateY(-150deg)}
+  }
+  .prime-menu-painel {animation:zeloMenuSubir .37s cubic-bezier(.18,.8,.2,1) both}
+  @keyframes zeloMenuSubir {
+    from{opacity:0;transform:translate3d(0,32px,0) scale(.96)}
+    to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+  }
+  .prime-menu-destaques {gap:.6rem}
+  .prime-menu-destaque {
+    min-height:110px!important;align-items:flex-start!important;
+    background:linear-gradient(145deg,#e7f2fb,#fbfdff)!important;
+    border-color:#cbddec!important;
+    transition:transform .22s ease,box-shadow .22s ease!important;
+  }
+  .prime-menu-destaque:nth-child(3) {background:linear-gradient(145deg,#fff0d4,#fffdf9)!important}
+  .prime-menu-destaque:nth-child(4) {background:linear-gradient(145deg,#ede8ff,#f9f7ff)!important}
+  .prime-menu-destaque-texto {display:grid;gap:.2rem;min-width:0}
+  .prime-menu-destaque-texto strong {font-weight:900;font-size:.89rem;line-height:1.2}
+  .prime-menu-destaque-texto small {font-size:.69rem;line-height:1.34;color:#547089}
+  .prime-menu-secundarios {
+    display:flex!important;gap:.5rem;max-width:100%;overflow-x:auto;
+    scroll-behavior:smooth;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;
+    padding:.2rem .15rem .65rem;
+  }
+  .prime-menu-secundarios button {
+    flex:0 0 clamp(88px,26vw,130px);
+    scroll-snap-align:start;min-height:4.25rem;border-radius:.9rem;
+    transition:background-color .23s ease,transform .23s ease;
+  }
+}
+@media(min-width:920px){
+  .portal-ux-shell.portal-paineis.portal-mobile {grid-template-columns:225px minmax(0,1fr);gap:1.25rem}
+  .portal-ux-navegacao {position:sticky;top:1rem}
+}
+@media(min-width:640px) and (min-height:651px){
+  .entrada-login {
+    box-sizing:border-box;display:grid;place-content:center;justify-items:center;
+    height:100dvh;min-height:0;overflow:hidden;
+    padding:.5rem 1rem;
+  }
+  .entrada-login>.entrada-marca,.entrada-login>.entrada-rodape{display:none}
+  .entrada-login>.portal-login.prime-login {
+    height:min(700px,calc(100dvh - 1.2rem));
+    max-height:calc(100dvh - 1.2rem);
+    min-height:0;align-self:center;margin:0;
+    grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);
+  }
+  .entrada-login .prime-login-cena {min-height:0;padding:1rem;gap:.25rem}
+  .entrada-login .prime-login-cena .prime-login-arte {
+    height:clamp(130px,25dvh,210px);width:min(250px,100%);
+  }
+  .entrada-login .prime-login-cena .prime-book-spread {--book-scale:clamp(.65,.13dvh + .6,.9)}
+  .entrada-login .prime-login-cena>strong {font-size:clamp(1.1rem,2.1vw,1.5rem)}
+  .entrada-login .prime-login-cena>p {font-size:.86rem;line-height:1.35}
+  .entrada-login .prime-login-corpo {padding:clamp(.85rem,2.1vh,1.7rem) clamp(1.1rem,2.7vw,2rem);gap:clamp(.4rem,1.5vh,.85rem)}
+  .entrada-login .prime-login .portal-login-cabecalho {gap:.25rem}
+  .entrada-login .prime-login .portal-login-cabecalho h2 {font-size:clamp(1.55rem,2.35vw,2.2rem)}
+  .entrada-login .prime-login .portal-perfis button {min-height:clamp(3.7rem,8.7vh,4.9rem)}
+  .entrada-login .prime-login .portal-form {gap:.45rem}
+  .entrada-login .prime-login .portal-form input {min-height:3.05rem}
+  .entrada-login .prime-login .portal-form .botao-principal {min-height:3.15rem}
+}
+@media(min-width:640px) and (max-height:650px){
+  .entrada-login {height:auto;min-height:100dvh;overflow-y:auto}
+  .entrada-login>.portal-login.prime-login {height:auto;max-height:none}
+}
+@media(max-width:919px){
+  .portal-ux-shell.portal-paineis.portal-mobile {grid-template-columns:minmax(0,1fr)}
+  .portal-ux-navegacao {padding:.85rem;border-radius:1.1rem;gap:.55rem}
+  .portal-ux-navegacao-cabecalho {padding:.3rem .4rem;gap:.2rem}
+  .portal-ux-navegacao-cabecalho strong {font-size:1.22rem}
+  .portal-ux-navegacao-cabecalho p {display:none}
+  .portal-ux-navegacao-rodape {display:none}
+  .portal-ux-trilhas {
+    display:flex;gap:.5rem;overflow-x:auto;
+    scroll-snap-type:x proximity;scroll-behavior:smooth;overscroll-behavior-x:contain;
+    padding:.2rem .15rem .65rem;
+  }
+  .portal-ux-trilhas button {
+    flex:0 0 auto;scroll-snap-align:start;min-height:3.4rem;
+    padding:.55rem .8rem;background:#ffffff0c;border:1px solid #ffffff30;
+  }
+  .portal-ux-trilha-texto strong {font-size:.84rem}
+  .portal-ux-trilha-texto small,.portal-ux-trilha-seta {display:none}
+  .portal-ux-trilha-icone {flex-basis:2.1rem;height:2.1rem}
+}
+@media(max-width:700px){
+  .portal-ux-next .portal-acoes-rapidas {grid-template-columns:minmax(0,1fr)}
+  .portal-ux-turma-contexto.portal-turma-barra {grid-template-columns:minmax(0,1fr)}
+  .portal-ux-shell .portal-metricas {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ux-pagina-materiais .grade-materiais {grid-template-columns:minmax(0,1fr)}
+  .prime-atalhos button {min-height:5.45rem;padding:.8rem}
+  .prime-atalhos .prime-atalho-icone {flex-basis:2.7rem;height:2.7rem}
+  .prime-atalho-texto strong {font-size:.94rem}
+  .prime-atalho-texto small {font-size:.7rem}
+  .portal-ux-material-resumo>span {font-size:.73rem}
+}
+@media(prefers-reduced-motion:reduce){
+  .portal-ux-trilhas button,.prime-atalhos button,.prime-menu-destaque,
+  .prime-menu-secundarios,.portal-ux-filtros-materia,.portal-ux-material-seta,
+  .portal-ux-next button,.prime-livro-nucleo,.prime-livro-folha,
+  .prime-livro-capa-tampa,.prime-menu-painel {
+    transition:none!important;animation:none!important;scroll-behavior:auto!important;
+  }
+  .prime-menu-livro.aberto .prime-livro-capa-tampa {transform:rotateY(-145deg)}
+  .prime-menu-livro.aberto .prime-livro-folha {transform:rotateY(-140deg)}
+}
