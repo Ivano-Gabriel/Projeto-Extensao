@@ -19,7 +19,7 @@ test('o menu do livro troca o conteudo das paginas mantendo as folhas abertas',(
 })
 test('Minha turma e mais importante do que progresso no menu e no inicio',()=>{
   const s=fonte('App.tsx')
-  const menu=s.slice(s.indexOf('const menu = ['),s.indexOf('] as const'))
+  const menu=s.slice(s.indexOf('const menu = ['),s.indexOf('] as const',s.indexOf('const menu = [')))
   assert.ok(menu.indexOf("id: 'portal'")<menu.indexOf("id: 'progresso'"))
   assert.match(s,/ResumoTurmaReal/)
   assert.match(fonte('portal/ResumoTurmaReal.tsx'),/prime-turma-real/)
@@ -60,7 +60,7 @@ test('o livro central troca o texto após abrir sem reanimar as páginas',()=>{
   assert.match(s,/setPaginaHub\(/)
   assert.match(s,/zelo-livro-overlay/)
   assert.match(css,/\.zelo-livro-overlay/)
-  assert.match(css,/\\.prime-menu-livro\\.aberto \\.zelo-livro-pagina/)
+  assert.match(css,/\.prime-menu-livro\.aberto \.zelo-livro-pagina/)
 })
 test('progresso separa conquistas escolares das marcações pessoais',()=>{
   const s=fonte('App.tsx')
