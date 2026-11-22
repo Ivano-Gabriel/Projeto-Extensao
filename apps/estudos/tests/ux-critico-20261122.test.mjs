@@ -52,3 +52,27 @@ test('feed real tem autor, data, publico e nao depende de scroll horizontal',()=
   assert.match(css,/\.portal-mural/)
   assert.match(css,/overflow-x:clip/)
 })
+
+
+test('o livro central troca o texto após abrir sem reanimar as páginas',()=>{
+  const s=fonte('App.tsx'),css=fonte('ux-ajustes-finais.css')
+  assert.match(s,/capitulosHub\[paginaHub\]/)
+  assert.match(s,/setPaginaHub\(/)
+  assert.match(s,/zelo-livro-overlay/)
+  assert.match(css,/\.zelo-livro-overlay/)
+  assert.match(css,/\\.prime-menu-livro\\.aberto \\.zelo-livro-pagina/)
+})
+test('progresso separa conquistas escolares das marcações pessoais',()=>{
+  const s=fonte('App.tsx')
+  assert.match(s,/apiEscolar\.meuDesempenho\(\)/)
+  assert.match(s,/zelo-progresso-escolar/)
+  assert.match(s,/irTurma=\{\(\) => navegar\('portal'\)\}/)
+  assert.match(s,/não substituem notas escolares/i)
+})
+test('plano pessoal destaca atividades reais cadastradas pelo professor',()=>{
+  const s=fonte('plano/Plano.tsx')
+  assert.match(s,/apiEscolar\.atividades\(\)/)
+  assert.match(s,/apiEscolar\.minhasRespostas\(\)/)
+  assert.match(s,/zelo-plano-escolar/)
+  assert.match(s,/irTurma/)
+})
