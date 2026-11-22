@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { AlertTriangle, Bell, Megaphone, Send } from 'lucide-react'
+import { AlertTriangle, Send } from 'lucide-react'
 import type { Aviso, PublicoAviso, TurmaEscolar } from './api'
 import { apiEscolar } from './api'
 import { Aviso as MensagemStatus, falha, Vazio, type Feedback } from './ComponentesPortal'
