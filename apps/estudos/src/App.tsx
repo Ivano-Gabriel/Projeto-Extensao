@@ -17,6 +17,7 @@ import Plano from './plano/Plano'
 import Jogo from './jogo/Jogo'
 import Portal from './portal/Portal'
 import PortalLogin from './portal/PortalLogin'
+import ResumoTurmaReal from './portal/ResumoTurmaReal'
 import ZeloMarca from './marca/ZeloMarca'
 import { apiEscolar, type UsuarioEscolar } from './portal/api'
 import { paginaDoUsuario, erroNaVerificacaoDeSessao } from './portal/sessao'
@@ -31,7 +32,7 @@ const menu = [
   { id: 'inicio', nome: 'Início', Icone: Home },
   { id: 'materiais', nome: 'Materiais', Icone: BookOpen },
   { id: 'revisao', nome: 'Revisão', Icone: Brain },
-  { id: 'escola', nome: 'Laboratório (demo)', Icone: Sparkles },
+  { id: 'escola', nome: 'Laboratório', Icone: Sparkles },
   { id: 'portal', nome: 'Minha turma', Icone: School },
   { id: 'progresso', nome: 'Progresso', Icone: Target },
 ] as const
@@ -103,7 +104,7 @@ function CartaoMaterial({ material, revisado, onAbrir }: {
   )
 }
 
-function Inicio({estado,dataDesafio,respostaDesafio,responderDesafio,abrirMaterial,irMateriais,irRevisao,irProgresso}:{
+function Inicio({estado,dataDesafio,respostaDesafio,responderDesafio,abrirMaterial,irMateriais,irRevisao,irProgresso,irTurma}:{
   estado:EstadoEstudos
   sequencia:number
   pendentesPlano:number
@@ -114,6 +115,7 @@ function Inicio({estado,dataDesafio,respostaDesafio,responderDesafio,abrirMateri
   irMateriais:()=>void
   irRevisao:()=>void
   irProgresso:()=>void
+  irTurma:()=>void
   irEscola:()=>void
   irPlano:()=>void
   irJogo:()=>void
@@ -137,6 +139,7 @@ function Inicio({estado,dataDesafio,respostaDesafio,responderDesafio,abrirMateri
         <span>Estude, descubra, avance.</span>
       </div>
     </section>
+    <ResumoTurmaReal abrirTurma={irTurma} abrirAtividades={irTurma}/>
     <div className="prime-atalhos zelo-atalhos-imagem" aria-label="Acesso rápido">
       <button type="button" onClick={irMateriais}>
         <span className="zelo-atalho-foto zelo-atalho-foto-materiais" aria-hidden="true"/>
@@ -533,7 +536,7 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
         </div>
         <div className="prime-navegacao-extras">
           <button type="button" onClick={()=>navegar('plano')}><ListChecks size={20}/> Meu plano</button>
-          <button type="button" onClick={()=>navegar('jogo')}><Sparkles size={20}/> Missões do Futuro</button>
+          <button type="button" onClick={()=>navegar('jogo')}><Sparkles size={20}/> Desafios práticos</button>
         </div>
         <span className="navegacao-rodape">zELO+ · APRENDER E CONECTAR</span>
       </nav>
@@ -575,7 +578,8 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
                 irPlano={() => navegar('plano')}
                 irEscola={() => navegar('escola')} irJogo={() => navegar('jogo')} abrirMaterial={abrirMaterial}
                 escolherMateria={escolherMateria} irMateriais={() => navegar('materiais')}
-                irRevisao={() => navegar('revisao')} irProgresso={() => navegar('progresso')}/>}
+                irRevisao={() => navegar('revisao')} irProgresso={() => navegar('progresso')}
+                irTurma={() => navegar('portal')}/>}
               {tela === 'materiais' && <MateriaisPagina estado={estado} busca={busca} setBusca={setBusca}
                 materia={materia} setMateria={setMateria} abrirMaterial={abrirMaterial}/>}
               {tela === 'revisao' && <QuizPagina estado={estado} indice={indiceQuiz} setIndice={setIndiceQuiz}
@@ -615,7 +619,7 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
               </button>
               <button type="button" className="prime-menu-destaque" onClick={()=>navegar('jogo')}>
                 <span className="prime-menu-destaque-icon"><Sparkles size={27}/></span>
-                <span className="zelo-destino"><strong>Missões do Futuro</strong><small>Aprenda jogando</small></span><ArrowRight size={18}/>
+                <span className="zelo-destino"><strong>Desafios práticos</strong><small>Aprenda jogando</small></span><ArrowRight size={18}/>
               </button>
             </div>
             <span className="prime-menu-subtitulo">Acesso rápido</span>
@@ -637,18 +641,18 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
             aria-label={menuAberto?'Fechar menu de áreas':'Abrir menu de áreas'} aria-expanded={menuAberto}
             aria-controls="prime-menu-areas" onClick={()=>setMenuAberto(x=>!x)}>
             <span className="zelo-livro-cenario" aria-hidden="true">
-              <span className="zelo-livro-esquerda"><span/></span>
-              <span className="zelo-livro-pagina zelo-livro-pagina-1"/>
-              <span className="zelo-livro-pagina zelo-livro-pagina-2"/>
-              <span className="zelo-livro-pagina zelo-livro-pagina-3"/>
-              <span className="zelo-livro-direita"><BookOpenCheck size={20}/></span>
+              <span className="zelo-livro-esquerda"><span className="zelo-livro-conteudo">Turma</span></span>
+              <span className="zelo-livro-pagina zelo-livro-pagina-1"><span className="zelo-livro-conteudo">Planos</span></span>
+              <span className="zelo-livro-pagina zelo-livro-pagina-2"><span className="zelo-livro-conteudo">Ideias</span></span>
+              <span className="zelo-livro-pagina zelo-livro-pagina-3"><span className="zelo-livro-conteudo">Livros</span></span>
+              <span className="zelo-livro-direita"><BookOpenCheck size={20}/><span className="zelo-livro-conteudo">zELO+</span></span>
               <span className="zelo-livro-espinha"/>
             </span>
           </button>
           <button type="button" className={tela==='revisao'?'ativo':''} aria-current={tela==='revisao'?'page':undefined}
             onClick={()=>navegar('revisao')}><Brain size={23}/><span>Revisão</span></button>
-          <button type="button" className={tela==='progresso'?'ativo':''} aria-current={tela==='progresso'?'page':undefined}
-            onClick={()=>navegar('progresso')}><Target size={23}/><span>Progresso</span></button>
+          <button type="button" className={tela==='portal'?'ativo':''} aria-current={tela==='portal'?'page':undefined}
+            onClick={()=>navegar('portal')}><School size={23}/><span>Minha turma</span></button>
         </nav>
       </div>}
       {aviso && <div className="aviso-flutuante" role="status">
