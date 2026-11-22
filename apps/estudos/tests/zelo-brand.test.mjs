@@ -18,7 +18,9 @@ test('zELO+ identifica login, cabecalho escolar e portal sem remover o aviso de 
   assert.match(app,/ZeloMarca/)
   assert.doesNotMatch(login,/Bem-vindo ao Extens[aã]o/)
   assert.doesNotMatch(app,/PROJETO EXTENS[AÃ]O|<strong>Extens[aã]o<\/strong>/)
-  assert.match(app,/Laborat[oó]rio \(demo\)/)
+  assert.match(app,/nome: 'Laboratório'/)
+  assert.doesNotMatch(app,/nome: 'Laboratório \(demo\)'/)
+  assert.match(read('src/escola/Escola.tsx'),/dados de exemplo/)
 })
 
 test('identidade PWA usa a nova marca com assets separados por tamanho e atualiza cache',()=>{
