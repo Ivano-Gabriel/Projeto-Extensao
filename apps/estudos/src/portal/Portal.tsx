@@ -12,6 +12,7 @@ import { falha } from './ComponentesPortal'
 import './portal.css'
 import './portal-academico.css'
 import './portal-premium.css'
+import './gestao-responsive.css'
 
 type Props={usuario:UsuarioEscolar;onSair:()=>Promise<void>;voltar?:()=>void}
 export default function Portal({usuario,onSair,voltar}:Props){
@@ -26,14 +27,25 @@ export default function Portal({usuario,onSair,voltar}:Props){
     setErro('');setSaindo(true)
     try{await onSair()}catch(e){setErro(falha(e));setSaindo(false)}
   }
-  return <div className="pagina portal-pagina">
+  return <div className={`pagina portal-pagina zelo-portal zelo-portal-${area.toLowerCase()}`}>
     {voltar&&<button type="button" className="botao-voltar" onClick={voltar}>
       <ArrowLeft size={18}/> Voltar aos estudos
     </button>}
-    <header className="portal-hero">
-      <span className="portal-hero-marca"><ZeloMarca variante="compacta" clara/> <span>PORTAL ESCOLAR</span></span>
-      <h1>Olá, {usuario.nome.split(' ')[0]}!</h1>
-      <div className="portal-acesso">
+    <header className="portal-hero zelo-hero-portal">
+      <div className="zelo-hero-conteudo">
+        <div className="zelo-hero-lockup">
+          <ZeloMarca variante="compacta" clara/>
+          <span>{area==='ALUNO'?'MEUS ESTUDOS':area==='PROFESSOR'?'SALA DO PROFESSOR':
+            area==='DIRECAO'?'PAINEL DE GESTÃO':'ADMINISTRAÇÃO'}</span>
+        </div>
+        <span className="zelo-hero-eyebrow">
+          {area==='ALUNO'?'SEU LUGAR DE APRENDER':area==='PROFESSOR'?'PLANEJE, ENSINE, ACOMPANHE':'CUIDE DA SUA ESCOLA'}
+        </span>
+        <h1>{area==='ALUNO'?'Bom te ver, ':area==='DIRECAO'?'Sua escola começa aqui, ':'Tudo pronto, '}{usuario.nome.split(' ')[0]}.</h1>
+        <p>{area==='ALUNO'?'O próximo passo da sua jornada está a um toque.':
+          area==='PROFESSOR'?'Sua turma e suas ferramentas, sem complicação.':
+          'Acompanhe sua comunidade e organize o dia com clareza.'}</p>
+        <div className="portal-acesso">
         <span><ShieldCheck size={17}/>{papel}</span>
         <button type="button" aria-expanded={seguranca} onClick={()=>setSeguranca(x=>!x)}>
           <KeyRound size={17}/>{seguranca?'Fechar segurança':'Minha segurança'}
@@ -41,7 +53,9 @@ export default function Portal({usuario,onSair,voltar}:Props){
         <button type="button" onClick={()=>void sair()} disabled={saindo}>
           <LogOut size={17}/>{saindo?'Saindo...':'Sair'}
         </button>
+        </div>
       </div>
+      <div className="zelo-hero-fotografia" aria-hidden="true"/>
     </header>
     {erro&&<p role="alert" className="portal-feedback falha">{erro}</p>}
     {seguranca&&<SegurancaConta/>}

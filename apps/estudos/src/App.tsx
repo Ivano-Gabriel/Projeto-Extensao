@@ -83,7 +83,8 @@ function CartaoMaterial({ material, revisado, onAbrir }: {
 }) {
   const Icone=iconesMaterias[material.materia]
   return (
-    <article className="cartao-material">
+    <article className="cartao-material zelo-cartao-estudo" data-materia={material.materia}>
+      <span className="zelo-materia-foto" aria-hidden="true"/>
       <span className={`icone-materia materia-${cores[material.materia]}`} aria-hidden="true"><Icone size={25} /></span>
       <div className="cartao-conteudo">
         <div className="cartao-etiquetas">
@@ -132,17 +133,21 @@ function Inicio({estado,dataDesafio,respostaDesafio,responderDesafio,abrirMateri
           Explorar materiais <ArrowRight size={20}/>
         </button>
       </div>
-      <div className="prime-hero-ilustracao" aria-hidden="true">
-        <div className="prime-orbita orbita-um"/><div className="prime-orbita orbita-dois"/>
-        <div className="prime-livro-capa"><div className="prime-livro-lombo"/>
-          <div className="prime-livro-simbolo"><BookOpenCheck size={56}/></div>
-          <span>zELO+</span></div>
-        <span className="prime-estrela estrela-a">✦</span><span className="prime-estrela estrela-b">✦</span>
+      <div className="zelo-home-fotografia" aria-hidden="true">
+        <span>Estude, descubra, avance.</span>
       </div>
     </section>
-    <div className="prime-atalhos" aria-label="Acesso rápido">
-      <button type="button" onClick={irMateriais}><BookOpen size={23}/><span>Materiais</span><ArrowRight size={18}/></button>
-      <button type="button" onClick={irRevisao}><Brain size={23}/><span>Revisar</span><ArrowRight size={18}/></button>
+    <div className="prime-atalhos zelo-atalhos-imagem" aria-label="Acesso rápido">
+      <button type="button" onClick={irMateriais}>
+        <span className="zelo-atalho-foto zelo-atalho-foto-materiais" aria-hidden="true"/>
+        <span className="zelo-atalho-texto"><strong>Materiais</strong><small>Leia o que você quer aprender</small></span>
+        <ArrowRight size={21} aria-hidden="true"/>
+      </button>
+      <button type="button" onClick={irRevisao}>
+        <span className="zelo-atalho-foto zelo-atalho-foto-revisao" aria-hidden="true"/>
+        <span className="zelo-atalho-texto"><strong>Revisar</strong><small>Teste o que já aprendeu</small></span>
+        <ArrowRight size={21} aria-hidden="true"/>
+      </button>
     </div>
     <p className="prime-demo-nota"><Info size={15}/> Resumos e quizzes desta área são conteúdos demonstrativos, não notas da escola.</p>
     <DesafioDia data={dataDesafio} resposta={respostaDesafio} responder={responderDesafio}
@@ -180,7 +185,7 @@ function MateriaisPagina({ estado, busca, setBusca, materia, setMateria, abrirMa
 }) {
   const encontrados = useMemo(() => buscarMateriais(materiais, busca, materia), [busca, materia])
   return (
-    <div className="pagina">
+    <div className="pagina zelo-materiais-pagina">
       <CabecalhoSecao etiqueta="BIBLIOTECA DE ESTUDOS" titulo="Materiais pra revisar"
         descricao="Encontre um assunto, leia o resumo e marque quando terminar de estudar" />
       <section className="painel-busca" aria-label="Busca e filtros de materiais">
@@ -220,7 +225,7 @@ function LerMaterial({ material, revisado, onVoltar, onAlternar, irRevisao }: {
   irRevisao: () => void
 }) {
   return (
-    <div className="pagina">
+    <div className="pagina zelo-leitura-pagina">
       <button type="button" className="botao-voltar" onClick={onVoltar}><ArrowLeft size={18}/> Voltar aos materiais</button>
       <div className="artigo-layout">
         <article className="artigo" aria-labelledby="artigo-titulo">
@@ -272,7 +277,7 @@ function QuizPagina({ estado, indice, setIndice, responder, irMateriais, reinici
   const resumo = resumirRespostas(questoes, estado.respostas)
   if (indice >= questoes.length) {
     return (
-      <div className="pagina">
+      <div className="pagina zelo-revisao-pagina">
         <CabecalhoSecao etiqueta="RESULTADO DA REVISÃO" titulo="Mandou bem por ter tentado!"
           descricao="O mais importante é entender os erros e continuar revisando, no seu ritmo" />
         <div className="resultado-quiz">
@@ -292,9 +297,13 @@ function QuizPagina({ estado, indice, setIndice, responder, irMateriais, reinici
   const resposta = estado.respostas.find((item) => item.questaoId === questao.id)
   const acertou = resposta?.opcao === questao.correta
   return (
-    <div className="pagina">
+    <div className="pagina zelo-revisao-pagina">
       <CabecalhoSecao etiqueta="HORA DE PRATICAR" titulo="Vamos testar o que ficou?"
         descricao="Responda com calma e veja a explicação antes de ir pra próxima pergunta" />
+      <div className="zelo-revisao-orientacao">
+        <span><Brain size={19} aria-hidden="true"/> Revisão guiada</span>
+        <strong>{resumo.respondidas} de {resumo.total} respostas registradas</strong>
+      </div>
       <div className="revisao-layout">
         <section className="quiz" aria-labelledby="pergunta-atual">
           <div className="quiz-topo">
@@ -353,7 +362,7 @@ function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, li
   const resumo = resumoEstudos(materiais, estado.revisados, estado.respostas)
   const quiz = resumirRespostas(questoes, estado.respostas)
   return (
-    <div className="pagina">
+    <div className="pagina zelo-progresso-pagina">
       <CabecalhoSecao etiqueta="NO SEU RITMO" titulo="Meu progresso"
         descricao="Veja o que você já revisou e quais assuntos ainda pode explorar" />
       <div className="progresso-layout">
@@ -361,7 +370,7 @@ function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, li
           <span className="sobretitulo">MATERIAIS REVISADOS</span>
           <div className="progresso-numero"><strong>{resumo.percentual}%</strong><span>{resumo.revisados} de {resumo.materiais} materiais</span></div>
           <Barrinha valor={resumo.percentual} />
-          <p>Seus avanços nos materiais de estudo da biblioteca.</p>
+          <p>{resumo.percentual===100?'Biblioteca concluída! Revise suas respostas quando quiser.':resumo.revisados===0?'Comece por um material e acompanhe seu avanço aqui.':'Bom progresso. Continue com o próximo material no seu ritmo.'}</p>
           <button type="button" className="botao-principal" onClick={irMateriais}>Continuar estudando <ArrowRight size={18}/></button>
         </section>
         <section className="progresso-quiz">
@@ -510,7 +519,7 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
   const reiniciarQuiz = () => { setEstado((atual) => ({ ...atual, respostas: [] })); setIndiceQuiz(0); setAviso('Quiz reiniciado! Bora tentar novamente') }
 
   return (
-    <div className="app-layout">
+    <div className={`app-layout ${tela==='portal'?'zelo-modo-portal':''}`}>
       <nav className="navegacao" aria-label="Navegação da ferramenta de estudos">
         <div className="navegacao-marca"><Marca /><p>Um lugar pra revisar e aprender do seu jeito</p></div>
         <div className="navegacao-itens">
@@ -586,7 +595,7 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
         </main>
         <footer className="rodape-app">zELO+ · Biblioteca demonstrativa · Registros escolares somente no portal</footer>
       </div>
-      <div className="prime-mobile-nav">
+      {tela!=='portal'&&<div className="prime-mobile-nav">
         {menuAberto&&<>
           <button type="button" className="prime-menu-sombra" aria-label="Fechar menu" onClick={()=>setMenuAberto(false)}/>
           <nav className="prime-menu-painel" aria-label="Todas as áreas de estudos" id="prime-menu-areas">
@@ -598,15 +607,15 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
                 <button type="button" key={id} className="prime-menu-destaque"
                   onClick={()=>navegar(id)}>
                   <span className="prime-menu-destaque-icon"><Icone size={27}/></span>
-                  <span>{nome}</span><ArrowRight size={18}/>
+                  <span className="zelo-destino"><strong>{nome}</strong><small>{id==='portal'?'Sua escola e professores':'Experimente novos desafios'}</small></span><ArrowRight size={18}/>
                 </button>)}
               <button type="button" className="prime-menu-destaque" onClick={()=>navegar('plano')}>
                 <span className="prime-menu-destaque-icon"><ListChecks size={27}/></span>
-                <span>Meu plano</span><ArrowRight size={18}/>
+                <span className="zelo-destino"><strong>Meu plano</strong><small>Organize a semana</small></span><ArrowRight size={18}/>
               </button>
               <button type="button" className="prime-menu-destaque" onClick={()=>navegar('jogo')}>
                 <span className="prime-menu-destaque-icon"><Sparkles size={27}/></span>
-                <span>Missões do Futuro</span><ArrowRight size={18}/>
+                <span className="zelo-destino"><strong>Missões do Futuro</strong><small>Aprenda jogando</small></span><ArrowRight size={18}/>
               </button>
             </div>
             <span className="prime-menu-subtitulo">Acesso rápido</span>
@@ -627,14 +636,21 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
           <button type="button" className={'prime-menu-livro '+(menuAberto?'aberto':'')}
             aria-label={menuAberto?'Fechar menu de áreas':'Abrir menu de áreas'} aria-expanded={menuAberto}
             aria-controls="prime-menu-areas" onClick={()=>setMenuAberto(x=>!x)}>
-            <span className="prime-livro-nucleo"><BookOpenCheck size={30}/><i aria-hidden="true"/></span>
+            <span className="zelo-livro-cenario" aria-hidden="true">
+              <span className="zelo-livro-esquerda"><span/></span>
+              <span className="zelo-livro-pagina zelo-livro-pagina-1"/>
+              <span className="zelo-livro-pagina zelo-livro-pagina-2"/>
+              <span className="zelo-livro-pagina zelo-livro-pagina-3"/>
+              <span className="zelo-livro-direita"><BookOpenCheck size={20}/></span>
+              <span className="zelo-livro-espinha"/>
+            </span>
           </button>
           <button type="button" className={tela==='revisao'?'ativo':''} aria-current={tela==='revisao'?'page':undefined}
             onClick={()=>navegar('revisao')}><Brain size={23}/><span>Revisão</span></button>
           <button type="button" className={tela==='progresso'?'ativo':''} aria-current={tela==='progresso'?'page':undefined}
             onClick={()=>navegar('progresso')}><Target size={23}/><span>Progresso</span></button>
         </nav>
-      </div>
+      </div>}
       {aviso && <div className="aviso-flutuante" role="status">
         <span><Check size={18}/>{aviso}</span>
         <button type="button" onClick={() => setAviso('')} aria-label="Fechar aviso"><X size={20}/></button>

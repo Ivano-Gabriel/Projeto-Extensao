@@ -19,17 +19,18 @@ export default function Jogo({voltar}:Props){
   return <div className="pagina arcade-pagina">
     <nav className="arcade-navegacao" aria-label="Navegação dos desafios">
       <button type="button" className="botao-voltar" onClick={voltar}><ArrowLeft size={18}/> Voltar</button>
-      <span><Sparkles size={16}/> DESAFIOS DE CARREIRA</span>
+      <span><Sparkles size={16}/> APRENDIZAGEM EM AÇÃO</span>
     </nav>
     {!missao?<><header className="arcade-cabecalho">
-      <span className="sobretitulo">MISSÕES DO FUTURO</span>
-      <h1>Qual problema você resolveria?</h1>
-      <p>Escolha uma área e teste suas decisões em três situações reais do mundo do trabalho.</p>
+      <span className="sobretitulo">DESAFIOS PRÁTICOS</span>
+      <h1>Casos para resolver</h1>
+      <p>Escolha um tema, analise três situações e entenda as respostas. Tudo demonstrativo, sem nota escolar.</p>
     </header>
       <div className="missao-grade">{missoes.map(m=>{
         const Icon=icons[m.id]
         return <button type="button" key={m.id} className={`missao-card missao-${m.cor}`}
             onClick={()=>setPartida(iniciarJogo(m.id))}>
+           <span className="missao-card-foto" aria-hidden="true"/>
           <span className="missao-icon"><Icon size={28}/></span>
           <span className="sobretitulo">{m.profissao}</span>
           <strong>{m.nome}</strong>
@@ -37,9 +38,10 @@ export default function Jogo({voltar}:Props){
           <span className="missao-cta">Começar <ArrowRight size={18}/></span>
         </button>})}
         <button type="button" className="missao-card missao-memoria" onClick={()=>setMemoria(true)}>
+           <span className="missao-card-foto" aria-hidden="true"/>
           <span className="missao-icon"><Sparkles size={28}/></span>
-          <span className="sobretitulo">RECUPERAÇÃO ATIVA</span>
-          <strong>Memória Flash</strong><small>Encontre pares de conceitos em 3 matérias.</small>
+          <span className="sobretitulo">REVISÃO COM CARTAS</span>
+          <strong>Pares de conceitos</strong><small>Associe cada conceito à explicação em três matérias.</small>
           <span className="missao-cta">Jogar <ArrowRight size={18}/></span>
         </button>
       </div>

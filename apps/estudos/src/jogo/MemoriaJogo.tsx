@@ -21,12 +21,12 @@ export default function MemoriaJogo({voltar}:Props){
   }
   return <div className="pagina memoria-pagina">
     <button type="button" className="botao-voltar" onClick={voltar}>
-      <ArrowLeft size={18}/> Missões do Futuro
+      <ArrowLeft size={18}/> Desafios
     </button>
     <header className="memoria-cabecalho">
-      <span className="sobretitulo">MEMÓRIA FLASH</span>
-      <h1>Encontre os pares.</h1>
-      <p>Conceito + significado. Quatro pares, uma revisão.</p>
+      <span className="sobretitulo">PRATIQUE COM CARTAS</span>
+      <h1>Associe e aprenda.</h1>
+      <p>Encontre quatro pares de conceito e significado. Um treino de memória, não uma avaliação escolar.</p>
     </header>
     {!jogo?<div className="memoria-areas">{areas.map(a=><button type="button" key={a.id}
       onClick={()=>iniciar(a.id)}>

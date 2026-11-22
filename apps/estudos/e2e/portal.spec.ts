@@ -121,7 +121,7 @@ test('histórico da prova persiste depois de recarregar a interface',async({page
 test('um professor e um diretor não recebem a aba Prova no portal',async({page})=>{
   await portalSimulado(page,'PROFESSOR')
   await page.goto('/')
-  await expect(page.getByRole('heading',{name:/Olá, QA!/})).toBeVisible()
+  await expect(page.getByRole('heading',{name:/Tudo pronto, QA\./})).toBeVisible()
   await expect(page.getByRole('tab',{name:'Prova'})).toHaveCount(0)
   await expect(page.getByRole('tab',{name:'Atividades'})).toBeVisible()
 })
@@ -137,3 +137,112 @@ test('login responsivo e acessível no Chromium mobile sem conta real',async({pa
   await expect(page.locator('#portal-senha')).toBeVisible()
   await expect(page.getByRole('button',{name:'Entrar'})).toBeVisible()
 })
+
+
+test('mobile 390px sem rolagem horizontal, quatro destinos visíveis e Mais',async({page})=>{
+  await page.setViewportSize({width:390,height:844})
+  await portalSimulado(page,'ALUNO')
+  await page.goto('/')
+  await page.getByRole('button',{name:'Abrir menu de áreas'}).click()
+  await page.getByRole('navigation',{name:'Todas as áreas de estudos'})
+    .getByRole('button',{name:/Minha turma/}).click()
+  const tabs=page.getByRole('tablist',{name:'Seções do portal'})
+  await expect(tabs.getByRole('tab',{name:'Hoje'})).toBeVisible()
+  await expect(tabs.getByRole('tab',{name:'Prova'})).toBeVisible()
+  await expect(page.getByRole('button',{name:'Mais áreas'})).toBeVisible()
+  await expect.poll(()=>page.evaluate(()=>({
+    total:document.documentElement.scrollWidth,
+    viewport:window.innerWidth,
+  }))).toMatchObject({total:390,viewport:390})
+  await page.getByRole('button',{name:'Mais áreas'}).click()
+  await expect(page.getByRole('dialog',{name:'Mais áreas do portal'})).toBeVisible()
+  await page.getByRole('dialog').getByRole('button',{name:'Assistente'}).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(page.getByRole('button',{name:'Mais áreas'})).toHaveAttribute('aria-expanded','false')
+})
+
+test('menu do livro abre áreas com páginas articuladas e fecha novamente',async({page})=>{
+  await portalSimulado(page,'ALUNO')
+  await page.setViewportSize({width:390,height:844})
+  await page.goto('/')
+  const livro=page.getByRole('button',{name:'Abrir menu de áreas'})
+  await expect(livro).toBeVisible()
+  await livro.click()
+  await expect(page.getByRole('navigation',{name:'Todas as áreas de estudos'})).toBeVisible()
+  await expect(page.locator('.zelo-livro-pagina')).toHaveCount(3)
+  await expect(page.getByRole('button',{name:'Fechar menu de áreas'})).toHaveAttribute('aria-expanded','true')
+  await page.getByRole('button',{name:'Fechar menu de áreas'}).click()
+  await expect(page.getByRole('navigation',{name:'Todas as áreas de estudos'})).toHaveCount(0)
+})
+
+test('direção no mobile encontra vínculos direto e histórico em Mais',async({page})=>{
+  await portalSimulado(page,'DIRECAO')
+  await page.setViewportSize({width:390,height:844})
+  await page.goto('/')
+  await expect(page.getByRole('tab',{name:'Vínculos'})).toBeVisible()
+  await expect(page.getByRole('tab',{name:'Histórico'})).toBeHidden()
+  await page.getByRole('button',{name:'Mais áreas'}).click()
+  await expect(page.getByRole('dialog').getByRole('button',{name:'Histórico'})).toBeVisible()
+})
+
+test('cabeçalho de aluno tem foto editorial e logomarca grande no desktop',async({page})=>{
+  await portalSimulado(page,'ALUNO')
+  await page.setViewportSize({width:1366,height:768})
+  await page.goto('/')
+  await page.getByRole('navigation',{name:'Navegação da ferramenta de estudos'})
+    .getByRole('button',{name:'Minha turma'}).click()
+  await expect(page.getByRole('heading',{name:/Bom te ver, QA\./})).toBeVisible()
+  const hero=page.locator('.zelo-hero-portal')
+  await expect(hero).toBeVisible()
+  await expect(hero.locator('.zelo-hero-fotografia')).toBeAttached()
+  await expect.poll(()=>hero.locator('.zelo-hero-fotografia').evaluate(node=>
+    getComputedStyle(node).backgroundImage.includes('images.unsplash.com'))).toBe(true)
+})
+
+
+for (const perfil of ['DIRECAO','PROFESSOR'] as const){
+  test(perfil+' exibe sidebar de desktop e ações com contraste suficiente',async({page})=>{
+    await portalSimulado(page,perfil)
+    await page.setViewportSize({width:900,height:800})
+    await page.goto('/')
+    const painel=page.locator(perfil==='DIRECAO'?'.zelo-direcao':'.zelo-professor')
+    const nav=painel.locator('.zelo-nav-direta')
+    await expect(nav).toBeVisible()
+    await expect.poll(()=>nav.evaluate(el=>getComputedStyle(el).position)).toBe('sticky')
+    await expect(painel.getByRole('button',{name:'Mais áreas'})).toBeHidden()
+    await expect(painel.getByRole('tab',{name:perfil==='DIRECAO'?'Histórico':'Resultados'})).toBeVisible()
+    const layout=await painel.evaluate(el=>getComputedStyle(el).gridTemplateColumns)
+    expect(layout.trim().split(/\s+/).length).toBe(2)
+    const botoes=painel.locator('.zelo-destaque-tarefa .botao-principal, .zelo-destaque-tarefa .botao-secundario')
+    await expect(botoes.first()).toBeVisible()
+    for(let i=0;i<await botoes.count();i++){
+      const cores=await botoes.nth(i).evaluate(el=>{
+        const s=getComputedStyle(el)
+        return {fg:s.color,bg:s.backgroundColor}
+      })
+      const rgb=(s:string)=>s.match(/[\d.]+/g)?.slice(0,3).map(Number)??[0,0,0]
+      const L=(v:number)=>{const s=v/255;return s<=.04045?s/12.92:Math.pow((s+.055)/1.055,2.4)}
+      const luminancia=(s:string)=>rgb(s).reduce((acc,c,k)=>acc+c*0+(k===0?.2126:k===1?.7152:.0722)*L(c),0)
+      const a=luminancia(cores.fg),b=luminancia(cores.bg)
+      expect((Math.max(a,b)+.05)/(Math.min(a,b)+.05)).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+  test(perfil+' no celular mantém navegação fixa legível e modal sem cortes',async({page})=>{
+    await portalSimulado(page,perfil)
+    await page.setViewportSize({width:390,height:844})
+    await page.goto('/')
+    const painel=page.locator(perfil==='DIRECAO'?'.zelo-direcao':'.zelo-professor')
+    const nav=painel.locator('.zelo-nav-direta')
+    await expect(nav).toBeVisible()
+    await expect.poll(()=>nav.evaluate(el=>getComputedStyle(el).position)).toBe('fixed')
+    await expect(painel.getByRole('button',{name:'Mais áreas'})).toBeVisible()
+    await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth)).toBe(0)
+    await painel.getByRole('button',{name:'Mais áreas'}).click()
+    const modal=page.getByRole('dialog',{name:'Mais áreas do portal'})
+    await expect(modal).toBeVisible()
+    const bounds=await modal.boundingBox()
+    expect(bounds).not.toBeNull()
+    expect(bounds!.y).toBeGreaterThanOrEqual(0)
+    expect(bounds!.y+bounds!.height).toBeLessThanOrEqual(844)
+  })
+}

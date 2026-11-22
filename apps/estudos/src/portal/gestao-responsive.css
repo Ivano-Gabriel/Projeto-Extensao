@@ -1,0 +1,321 @@
+/* zELO+ | Portal de equipes — responsividade e contraste.
+   Restrito a direção e professor. Não modifica a área do aluno. */
+.zelo-portal-direcao,.zelo-portal-professor{
+  --gestao-azul:#17446a;
+  --gestao-azul-claro:#eaf3fa;
+  --gestao-borda:#d3e2ec;
+}
+.zelo-portal-direcao .zelo-hero-portal,
+.zelo-portal-professor .zelo-hero-portal{
+  min-height:240px;
+  border-radius:1.25rem;
+  padding:clamp(1.15rem,2.5vw,2rem);
+}
+.zelo-portal-direcao .zelo-hero-conteudo,
+.zelo-portal-professor .zelo-hero-conteudo{max-width:65%;gap:.6rem}
+.zelo-portal-direcao .zelo-hero-portal h1,
+.zelo-portal-professor .zelo-hero-portal h1{
+  max-width:23ch;font-size:clamp(1.7rem,3.1vw,2.55rem);line-height:1.12;
+}
+.zelo-portal-direcao .zelo-hero-fotografia,
+.zelo-portal-professor .zelo-hero-fotografia{
+  inset:0 0 0 48%;background-position:center;background-size:cover;
+}
+.zelo-portal-direcao .zelo-hero-portal:before,
+.zelo-portal-professor .zelo-hero-portal:before{
+  background:linear-gradient(90deg,#0b2b48f8 0%,#0c2e4aee 43%,#143f6099 72%,#0e294a2b 100%);
+}
+.zelo-portal-direcao .zelo-hero-portal .portal-acesso,
+.zelo-portal-professor .zelo-hero-portal .portal-acesso{
+  display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-top:.45rem;
+}
+.zelo-portal-direcao .zelo-hero-portal .portal-acesso button,
+.zelo-portal-professor .zelo-hero-portal .portal-acesso button,
+.zelo-portal-direcao .zelo-hero-portal .portal-acesso>span,
+.zelo-portal-professor .zelo-hero-portal .portal-acesso>span{
+  min-height:2.7rem;padding:.45rem .85rem;
+  background:#0b2a45d9;border:1px solid #b8d0df88;
+  color:#fff;font-size:.8rem;font-weight:800;
+}
+.zelo-portal-direcao .zelo-hero-portal .portal-acesso button:hover,
+.zelo-portal-professor .zelo-hero-portal .portal-acesso button:hover{
+  background:#2c587b;border-color:#cfdfed;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor){
+  width:100%;max-width:100%;min-width:0;align-items:start;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor)>.zelo-area-conteudo{
+  display:grid;grid-template-columns:minmax(0,1fr);
+  align-content:start;min-width:0;width:100%;max-width:100%;
+  gap:clamp(.8rem,1.6vw,1.2rem);
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-cartao{
+  min-width:0;overflow-wrap:anywhere;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-metricas{
+  min-width:0;width:100%;
+  grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-metrica{
+  min-width:0;padding:.85rem 1rem;border-color:#d2e2ed;
+  background:#fff;border-radius:1rem;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-metrica strong{
+  font-size:clamp(1.4rem,2.8vw,2.3rem);
+  line-height:1.15;color:#164c75;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-metrica span{
+  font-size:.75rem;color:#45657c;line-height:1.4;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-acoes-rapidas{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-acoes-rapidas>button{
+  display:inline-flex;justify-content:center;align-items:center;flex-wrap:wrap;
+  gap:.4rem;max-width:100%;min-width:0;
+  padding:.8rem .9rem;line-height:1.35;white-space:normal;text-align:center;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-acoes-rapidas>button svg{
+  flex:none;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-destaque-tarefa.portal-cartao{
+  background:linear-gradient(125deg,#123651,#24577e);
+  border:1px solid #376d8d;
+  color:#fff;
+  border-radius:1.2rem;
+  padding:clamp(1.2rem,2.3vw,1.65rem);
+  box-shadow:0 10px 30px #0c2f491f;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-destaque-tarefa.portal-cartao h2{
+  color:#fff;font-size:clamp(1.4rem,2.6vw,1.8rem);
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-destaque-tarefa.portal-cartao p{
+  color:#f1f6fa;line-height:1.55;
+}
+/* Maior especificidade que portal-premium.css: evitar texto azul sobre botão azul. */
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-cartao.zelo-destaque-tarefa .botao-principal:not(:disabled){
+  color:#12344c;background:#fff;
+  border:1px solid #fff;
+  font-weight:900;box-shadow:0 3px 0 #0b2b48a6;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-cartao.zelo-destaque-tarefa .botao-principal:not(:disabled):hover{
+  background:#eff7fc;border-color:#eff7fc;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-cartao.zelo-destaque-tarefa .botao-secundario:not(:disabled){
+  background:#31658d;color:#fff;
+  border:1px solid #b5d4e8;
+  font-weight:850;box-shadow:none;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-cartao.zelo-destaque-tarefa .botao-secundario:not(:disabled):hover{
+  background:#245577;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-cartao.zelo-destaque-tarefa button:disabled{
+  opacity:1;color:#294a60;background:#dcebf5;
+  border:1px solid #adc7da;box-shadow:none;
+  cursor:not-allowed;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-cartao.zelo-destaque-tarefa button:focus-visible{
+  outline:3px solid #f4c96a;outline-offset:3px;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-form input,
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-form select,
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-form textarea{
+  width:100%;max-width:100%;min-width:0;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-tabela{
+  max-width:100%;overflow-x:auto;
+}
+.zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-contexto-turma.portal-turma-barra{
+  grid-template-columns:auto minmax(0,1fr) auto;
+  max-width:100%;min-width:0;
+}
+
+/* Tablet horizontal e desktop: sidebar fixa no fluxo, todas as seções abertas. */
+@media(min-width:840px){
+  .zelo-layout.portal-paineis.portal-mobile:is(.zelo-direcao,.zelo-professor){
+    display:grid;grid-template-columns:minmax(185px,225px) minmax(0,1fr);
+    align-items:start;gap:1.25rem;padding-bottom:0;
+  }
+  .zelo-layout.portal-paineis.portal-mobile:is(.zelo-direcao,.zelo-professor)>.zelo-nav-direta{
+    grid-column:1;grid-row:1;position:sticky;
+    top:1rem;left:auto;right:auto;bottom:auto;
+    display:block;width:100%;max-width:100%;
+    box-sizing:border-box;min-width:0;padding:.85rem;
+    background:linear-gradient(160deg,#173b5c,#0e2b44);
+    border:1px solid #2c506d;border-radius:1rem;
+    box-shadow:0 12px 28px #123b531d;
+  }
+  .zelo-layout.portal-paineis.portal-mobile:is(.zelo-direcao,.zelo-professor)>.zelo-area-conteudo{
+    grid-column:2;grid-row:1;min-width:0;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-marca{
+    display:grid;gap:.35rem;padding:.3rem .5rem .95rem;
+    border-bottom:1px solid #ffffff29;margin-bottom:.5rem;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-todas{
+    display:grid;grid-template-columns:minmax(0,1fr);gap:.25rem;
+    width:100%;min-width:0;overflow:visible;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-item.zelo-nav-principal,
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-item.zelo-nav-extra{
+    display:flex!important;flex-direction:row;justify-content:flex-start;align-items:center;
+    gap:.75rem;width:100%;max-width:100%;min-width:0;
+    min-height:2.9rem;padding:.65rem .7rem;
+    text-align:left;background:transparent;color:#e3eff8;
+    border:1px solid transparent;border-radius:.75rem;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-item.ativa{
+    color:#123d5f;background:#eff7fc;border-color:#c7dae7;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-item span{
+    text-align:left;white-space:normal;
+    font-size:.85rem;line-height:1.25;font-weight:800;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-item svg{
+    width:20px;height:20px;flex:none;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-mais,
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-mais-fundo{
+    display:none!important;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-area-inicio{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-area-inicio>.portal-metricas,
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-area-inicio>.zelo-destaque-tarefa,
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-area-inicio>.portal-feedback,
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-area-inicio>.portal-turma-barra,
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-area-inicio>.portal-vazio{
+    grid-column:1/-1;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-area-inicio>.portal-cartao:not(.zelo-destaque-tarefa){
+    grid-column:auto;align-self:start;
+  }
+}
+/* Mobile: quatro destinos + Mais, sem esticamento horizontal nem área modal cortada. */
+@media(max-width:839px){
+  .zelo-layout.portal-paineis.portal-mobile:is(.zelo-direcao,.zelo-professor){
+    display:grid;grid-template-columns:minmax(0,1fr);
+    padding-bottom:calc(5.7rem + env(safe-area-inset-bottom));
+  }
+  .zelo-layout.portal-paineis.portal-mobile:is(.zelo-direcao,.zelo-professor)>.zelo-nav-direta{
+    position:fixed;z-index:100;inset:auto 0 0;
+    box-sizing:border-box;width:100%;max-width:100%;min-width:0;
+    padding:.4rem .45rem calc(.45rem + env(safe-area-inset-bottom));
+    border-top:1px solid #385e7d;background:#142f4b;border-radius:0;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-todas{
+    display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+    width:100%;min-width:0;gap:.2rem;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-item.zelo-nav-principal,
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-mais{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-width:0;max-width:100%;min-height:3.65rem;
+    padding:.4rem .08rem;gap:.2rem;text-align:center;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-item.zelo-nav-principal span,
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-mais span{
+    color:inherit;font-size:clamp(.62rem,1.8vw,.76rem);
+    line-height:1.16;font-weight:800;
+    overflow-wrap:break-word;text-align:center;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-item.ativa,
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-mais.ativa{
+    color:#123957;background:#eff7fc;border-color:#eff7fc;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-mais-fundo{
+    display:flex;align-items:flex-end;justify-content:center;
+    position:fixed;inset:0;z-index:120;
+    overflow-y:auto;
+    background:#051f34bb;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-mais-folha{
+    width:100%;max-width:530px;max-height:calc(100dvh - 1.4rem);
+    overflow-y:auto;overscroll-behavior:contain;
+    padding:1rem 1rem calc(1.2rem + env(safe-area-inset-bottom));
+    background:#f8fbfe;border-radius:1.35rem 1.35rem 0 0;
+    animation:none;transform:none;box-sizing:border-box;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-mais-itens{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-mais-itens button{
+    min-height:5rem;background:#fff;color:#153f5f;
+  }
+  .zelo-portal-direcao .zelo-hero-portal,.zelo-portal-professor .zelo-hero-portal{
+    min-height:240px;padding:1.2rem;overflow:hidden;
+  }
+  .zelo-portal-direcao .zelo-hero-conteudo,
+  .zelo-portal-professor .zelo-hero-conteudo{
+    width:100%;max-width:100%;gap:.55rem;
+  }
+  .zelo-portal-direcao .zelo-hero-portal h1,
+  .zelo-portal-professor .zelo-hero-portal h1{
+    font-size:clamp(1.5rem,5.4vw,2.05rem);
+    max-width:24ch;
+  }
+  .zelo-portal-direcao .zelo-hero-portal:before,
+  .zelo-portal-professor .zelo-hero-portal:before{
+    background:linear-gradient(90deg,#0b2b48f5 0%,#0b2b48e9 56%,#113a58a1 100%);
+  }
+  .zelo-portal-direcao .zelo-hero-fotografia,
+  .zelo-portal-professor .zelo-hero-fotografia{
+    inset:0 0 0 37%;background-position:center;
+  }
+  .zelo-portal-direcao .portal-acesso,
+  .zelo-portal-professor .portal-acesso{max-width:100%}
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-metricas{
+    grid-template-columns:repeat(3,minmax(0,1fr));gap:.45rem;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-metrica{
+    padding:.75rem .55rem;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-metrica span{
+    font-size:.67rem;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-contexto-turma.portal-turma-barra{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-cartao{
+    padding:1rem;
+  }
+}
+@media(max-width:480px){
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .portal-acoes-rapidas{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .zelo-portal-direcao .zelo-hero-lockup,
+  .zelo-portal-professor .zelo-hero-lockup{gap:.35rem}
+  .zelo-portal-direcao .zelo-hero-lockup .zelo-marca-compacta>img,
+  .zelo-portal-professor .zelo-hero-lockup .zelo-marca-compacta>img{
+    width:2.65rem;height:2.65rem;
+  }
+  .zelo-portal-direcao .zelo-hero-lockup .zelo-marca-compacta>span,
+  .zelo-portal-professor .zelo-hero-lockup .zelo-marca-compacta>span{
+    font-size:1.35rem;
+  }
+  .zelo-portal-direcao .zelo-hero-lockup>span,
+  .zelo-portal-professor .zelo-hero-lockup>span{
+    font-size:.58rem;letter-spacing:0;
+  }
+  .zelo-portal-direcao .zelo-hero-portal .portal-acesso button,
+  .zelo-portal-professor .zelo-hero-portal .portal-acesso button,
+  .zelo-portal-direcao .zelo-hero-portal .portal-acesso>span,
+  .zelo-portal-professor .zelo-hero-portal .portal-acesso>span{
+    min-height:2.5rem;padding:.42rem .65rem;font-size:.72rem;
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-mais-itens{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-mais-itens button{
+    min-height:3.65rem;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-nav-item,
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-mais-fundo,
+  .zelo-layout:is(.zelo-direcao,.zelo-professor) .zelo-mais-folha{
+    animation:none;transition:none;
+  }
+}

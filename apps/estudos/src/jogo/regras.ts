@@ -8,7 +8,7 @@ export type Pergunta = {
 }
 export type Missao = {id:MissaoId;nome:string;descricao:string;profissao:string;cor:string;perguntas:readonly Pergunta[]}
 export const missoes: readonly Missao[] = [
-  {id:'tecnologia',nome:'Missão Tech',descricao:'Encontre falhas e proteja dados.',profissao:'Tecnologia',cor:'azul',perguntas:[
+  {id:'tecnologia',nome:'Segurança digital',descricao:'Reconheça golpes e proteja informações.',profissao:'Tecnologia',cor:'azul',perguntas:[
     {situacao:'Você trabalha com segurança digital.',desafio:'Chegou um e-mail pedindo sua senha para liberar a conta. O que fazer?',
       opcoes:['Responder com a senha','Abrir o link para conferir','Acessar o site oficial por conta própria','Encaminhar para todos'],
       correta:2,explicacao:'Links em mensagens suspeitas podem ser falsos. Entre diretamente no site oficial e use canais de suporte confiáveis.'},
@@ -19,7 +19,7 @@ export const missoes: readonly Missao[] = [
       opcoes:['Todos os alunos do município','Apenas suas turmas autorizadas','Todos os administradores','Qualquer usuário com o link'],
       correta:1,explicacao:'O princípio do menor privilégio limita cada pessoa aos dados necessários para seu trabalho.'}
   ]},
-  {id:'negocios',nome:'Missão Negócios',descricao:'Tome decisões e avalie resultados.',profissao:'Gestão e empreendedorismo',cor:'amarelo',perguntas:[
+  {id:'negocios',nome:'Decisões de negócio',descricao:'Use números para resolver situações do dia a dia.',profissao:'Gestão e empreendedorismo',cor:'amarelo',perguntas:[
     {situacao:'Você vende camisetas feitas por encomenda.',desafio:'Custo por peça: R$ 40. Venda: R$ 65. Qual margem bruta em reais por peça?',
       opcoes:['R$ 15','R$ 25','R$ 40','R$ 105'],correta:1,
       explicacao:'A diferença entre o preço de venda e o custo direto é R$ 65 − R$ 40 = R$ 25, antes das demais despesas.'},
@@ -30,7 +30,7 @@ export const missoes: readonly Missao[] = [
       opcoes:['Comprar mil unidades','Validar com um grupo pequeno e medir retorno','Investir tudo em anúncios','Copiar a concorrência sem dados'],
       correta:1,explicacao:'Um piloto pequeno permite aprender com custos e riscos mais baixos antes de escalar.'}
   ]},
-  {id:'jornalismo',nome:'Missão Investigação',descricao:'Cheque pistas e encontre o contexto.',profissao:'Comunicação e pesquisa',cor:'verde',perguntas:[
+  {id:'jornalismo',nome:'Checagem de fatos',descricao:'Aprenda a conferir informações e fontes.',profissao:'Comunicação e pesquisa',cor:'verde',perguntas:[
     {situacao:'Uma mensagem viral traz um dado surpreendente.',desafio:'Qual é a primeira atitude mais confiável?',
       opcoes:['Repassar rápido','Verificar fonte, data e contexto','Confiar em muitas curtidas','Ignorar toda notícia'],
       correta:1,explicacao:'A credibilidade depende da fonte, evidências, contexto e atualização, não da quantidade de compartilhamentos.'},
