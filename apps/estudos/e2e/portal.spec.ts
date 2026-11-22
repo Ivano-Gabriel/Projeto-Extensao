@@ -161,7 +161,7 @@ test('mobile 390px sem rolagem horizontal, quatro destinos visíveis e Mais',asy
   await expect(page.getByRole('button',{name:'Mais áreas'})).toHaveAttribute('aria-expanded','false')
 })
 
-test('menu do livro abre áreas com páginas articuladas e fecha novamente',async({page})=>{
+test('hub com livro simples abre as áreas e fecha novamente',async({page})=>{
   await portalSimulado(page,'ALUNO')
   await page.setViewportSize({width:390,height:844})
   await page.goto('/')
@@ -169,7 +169,8 @@ test('menu do livro abre áreas com páginas articuladas e fecha novamente',asyn
   await expect(livro).toBeVisible()
   await livro.click()
   await expect(page.getByRole('navigation',{name:'Todas as áreas de estudos'})).toBeVisible()
-  await expect(page.locator('.zelo-livro-pagina')).toHaveCount(3)
+  await expect(page.locator('.zelo-hub-v4-emblema')).toBeVisible()
+  await expect(page.locator('.zelo-livro-pagina')).toHaveCount(0)
   await expect(page.getByRole('button',{name:'Fechar menu de áreas'})).toHaveAttribute('aria-expanded','true')
   await page.getByRole('button',{name:'Fechar menu de áreas'}).click()
   await expect(page.getByRole('navigation',{name:'Todas as áreas de estudos'})).toHaveCount(0)
@@ -299,3 +300,50 @@ test('Minha turma aparece primeiro e usa publicações do servidor, sem conteúd
   await expect(vitrine).toContainText('Professora QA')
   await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth)).toBe(0)
 })
+
+
+for (const perfilNav of ['ALUNO','PROFESSOR','DIRECAO'] as const){
+  test(perfilNav+' usa cinco posições no celular e sidebar no desktop em larguras de transição',async({page})=>{
+    await portalSimulado(page,perfilNav)
+    for(const width of [320,390,840,899,900,1024]){
+      await page.setViewportSize({width,height:820})
+      await page.goto('/')
+      if(perfilNav==='ALUNO'){
+        if(width<900)await page.getByRole('button',{name:'Minha turma'}).click()
+        else await page.getByRole('navigation',{name:'Navegação da ferramenta de estudos'})
+          .getByRole('button',{name:'Minha turma'}).click()
+      }
+      const painel=page.locator(perfilNav==='ALUNO'?'.zelo-aluno':perfilNav==='PROFESSOR'?'.zelo-professor':'.zelo-direcao')
+      const nav=painel.locator('.zelo-nav-v4')
+      await expect(nav).toBeVisible()
+      if(width<900){
+        await expect(nav).toHaveCSS('position','fixed')
+        const positions=await nav.locator('.zelo-nav-principal, .zelo-nav-mais')
+          .evaluateAll(elements=>elements.filter(el=>getComputedStyle(el).display!=='none')
+            .map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom}}))
+        expect(positions).toHaveLength(5)
+        for(let i=0;i<positions.length;i++){
+          expect(positions[i].left).toBeGreaterThanOrEqual(-1)
+          expect(positions[i].right).toBeLessThanOrEqual(width+1)
+          expect(positions[i].bottom).toBeLessThanOrEqual(821)
+          if(i>0)expect(positions[i].left).toBeGreaterThanOrEqual(positions[i-1].right-2)
+        }
+        await painel.getByRole('button',{name:'Mais áreas'}).click()
+        const modal=page.getByRole('dialog',{name:'Mais áreas do portal'})
+        await expect(modal).toBeVisible()
+        await expect.poll(()=>page.evaluate(()=>document.body.style.overflow)).toBe('hidden')
+        const bounds=await modal.boundingBox()
+        expect(bounds).not.toBeNull()
+        expect(bounds!.y).toBeGreaterThanOrEqual(-1)
+        expect(bounds!.y+bounds!.height).toBeLessThanOrEqual(821)
+        await page.keyboard.press('Escape')
+        await expect(modal).toHaveCount(0)
+        await expect.poll(()=>page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden')
+      }else{
+        await expect(nav).toHaveCSS('position','sticky')
+        await expect(nav.getByRole('button',{name:'Mais áreas'})).toBeHidden()
+        await expect(nav.getByRole('tab',{name:perfilNav==='ALUNO'?'Avisos':perfilNav==='PROFESSOR'?'Mural':'Histórico'})).toBeVisible()
+      }
+    }
+  })
+}

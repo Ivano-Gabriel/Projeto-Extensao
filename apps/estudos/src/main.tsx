@@ -6,6 +6,7 @@ import './escola/escola.css'
 import './prime-v2.css'
 import './zelo-redesign-v2.css'
 import './ux-ajustes-finais.css'
+import './portal-nav-v4.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

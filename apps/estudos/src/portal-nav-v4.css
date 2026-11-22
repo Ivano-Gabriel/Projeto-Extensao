@@ -1,0 +1,209 @@
+/* zELO+ navegação V4. Escopo restrito aos menus — login e Laboratório preservados. */
+.zelo-nav-v4{box-sizing:border-box;min-width:0}
+.zelo-nav-v4 button{touch-action:manipulation}
+.zelo-nav-v4 .zelo-nav-texto-curto{display:none}
+.zelo-nav-v4 .zelo-nav-texto-completo{display:block}
+.zelo-nav-v4 .zelo-nav-item:focus-visible,
+.zelo-nav-v4 .zelo-nav-mais:focus-visible,
+.zelo-mais-v4 button:focus-visible{
+  outline:3px solid #f5cb66;outline-offset:2px
+}
+@media(max-width:899px){
+  .zelo-portal.portal-pagina .zelo-layout.portal-paineis.portal-mobile{
+    display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+    gap:.85rem!important;padding-bottom:calc(6.5rem + env(safe-area-inset-bottom))!important;
+    min-width:0;max-width:100%;align-content:start
+  }
+  .zelo-portal .zelo-layout.portal-paineis.portal-mobile>.zelo-area-conteudo{
+    grid-column:1!important;grid-row:auto!important;min-width:0;max-width:100%
+  }
+  .zelo-portal .zelo-layout.portal-paineis.portal-mobile>.zelo-nav-direta.zelo-nav-v4{
+    display:block!important;position:fixed!important;top:auto!important;
+    bottom:0!important;left:0!important;right:0!important;
+    z-index:1200!important;box-sizing:border-box;width:100%;max-width:100%;
+    min-width:0;min-height:0;padding:.35rem .35rem calc(.32rem + env(safe-area-inset-bottom))!important;
+    margin:0;overflow:visible;border-radius:0;border:0;
+    border-top:1px solid #496c88;background:#102b47;
+    box-shadow:0 -9px 32px #071a3260
+  }
+  .zelo-nav-v4 .zelo-nav-marca{display:none!important}
+  .zelo-portal .zelo-nav-v4 .zelo-nav-todas{
+    display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    align-items:stretch;gap:.16rem;width:100%;min-width:0;
+    padding:0;margin:0;overflow:visible!important
+  }
+  .zelo-portal .zelo-nav-v4 .zelo-nav-item.zelo-nav-extra{
+    display:none!important
+  }
+  .zelo-portal .zelo-nav-v4 .zelo-nav-item.zelo-nav-principal,
+  .zelo-portal .zelo-nav-v4 .zelo-nav-mais{
+    display:flex!important;flex-direction:column!important;
+    justify-content:center;align-items:center;gap:.24rem;
+    box-sizing:border-box;min-width:0;width:100%;max-width:100%;
+    min-height:3.95rem;margin:0;padding:.44rem .06rem;
+    border:1px solid transparent;border-radius:.8rem;
+    background:transparent;color:#dceaf6;text-align:center;
+    box-shadow:none;transform:none;transition:background .16s ease,color .16s ease
+  }
+  .zelo-portal .zelo-nav-v4 .zelo-nav-item svg,
+  .zelo-portal .zelo-nav-v4 .zelo-nav-mais svg{
+    width:23px;height:23px;flex:0 0 23px
+  }
+  .zelo-portal .zelo-nav-v4 .zelo-nav-texto-curto,
+  .zelo-portal .zelo-nav-v4 .zelo-nav-mais>span{
+    display:block!important;min-width:0;max-width:100%;
+    color:inherit;font-size:clamp(.62rem,2.3vw,.75rem)!important;
+    font-weight:850;line-height:1.16;letter-spacing:-.016em;
+    text-align:center;white-space:normal;overflow-wrap:normal;word-break:normal
+  }
+  .zelo-portal .zelo-nav-v4 .zelo-nav-texto-completo{display:none!important}
+  .zelo-portal .zelo-nav-v4 .zelo-nav-item.ativa,
+  .zelo-portal .zelo-nav-v4 .zelo-nav-mais.ativa{
+    background:#eaf4fc!important;color:#154468!important;border-color:#bdd9ea!important
+  }
+  .zelo-portal .zelo-nav-v4 .zelo-nav-item:hover,
+  .zelo-portal .zelo-nav-v4 .zelo-nav-mais:hover{transform:none}
+}
+@media(min-width:900px){
+  .zelo-portal.portal-pagina .zelo-layout.portal-paineis.portal-mobile{
+    display:grid!important;grid-template-columns:minmax(195px,228px) minmax(0,1fr)!important;
+    gap:1.1rem!important;align-items:start!important;padding-bottom:0!important;
+    min-width:0;max-width:100%
+  }
+  .zelo-portal .zelo-layout.portal-paineis.portal-mobile>.zelo-nav-direta.zelo-nav-v4{
+    display:block!important;position:sticky!important;
+    top:1rem!important;left:auto!important;right:auto!important;bottom:auto!important;
+    grid-column:1!important;grid-row:1!important;
+    box-sizing:border-box;align-self:start;
+    width:100%!important;max-width:100%;min-width:0;
+    padding:.8rem!important;border:1px solid #2e5472;border-radius:1.15rem;
+    background:linear-gradient(150deg,#153c60,#102a43);
+    box-shadow:0 10px 26px #18395421;overflow:visible
+  }
+  .zelo-portal .zelo-layout.portal-paineis.portal-mobile>.zelo-area-conteudo{
+    grid-column:2!important;grid-row:1!important;min-width:0
+  }
+  .zelo-portal .zelo-nav-v4 .zelo-nav-marca{
+    display:grid!important;gap:.3rem;padding:.35rem .5rem .8rem;
+    margin-bottom:.5rem;color:#fff;border-bottom:1px solid #ffffff2f
+  }
+  .zelo-portal .zelo-nav-v4 .zelo-nav-todas{
+    display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+    gap:.25rem;overflow:visible!important;min-width:0
+  }
+  .zelo-portal .zelo-nav-v4 .zelo-nav-item.zelo-nav-principal,
+  .zelo-portal .zelo-nav-v4 .zelo-nav-item.zelo-nav-extra{
+    display:flex!important;flex-direction:row!important;
+    align-items:center!important;justify-content:flex-start!important;gap:.7rem;
+    box-sizing:border-box;width:100%;max-width:100%;min-width:0;
+    min-height:2.95rem;padding:.62rem .7rem;border:1px solid transparent;
+    border-radius:.75rem;background:transparent;color:#e4f0f9;text-align:left;
+    transform:none
+  }
+  .zelo-portal .zelo-nav-v4 .zelo-nav-item.ativa{
+    background:#f0f7fc!important;color:#143d5d!important;
+    border-color:#b8d5e5!important
+  }
+  .zelo-portal .zelo-nav-v4 .zelo-nav-item svg{
+    width:21px;height:21px;flex:none
+  }
+  .zelo-portal .zelo-nav-v4 .zelo-nav-texto-curto{display:none!important}
+  .zelo-portal .zelo-nav-v4 .zelo-nav-texto-completo{
+    display:block!important;min-width:0;color:inherit;font-size:.85rem;
+    font-weight:850;line-height:1.24;text-align:left;white-space:normal;overflow-wrap:break-word
+  }
+  .zelo-portal .zelo-nav-v4 .zelo-nav-mais{display:none!important}
+}
+.zelo-mais-fundo.zelo-mais-v4{
+  display:flex!important;position:fixed!important;inset:0!important;z-index:9999!important;
+  align-items:flex-end;justify-content:center;
+  box-sizing:border-box;min-width:0;width:100%;
+  background:#071e33b8;overflow-y:auto;overscroll-behavior:contain;
+  animation:zeloV4Fundo .17s ease-out both
+}
+.zelo-mais-v4>.zelo-mais-folha{
+  position:relative;display:grid;align-content:start;gap:1rem;
+  box-sizing:border-box;width:min(100%,560px);max-width:100%;
+  max-height:calc(100dvh - 1.25rem);padding:1.15rem 1rem calc(1.3rem + env(safe-area-inset-bottom));
+  overflow-y:auto;overscroll-behavior:contain;background:#f5f9fc;color:#173c5a;
+  border:1px solid #d2e2eb;border-bottom:0;border-radius:1.25rem 1.25rem 0 0;
+  box-shadow:0 -18px 50px #061d36a1;
+  animation:zeloV4Subir .23s cubic-bezier(.2,.85,.2,1) both
+}
+.zelo-mais-v4 .zelo-mais-titulo{
+  display:flex;align-items:center;justify-content:space-between;gap:.8rem;
+  margin:0;padding:0 0 .3rem
+}
+.zelo-mais-v4 .zelo-mais-titulo>div{display:grid;gap:.16rem}
+.zelo-mais-v4 .zelo-mais-titulo span{
+  color:#476e86;font-size:.7rem;letter-spacing:.09em;font-weight:850
+}
+.zelo-mais-v4 .zelo-mais-titulo strong{color:#153c5a;font-size:1.4rem}
+.zelo-mais-v4 .zelo-mais-fechar{
+  display:grid;place-items:center;flex:0 0 2.7rem;
+  width:2.7rem;height:2.7rem;padding:0;border:1px solid #d4e3ec;
+  border-radius:.75rem;background:#fff;color:#16466a
+}
+.zelo-mais-v4 .zelo-mais-itens{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem
+}
+.zelo-mais-v4 .zelo-mais-itens button{
+  display:grid;justify-items:start;align-content:center;gap:.5rem;
+  min-width:0;width:100%;min-height:5.4rem;padding:.85rem .95rem;
+  text-align:left;background:#fff;color:#194867;border:1px solid #d1e0e9;
+  border-radius:1rem;box-shadow:0 4px 13px #173a5810
+}
+.zelo-mais-v4 .zelo-mais-itens button svg{width:23px;height:23px}
+.zelo-mais-v4 .zelo-mais-itens button strong{
+  font-size:.86rem;line-height:1.3;overflow-wrap:break-word
+}
+@keyframes zeloV4Fundo{from{opacity:0}to{opacity:1}}
+@keyframes zeloV4Subir{from{opacity:.55;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+/* Hub: livro vetorial discreto e um único clique. Sem 3D, animação de folhas ou letras miúdas. */
+@media(max-width:899px){
+  .prime-bottom-nav>button.prime-menu-livro.zelo-hub-v4{
+    display:grid!important;grid-template-columns:minmax(0,1fr);
+    place-items:center;align-content:center;gap:.13rem;
+    min-width:0;width:100%;min-height:4.1rem;
+    padding:.13rem .05rem .25rem;
+    color:#f1f7fc;background:transparent;border:0;border-radius:.85rem;
+    overflow:visible;transform:none
+  }
+  .prime-bottom-nav .zelo-hub-v4-emblema{
+    position:relative;display:grid;place-items:center;
+    box-sizing:border-box;width:3.15rem;height:3.15rem;
+    border:1.5px solid #e5bf6a;border-radius:1.08rem;
+    background:linear-gradient(150deg,#285f85,#143754);
+    color:#ffe29b;box-shadow:0 4px 13px #051a2d7b,inset 0 1px 0 #ffffff3b;
+    transform:translateY(-.18rem);transition:transform .22s ease,background .22s ease,border-color .22s ease
+  }
+  .prime-bottom-nav .zelo-hub-v4-emblema>svg{width:29px;height:29px;stroke-width:1.9}
+  .prime-bottom-nav .zelo-hub-v4-nome{
+    display:block;min-width:0;max-width:100%;font-size:.66rem;
+    font-weight:850;line-height:1.1;color:#dbeaf6;text-align:center;white-space:normal
+  }
+  .prime-bottom-nav .prime-menu-livro.zelo-hub-v4.aberto .zelo-hub-v4-emblema{
+    background:linear-gradient(150deg,#f9db91,#edc266);border-color:#fff3cd;
+    color:#173e5b;transform:translateY(-.24rem) scale(1.035)
+  }
+  .prime-bottom-nav .prime-menu-livro.zelo-hub-v4.aberto .zelo-hub-v4-nome{color:#ffe6ad}
+  .prime-bottom-nav .prime-menu-livro.zelo-hub-v4:focus-visible{
+    outline:3px solid #ffe2a0;outline-offset:-2px
+  }
+  .prime-mobile-nav .prime-menu-painel{
+    box-sizing:border-box;left:max(.55rem,env(safe-area-inset-left));
+    right:max(.55rem,env(safe-area-inset-right));
+    bottom:calc(5.4rem + env(safe-area-inset-bottom));
+    width:auto;max-width:520px;max-height:min(70dvh,560px);
+    margin:0 auto;overflow-y:auto;overflow-x:hidden
+  }
+  .prime-bottom-nav{grid-template-columns:repeat(5,minmax(0,1fr));max-width:100%}
+  .prime-bottom-nav>button{min-width:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .zelo-nav-v4 .zelo-nav-item,.zelo-nav-v4 .zelo-nav-mais,
+  .prime-bottom-nav .zelo-hub-v4-emblema,
+  .zelo-mais-v4,.zelo-mais-v4>.zelo-mais-folha{
+    animation:none!important;transition:none!important;transform:none!important
+  }
+}

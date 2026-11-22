@@ -28,13 +28,12 @@ test('redesign de fotografias inclui home, biblioteca, estudos e professor',()=>
   assert.match(fonte('portal/Portal.tsx'),/zelo-hero-fotografia/)
 })
 
-test('o livro central virou capa e folhas articuladas ativadas pelo clique',()=>{
-  const app=fonte('App.tsx'),css=fonte('zelo-redesign-v2.css')
-  assert.match(app,/zelo-livro-esquerda/)
-  assert.match(app,/zelo-livro-direita/)
-  assert.match(app,/zelo-livro-pagina-3/)
-  assert.match(css,/@keyframes zeloVirarPagina/)
-  assert.match(css,/\.prime-menu-livro\.aberto \.zelo-livro-direita/)
+test('o livro central da navegação agora é simples, sem folha 3D que se sobrepõe',()=>{
+  const app=fonte('App.tsx'),css=fonte('portal-nav-v4.css')
+  assert.match(app,/zelo-hub-v4-emblema/)
+  assert.match(app,/zelo-hub-v4-nome/)
+  assert.doesNotMatch(app,/zelo-livro-pagina/)
+  assert.match(css,/\.prime-menu-livro\.zelo-hub-v4/)
   assert.match(css,/prefers-reduced-motion:reduce/)
 })
 
@@ -72,12 +71,13 @@ test('regressão visual V3: login mobile mantém fotografia, acabamento azul e c
   assert.match(css,/\.entrada-login \.prime-login \.portal-form \.botao-principal\{[\s\S]*?background:/)
   assert.match(css,/\.entrada-login \.prime-login-cena \.prime-login-arte\{[\s\S]*?transform:/)
 })
-test('regressão visual V3: livro abre no sentido direito e o menu permanece centralizado',()=>{
-  const css=fonte('zelo-redesign-v2.css')
-  assert.match(css,/@keyframes zeloPaginaParaDireita/)
-  assert.match(css,/\.prime-menu-livro\.aberto \.zelo-livro-direita\{transform:rotateY\(158deg\)/)
-  assert.match(css,/\.zelo-livro-cenario\{[\s\S]*?perspective:/)
+test('regressão visual V4: hub abre áreas e menu mantém proporção',()=>{
+  const css=fonte('portal-nav-v4.css')
+  assert.match(css,/zelo-hub-v4-emblema/)
+  assert.match(css,/\.prime-mobile-nav \.prime-menu-painel/)
+  assert.match(css,/repeat\(5,minmax\(0,1fr\)\)/)
 })
+
 test('regressão visual V3: revisão, progresso e desafios têm cabeçalhos claros e hierarquia',()=>{
   const css=fonte('zelo-redesign-v2.css')
   const app=fonte('App.tsx')

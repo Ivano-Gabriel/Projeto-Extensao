@@ -10,13 +10,14 @@ test('livro do login segue visivel no mobile e nao reinicia o folhear',()=>{
   assert.match(s,/animation-fill-mode/)
   assert.match(s,/prefers-reduced-motion:reduce/)
 })
-test('o menu do livro troca o conteudo das paginas mantendo as folhas abertas',()=>{
-  const s=fonte('App.tsx'),css=fonte('ux-ajustes-finais.css')
-  assert.match(s,/zelo-livro-conteudo/)
+test('o hub central abre as áreas sem animações 3D',()=>{
+  const s=fonte('App.tsx'),css=fonte('portal-nav-v4.css')
+  assert.match(s,/zelo-hub-v4-emblema/)
   assert.match(s,/Minha turma/)
-  assert.match(css,/zelo-livro-ciclo/)
-  assert.match(css,/\.prime-menu-livro\.aberto/)
+  assert.match(css,/zelo-hub-v4-emblema/)
+  assert.doesNotMatch(s,/zelo-livro-pagina/)
 })
+
 test('Minha turma e mais importante do que progresso no menu e no inicio',()=>{
   const s=fonte('App.tsx')
   const menu=s.slice(s.indexOf('const menu = ['),s.indexOf('] as const',s.indexOf('const menu = [')))
@@ -54,14 +55,14 @@ test('feed real tem autor, data, publico e nao depende de scroll horizontal',()=
 })
 
 
-test('o livro central troca o texto após abrir sem reanimar as páginas',()=>{
-  const s=fonte('App.tsx'),css=fonte('ux-ajustes-finais.css')
-  assert.match(s,/capitulosHub\[paginaHub\]/)
-  assert.match(s,/setPaginaHub\(/)
-  assert.match(s,/zelo-livro-overlay/)
-  assert.match(css,/\.zelo-livro-overlay/)
-  assert.match(css,/\.prime-menu-livro\.aberto \.zelo-livro-pagina/)
+test('hub central mantém as áreas acessíveis sem efeitos defeituosos',()=>{
+  const s=fonte('App.tsx'),css=fonte('portal-nav-v4.css')
+  assert.match(s,/prime-menu-livro zelo-hub-v4/)
+  assert.match(s,/aria-expanded=\{menuAberto\}/)
+  assert.doesNotMatch(s,/setPaginaHub\(|zelo-livro-overlay/)
+  assert.match(css,/\.prime-menu-livro\.zelo-hub-v4/)
 })
+
 test('progresso separa conquistas escolares das marcações pessoais',()=>{
   const s=fonte('App.tsx')
   assert.match(s,/apiEscolar\.meuDesempenho\(\)/)

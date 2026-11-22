@@ -28,12 +28,6 @@ import { adicionarTarefa, alternarTarefa, agendaDoDia, carregarPlano, reagendarT
 
 type Tela = 'inicio' | 'materiais' | 'revisao' | 'escola' | 'progresso' | 'plano' | 'jogo' | 'portal'
 type FiltroMateria = 'Todas' | Materia
-const capitulosHub=[
-  {esquerda:'Minha',direita:'turma'},
-  {esquerda:'Bons',direita:'planos'},
-  {esquerda:'Novas',direita:'ideias'},
-  {esquerda:'Hora',direita:'de ler'},
-] as const
 const menu = [
   { id: 'inicio', nome: 'Início', Icone: Home },
   { id: 'materiais', nome: 'Materiais', Icone: BookOpen },
@@ -466,18 +460,12 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
   const [aviso, setAviso] = useState('')
   const [saindo,setSaindo] = useState(false)
   const [menuAberto,setMenuAberto] = useState(false)
-  const [paginaHub,setPaginaHub]=useState(0)
   const [configAberta,setConfigAberta] = useState(false)
   const materialAtual = materialAberto ? materiais.find((item) => item.id === materialAberto) : undefined
 
   useEffect(() => { salvarEstado(armazenamentoDaConta(armazenamento(),usuario.id), estado) }, [estado])
   useEffect(() => { salvarEscola(armazenamentoDaConta(armazenamento(),usuario.id), escola) }, [escola])
   useEffect(() => { salvarPlano(armazenamentoDaConta(armazenamento(),usuario.id), plano) }, [plano])
-  useEffect(()=>{
-    if(!menuAberto){setPaginaHub(0);return}
-    const tempo=window.setInterval(()=>setPaginaHub(v=>(v+1)%capitulosHub.length),3300)
-    return()=>window.clearInterval(tempo)
-  },[menuAberto])
   useEffect(() => {
     document.documentElement.dataset.tema = escola.tema
     return () => { delete document.documentElement.dataset.tema }
@@ -677,21 +665,13 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
             onClick={()=>navegar('inicio')}><Home size={23}/><span>Início</span></button>
           <button type="button" className={tela==='materiais'?'ativo':''} aria-current={tela==='materiais'?'page':undefined}
             onClick={()=>navegar('materiais')}><BookOpen size={23}/><span>Materiais</span></button>
-          <button type="button" className={'prime-menu-livro '+(menuAberto?'aberto':'')}
+          <button type="button" className={'prime-menu-livro zelo-hub-v4 '+(menuAberto?'aberto':'')}
             aria-label={menuAberto?'Fechar menu de áreas':'Abrir menu de áreas'} aria-expanded={menuAberto}
             aria-controls="prime-menu-areas" onClick={()=>setMenuAberto(x=>!x)}>
-            <span className="zelo-livro-cenario" aria-hidden="true">
-              <span className="zelo-livro-esquerda"><span/></span>
-              <span className="zelo-livro-pagina zelo-livro-pagina-1"/>
-              <span className="zelo-livro-pagina zelo-livro-pagina-2"/>
-              <span className="zelo-livro-pagina zelo-livro-pagina-3"/>
-              <span className="zelo-livro-direita"><BookOpenCheck size={20}/></span>
-              <span className="zelo-livro-espinha"/>
-              {menuAberto&&<span className="zelo-livro-overlay" key={paginaHub}>
-                <span className="zelo-livro-conteudo">{capitulosHub[paginaHub].esquerda}</span>
-                <span className="zelo-livro-conteudo">{capitulosHub[paginaHub].direita}</span>
-              </span>}
+            <span className="zelo-hub-v4-emblema" aria-hidden="true">
+              <BookOpenCheck size={29}/>
             </span>
+            <span className="zelo-hub-v4-nome">{menuAberto?'Fechar':'Áreas'}</span>
           </button>
           <button type="button" className={tela==='revisao'?'ativo':''} aria-current={tela==='revisao'?'page':undefined}
             onClick={()=>navegar('revisao')}><Brain size={23}/><span>Revisão</span></button>
