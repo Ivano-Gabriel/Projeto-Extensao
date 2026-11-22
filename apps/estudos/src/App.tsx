@@ -651,8 +651,9 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
           </button>
           <button type="button" className={tela==='revisao'?'ativo':''} aria-current={tela==='revisao'?'page':undefined}
             onClick={()=>navegar('revisao')}><Brain size={23}/><span>Revisão</span></button>
-          <button type="button" className={tela==='portal'?'ativo':''} aria-current={tela==='portal'?'page':undefined}
-            onClick={()=>navegar('portal')}><School size={23}/><span>Minha turma</span></button>
+          <button type="button" onClick={()=>navegar('portal')}>
+              <School size={23}/><span>Minha turma</span>
+            </button>
         </nav>
       </div>}
       {aviso && <div className="aviso-flutuante" role="status">
