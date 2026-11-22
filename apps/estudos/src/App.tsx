@@ -19,7 +19,7 @@ import Portal from './portal/Portal'
 import PortalLogin from './portal/PortalLogin'
 import ResumoTurmaReal from './portal/ResumoTurmaReal'
 import ZeloMarca from './marca/ZeloMarca'
-import { apiEscolar, type UsuarioEscolar } from './portal/api'
+import { apiEscolar, type UsuarioEscolar, type MeuDesempenho } from './portal/api'
 import { paginaDoUsuario, erroNaVerificacaoDeSessao } from './portal/sessao'
 import { armazenamentoDaConta } from './portal/armazenamento'
 import DesafioDia from './desafio/DesafioDia'
@@ -28,6 +28,12 @@ import { adicionarTarefa, alternarTarefa, agendaDoDia, carregarPlano, reagendarT
 
 type Tela = 'inicio' | 'materiais' | 'revisao' | 'escola' | 'progresso' | 'plano' | 'jogo' | 'portal'
 type FiltroMateria = 'Todas' | Materia
+const capitulosHub=[
+  {esquerda:'Minha',direita:'turma'},
+  {esquerda:'Bons',direita:'planos'},
+  {esquerda:'Novas',direita:'ideias'},
+  {esquerda:'Hora',direita:'de ler'},
+] as const
 const menu = [
   { id: 'inicio', nome: 'Início', Icone: Home },
   { id: 'materiais', nome: 'Materiais', Icone: BookOpen },
@@ -352,15 +358,25 @@ function QuizPagina({ estado, indice, setIndice, responder, irMateriais, reinici
   )
 }
 
-function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, limparProgresso }: {
+function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, irTurma, limparProgresso }: {
   pendentesPlano: number
   estado: EstadoEstudos
   irMateriais: () => void
   irRevisao: () => void
   limparProgresso: () => void
   irPlano: () => void
+  irTurma: () => void
 }) {
   const [confirmarLimpeza, setConfirmarLimpeza] = useState(false)
+  const [escolar,setEscolar]=useState<MeuDesempenho|null>(null)
+  const [erroEscolar,setErroEscolar]=useState(false)
+  useEffect(()=>{
+    let ativo=true
+    apiEscolar.meuDesempenho().then(resultado=>{
+      if(ativo){setEscolar(resultado);setErroEscolar(false)}
+    }).catch(()=>{if(ativo)setErroEscolar(true)})
+    return()=>{ativo=false}
+  },[])
 
   const resumo = resumoEstudos(materiais, estado.revisados, estado.respostas)
   const quiz = resumirRespostas(questoes, estado.respostas)
@@ -368,6 +384,23 @@ function Progresso({ estado, pendentesPlano, irMateriais, irRevisao, irPlano, li
     <div className="pagina zelo-progresso-pagina">
       <CabecalhoSecao etiqueta="NO SEU RITMO" titulo="Meu progresso"
         descricao="Veja o que você já revisou e quais assuntos ainda pode explorar" />
+      <section className="zelo-progresso-escolar" aria-labelledby="progresso-real-titulo">
+        <div><span className="zelo-kicker">DADOS DO PORTAL ESCOLAR</span>
+          <h2 id="progresso-real-titulo">O que você fez na sua turma</h2>
+          <p>São atividades que os professores publicaram e suas respostas guardadas pela escola.
+            Estes acertos não substituem notas escolares.</p></div>
+        {!escolar&&!erroEscolar&&<p role="status">Carregando suas atividades escolares…</p>}
+        {erroEscolar&&<p role="status">Não foi possível consultar o servidor agora. Seus dados escolares não foram substituídos por exemplos.</p>}
+        {escolar&&<div className="zelo-escolar-numeros">
+          <div><strong>{escolar.atividades}</strong><span>Publicadas</span></div>
+          <div><strong>{escolar.respondidas}</strong><span>Respondidas</span></div>
+          <div><strong>{escolar.acertos}</strong><span>Acertos</span></div>
+        </div>}
+        <button type="button" className="botao-principal" onClick={irTurma}>
+          Abrir atividades da escola <ArrowRight size={18}/></button>
+      </section>
+      <p className="zelo-progresso-distincao"><Info size={16}/>
+        Abaixo está seu estudo pessoal: marcações neste dispositivo, separadas do desempenho escolar.</p>
       <div className="progresso-layout">
         <section className="progresso-destaque">
           <span className="sobretitulo">MATERIAIS REVISADOS</span>
@@ -433,12 +466,18 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
   const [aviso, setAviso] = useState('')
   const [saindo,setSaindo] = useState(false)
   const [menuAberto,setMenuAberto] = useState(false)
+  const [paginaHub,setPaginaHub]=useState(0)
   const [configAberta,setConfigAberta] = useState(false)
   const materialAtual = materialAberto ? materiais.find((item) => item.id === materialAberto) : undefined
 
   useEffect(() => { salvarEstado(armazenamentoDaConta(armazenamento(),usuario.id), estado) }, [estado])
   useEffect(() => { salvarEscola(armazenamentoDaConta(armazenamento(),usuario.id), escola) }, [escola])
   useEffect(() => { salvarPlano(armazenamentoDaConta(armazenamento(),usuario.id), plano) }, [plano])
+  useEffect(()=>{
+    if(!menuAberto){setPaginaHub(0);return}
+    const tempo=window.setInterval(()=>setPaginaHub(v=>(v+1)%capitulosHub.length),3300)
+    return()=>window.clearInterval(tempo)
+  },[menuAberto])
   useEffect(() => {
     document.documentElement.dataset.tema = escola.tema
     return () => { delete document.documentElement.dataset.tema }
@@ -591,7 +630,7 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
                 remover={excluirTarefa} reagendar={reagendar} abrirMaterial={abrirPorId} voltar={() => navegar('inicio')}/>}
               {tela === 'progresso' && <Progresso estado={estado} pendentesPlano={resumoPlano(plano).pendentes}
                 irPlano={() => navegar('plano')} irMateriais={() => navegar('materiais')}
-                irRevisao={() => navegar('revisao')}
+                irRevisao={() => navegar('revisao')} irTurma={() => navegar('portal')}
                 limparProgresso={() => {setEstado({ revisados: [], respostas: [] }); setAviso('Demonstração reiniciada')}}
                 />}
             </>
@@ -641,12 +680,16 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
             aria-label={menuAberto?'Fechar menu de áreas':'Abrir menu de áreas'} aria-expanded={menuAberto}
             aria-controls="prime-menu-areas" onClick={()=>setMenuAberto(x=>!x)}>
             <span className="zelo-livro-cenario" aria-hidden="true">
-              <span className="zelo-livro-esquerda"><span className="zelo-livro-conteudo">Turma</span></span>
-              <span className="zelo-livro-pagina zelo-livro-pagina-1"><span className="zelo-livro-conteudo">Planos</span></span>
-              <span className="zelo-livro-pagina zelo-livro-pagina-2"><span className="zelo-livro-conteudo">Ideias</span></span>
-              <span className="zelo-livro-pagina zelo-livro-pagina-3"><span className="zelo-livro-conteudo">Livros</span></span>
-              <span className="zelo-livro-direita"><BookOpenCheck size={20}/><span className="zelo-livro-conteudo">zELO+</span></span>
+              <span className="zelo-livro-esquerda"><span/></span>
+              <span className="zelo-livro-pagina zelo-livro-pagina-1"/>
+              <span className="zelo-livro-pagina zelo-livro-pagina-2"/>
+              <span className="zelo-livro-pagina zelo-livro-pagina-3"/>
+              <span className="zelo-livro-direita"><BookOpenCheck size={20}/></span>
               <span className="zelo-livro-espinha"/>
+              {menuAberto&&<span className="zelo-livro-overlay" key={paginaHub}>
+                <span className="zelo-livro-conteudo">{capitulosHub[paginaHub].esquerda}</span>
+                <span className="zelo-livro-conteudo">{capitulosHub[paginaHub].direita}</span>
+              </span>}
             </span>
           </button>
           <button type="button" className={tela==='revisao'?'ativo':''} aria-current={tela==='revisao'?'page':undefined}
