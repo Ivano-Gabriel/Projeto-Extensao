@@ -1,0 +1,79 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {readFileSync} from 'node:fs'
+const fonte=path=>readFileSync(new URL('../src/'+path,import.meta.url),'utf8')
+test('livro do login segue visivel no mobile e nao reinicia o folhear',()=>{
+  const s=fonte('ux-ajustes-finais.css')
+  assert.match(s,/\.entrada-login \.prime-login-cena \.prime-login-arte\s*\{/)
+  assert.match(s,/display:grid/)
+  assert.match(s,/primeBookHoldOne/)
+  assert.match(s,/animation-fill-mode/)
+  assert.match(s,/prefers-reduced-motion:reduce/)
+})
+test('o hub central abre as áreas sem animações 3D',()=>{
+  const s=fonte('App.tsx'),css=fonte('portal-nav-v4.css')
+  assert.match(s,/zelo-hub-v4-emblema/)
+  assert.match(s,/Minha turma/)
+  assert.match(css,/zelo-hub-v4-emblema/)
+  assert.doesNotMatch(s,/zelo-livro-pagina/)
+})
+
+test('Minha turma e mais importante do que progresso no menu e no inicio',()=>{
+  const s=fonte('App.tsx')
+  const menu=s.slice(s.indexOf('const menu = ['),s.indexOf('] as const',s.indexOf('const menu = [')))
+  assert.ok(menu.indexOf("id: 'portal'")<menu.indexOf("id: 'progresso'"))
+  assert.match(s,/ResumoTurmaReal/)
+  assert.match(fonte('portal/ResumoTurmaReal.tsx'),/prime-turma-real/)
+  assert.match(s,/irTurma=\{\(\) => navegar\('portal'\)\}/)
+  const nav=s.slice(s.indexOf('className="prime-bottom-nav"'),s.indexOf('</nav>',s.indexOf('className="prime-bottom-nav"')))
+  assert.match(nav,/navegar\('portal'\)/)
+  assert.doesNotMatch(nav,/navegar\('progresso'\)/)
+})
+test('home le informacao da API de professor e nao inventa notas',()=>{
+  const s=fonte('portal/ResumoTurmaReal.tsx')
+  assert.match(s,/apiEscolar\.turmas\(\)/)
+  assert.match(s,/apiEscolar\.atividades\(\)/)
+  assert.match(s,/apiEscolar\.avisos\(\)/)
+  assert.match(s,/pendentes/)
+  assert.match(s,/role="status"/)
+  assert.doesNotMatch(s,/fict[ií]ci[oa]|nota oficial/i)
+})
+test('laboratorio sem selo demo no nome mas ainda declara dados de exemplo',()=>{
+  const s=fonte('App.tsx')
+  assert.match(s, /id: 'escola', nome: 'Laboratório'/)
+  assert.doesNotMatch(s,/nome: 'Laboratório \(demo\)'/)
+  const escola=fonte('escola/Escola.tsx')
+  assert.match(escola,/dados de exemplo/)
+})
+test('feed real tem autor, data, publico e nao depende de scroll horizontal',()=>{
+  const s=fonte('portal/Avisos.tsx'),css=fonte('ux-ajustes-finais.css')
+  assert.match(s,/zelo-feed-identidade/)
+  assert.match(s,/a\.autorNome/)
+  assert.match(s,/a\.criadoEm/)
+  assert.match(css,/\.portal-mural/)
+  assert.match(css,/overflow-x:clip/)
+})
+
+
+test('hub central mantém as áreas acessíveis sem efeitos defeituosos',()=>{
+  const s=fonte('App.tsx'),css=fonte('portal-nav-v4.css')
+  assert.match(s,/prime-menu-livro zelo-hub-v4/)
+  assert.match(s,/aria-expanded=\{menuAberto\}/)
+  assert.doesNotMatch(s,/setPaginaHub\(|zelo-livro-overlay/)
+  assert.match(css,/\.prime-menu-livro\.zelo-hub-v4/)
+})
+
+test('progresso separa conquistas escolares das marcações pessoais',()=>{
+  const s=fonte('App.tsx')
+  assert.match(s,/apiEscolar\.meuDesempenho\(\)/)
+  assert.match(s,/zelo-progresso-escolar/)
+  assert.match(s,/irTurma=\{\(\) => navegar\('portal'\)\}/)
+  assert.match(s,/não substituem notas escolares/i)
+})
+test('plano pessoal destaca atividades reais cadastradas pelo professor',()=>{
+  const s=fonte('plano/Plano.tsx')
+  assert.match(s,/apiEscolar\.atividades\(\)/)
+  assert.match(s,/apiEscolar\.minhasRespostas\(\)/)
+  assert.match(s,/zelo-plano-escolar/)
+  assert.match(s,/irTurma/)
+})

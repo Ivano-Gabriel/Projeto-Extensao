@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Atom, BookOpenCheck, BookText, Brain, Code2, Eye, EyeOff, FlaskConical, Globe2, GraduationCap, Landmark, LockKeyhole, ShieldCheck, Sigma, Users } from 'lucide-react'
 import { apiEscolar } from './api'
@@ -9,9 +9,20 @@ import './portal-premium.css'
 
 type Props = { entrar: (pessoa: UsuarioEscolar) => void }
 type Categoria = 'aluno' | 'funcionario'
+const capitulos = [
+  {titulo:'Novas ideias',legenda:'Uma descoberta por dia.'},
+  {titulo:'Sua turma',legenda:'Aprender é compartilhar.'},
+  {titulo:'Seu caminho',legenda:'Cada passo conta.'},
+  {titulo:'Vá mais longe',legenda:'O futuro começa aqui.'},
+] as const
 
 export default function PortalLogin({entrar}:Props){
   const [categoria,setCategoria]=useState<Categoria>('aluno')
+  const [capitulo,setCapitulo]=useState(0)
+  useEffect(()=>{
+    const relogio=window.setInterval(()=>setCapitulo(atual=>(atual+1)%capitulos.length),3600)
+    return()=>window.clearInterval(relogio)
+  },[])
   const [email,setEmail]=useState('')
   const [senha,setSenha]=useState('')
   const [mostrarSenha,setMostrarSenha]=useState(false)
@@ -46,8 +57,10 @@ export default function PortalLogin({entrar}:Props){
           <div className="prime-book-cover prime-book-right">
             <span className="prime-book-caption">SEU FUTURO</span>
             <GraduationCap size={35}/>
-            <strong>Vamos além!</strong>
-            <small>Um passo por dia.</small>
+            <span className="prime-book-renovacao" key={capitulo}>
+              <strong>{capitulos[capitulo].titulo}</strong>
+              <small>{capitulos[capitulo].legenda}</small>
+            </span>
           </div>
           <div className="prime-book-page prime-book-page-four">
             <span className="prime-book-page-face prime-book-page-front">

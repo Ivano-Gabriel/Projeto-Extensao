@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, Check, CheckCircle2,
   Circle, ClipboardList, Clock3, Info, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { materiais, type Materia } from '../dados/materiais'
 import { formatarDataLocal } from '../escola/regras'
+import { apiEscolar } from '../portal/api'
 import { filtrarPlano, resumoPlano, type NovaTarefa, type TarefaPlano, type FiltroPlano } from './regras'
 import './plano.css'
 
@@ -15,6 +16,7 @@ type Props = {
   reagendar: (id: string, data: string) => void
   abrirMaterial: (id: string) => void
   voltar: () => void
+  irTurma: () => void
 }
 
 const disciplinas: Materia[]=['Matemática','Português','Física','História']
@@ -34,7 +36,21 @@ function nomeData(data: string): string {
   return new Date(a,m-1,d).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'})
 }
 
-export default function Plano({tarefas,adicionar,alternar,remover,reagendar,abrirMaterial,voltar}:Props) {
+export default function Plano({tarefas,adicionar,alternar,remover,reagendar,abrirMaterial,voltar,irTurma}:Props) {
+  const [tarefasEscola,setTarefasEscola]=useState<number|null>(null)
+  const [falhaEscola,setFalhaEscola]=useState(false)
+  useEffect(()=>{
+    let ativo=true
+    Promise.all([apiEscolar.atividades(),apiEscolar.minhasRespostas()])
+      .then(([atividades,respostas])=>{
+        if(!ativo)return
+        const ids=new Set(respostas.map(r=>r.atividadeId))
+        setTarefasEscola(atividades.filter(a=>!ids.has(a.id)).length)
+        setFalhaEscola(false)
+      })
+      .catch(()=>{if(ativo)setFalhaEscola(true)})
+    return()=>{ativo=false}
+  },[])
   const [titulo,setTitulo]=useState('')
   const [materia,setMateria]=useState<Materia>('Matemática')
   const [data,setData]=useState(()=>diaFuturo(1))
@@ -83,6 +99,17 @@ export default function Plano({tarefas,adicionar,alternar,remover,reagendar,abri
         <p>Um lembrete de cada vez. Escolha o que estudar e marque o que terminou, sem pressão.</p></div>
       <span className="plano-selo"><ClipboardList size={18}/> PLANO PESSOAL</span>
     </header>
+    <section className="zelo-plano-escolar" aria-label="Atividades escolares do professor">
+      <div><span className="sobretitulo">SUA TURMA TEM PRIORIDADE</span>
+        <h2>Atividades do professor</h2>
+        <p>Seus compromissos oficiais aparecem na Minha turma, separados das tarefas pessoais deste plano.</p></div>
+      <div className="zelo-plano-escolar-acao">
+        {tarefasEscola!==null&&<strong>{tarefasEscola} <span>{tarefasEscola===1?'pendente':'pendentes'}</span></strong>}
+        {tarefasEscola===null&&!falhaEscola&&<span role="status">Carregando atividades…</span>}
+        {falhaEscola&&<span role="status">Servidor indisponível para consulta.</span>}
+        <button type="button" onClick={irTurma}>Abrir Minha turma <ArrowRight size={17}/></button>
+      </div>
+    </section>
     <div className="demo-nota" role="note"><Info size={19}/>
       <span><strong>Seu planejamento é pessoal.</strong> Salvo só neste navegador, sem login nem envio para professores. Não equivale a tarefa oficial da escola.</span>
     </div>

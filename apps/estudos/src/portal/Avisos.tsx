@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { AlertTriangle, Bell, Megaphone, Send } from 'lucide-react'
+import { AlertTriangle, Send } from 'lucide-react'
 import type { Aviso, PublicoAviso, TurmaEscolar } from './api'
 import { apiEscolar } from './api'
 import { Aviso as MensagemStatus, falha, Vazio, type Feedback } from './ComponentesPortal'
@@ -40,9 +40,21 @@ export function Mural({avisos,usuarioId,perfil,atualizado}:{avisos:readonly Avis
       const podeEditar=perfil==='PROFESSOR'&&a.autorId===usuarioId
       const podeRemover=perfil==='DIRECAO'||podeEditar
       return <article className={a.importante?'mural-card importante':'mural-card'} key={a.id}>
-        <span className="mural-meta">{a.importante?<AlertTriangle size={16}/>:<Bell size={16}/>}
-          {a.autorPapel==='PROFESSOR'?'PROFESSOR':a.autorPapel==='DIRECAO'?'DIREÇÃO':'ESCOLA'} ·
-          {' '}{a.autorNome} · {a.turmaId?'Turma #'+a.turmaId:'Escola inteira'}</span>
+        <header className="zelo-feed-identidade">
+          <span className="zelo-feed-avatar" aria-hidden="true">{a.autorNome.trim().charAt(0).toLocaleUpperCase('pt-BR')||'E'}</span>
+          <div className="zelo-feed-autor">
+            <strong>{a.autorNome}</strong>
+            <span className="mural-meta">
+              {a.autorPapel==='PROFESSOR'?'Professor':a.autorPapel==='DIRECAO'?'Direção':'Escola'}
+              <span aria-hidden="true">·</span>
+              {a.turmaId?'Turma #'+a.turmaId:'Escola inteira'}
+            </span>
+          </div>
+          <time dateTime={a.criadoEm} className="zelo-feed-data">
+            {new Date(a.criadoEm).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}
+          </time>
+        </header>
+        {a.importante&&<span className="zelo-feed-importante"><AlertTriangle size={14}/> Comunicado importante</span>}
         {editando===a.id?<form className="portal-form" onSubmit={e=>{e.preventDefault();void editar(a.id)}}>
           <label htmlFor={`feed-titulo-${a.id}`}>Título</label>
           <input id={`feed-titulo-${a.id}`} required maxLength={120} value={titulo}
@@ -58,7 +70,6 @@ export function Mural({avisos,usuarioId,perfil,atualizado}:{avisos:readonly Avis
           </div>
         </form>:<>
           <h3>{a.titulo}</h3><p>{a.texto}</p>
-          <small>{new Date(a.criadoEm).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</small>
         </>}
         {podeRemover&&editando!==a.id&&<div className="portal-acoes-rapidas">
           {podeEditar&&<button type="button" className="botao-secundario" disabled={ocupado}

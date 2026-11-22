@@ -1,6 +1,6 @@
 import NavegacaoDireta from './NavegacaoDireta'
 import { useEffect, useState } from 'react'
-import { ArrowRight, BookOpen, CheckCircle2, ChevronDown, Flame, Search, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowRight, BookOpen, CheckCircle2, ChevronDown, Flame, Search, School, ShieldCheck, Sparkles } from 'lucide-react'
 import { apiEscolar } from './api'
 import type { AtividadeEscolar, Aviso, FrequenciaEscolar, HorarioTurma, MaterialTurma, MeuDesempenho, RespostaSalva, TurmaConfiguracao, TurmaEscolar } from './api'
 import { Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
@@ -67,7 +67,6 @@ export default function AlunoPainel(){
     finally{setEnviando(null)}
   }
   const pendentes=atividades.filter(a=>!respostas.some(r=>r.atividadeId===a.id))
-  const importante=avisos.find(a=>a.importante)
   const materiasDisponiveis=[...new Set(materiais.map(m=>m.disciplina))].sort()
   const materiaisFiltrados=materiais.filter(m=>
     (filtroDisciplina==='Todas'||m.disciplina===filtroDisciplina)&&
@@ -80,9 +79,9 @@ export default function AlunoPainel(){
     {carregando&&<p className="portal-vazio">Carregando sua escola...</p>}
     {!carregando&&aba==='inicio'&&<>
       <section className="zelo-aluno-bemvindo">
-        <div><span className="zelo-kicker">AGORA É COM VOCÊ</span>
-        <h2>Um passo por vez. Você chega lá.</h2>
-        <p>Resolva uma atividade, prepare uma prova ou encontre seus materiais.</p></div>
+        <div><span className="zelo-kicker">SUA ESCOLA, SUA TURMA</span>
+        <h2>{turmas[0]?'Tudo pronto para a '+turmas[0].codigo+'.':'Seu espaço de aprendizagem'}</h2>
+        <p>Encontre o que seus professores publicaram e continue de onde parou.</p></div>
         <div className="zelo-aluno-bemvindo-acoes">
           <button type="button" className="botao-principal" onClick={()=>setAba('atividades')}>
             <BookOpen size={18}/> Atividades
@@ -97,18 +96,39 @@ export default function AlunoPainel(){
         <Selo valor={pendentes.length} legenda="Para fazer"/>
         <Selo valor={desempenho?.acertos||0} legenda="Acertos"/>
       </div>
-      {importante&&<Cartao titulo="Aviso importante">
-        <div className="mural-card importante"><strong>{importante.titulo}</strong><p>{importante.texto}</p></div>
-        <button type="button" className="portal-link" onClick={()=>setAba('avisos')}>Ver avisos <ArrowRight size={17}/></button>
-      </Cartao>}
-      <Cartao titulo="Sua escola">
-        {turmas.length?<div className="portal-etiquetas">{turmas.map(t=><span key={t.id}>{t.codigo} · {t.nome}</span>)}</div>:
-          <Vazio texto="Ainda sem turma vinculada. Procure a direção."/>}
-        {pendentes.length>0&&<button type="button" className="botao-principal" onClick={()=>setAba('atividades')}>
-          <BookOpen size={17}/> Fazer atividade <ArrowRight size={17}/></button>}
-      </Cartao>
-      <Cartao titulo="Tire uma dúvida">
-        <p>Atividades, comunicados e professores da sua turma.</p>
+      <section className="zelo-turma-vitrine" aria-labelledby="zelo-turma-vitrine-titulo">
+        <header className="zelo-turma-vitrine-cabecalho">
+          <span className="zelo-turma-vitrine-icone"><School size={25}/></span>
+          <div><span className="zelo-kicker">LIGAÇÃO DIRETA COM A ESCOLA</span>
+            <h2 id="zelo-turma-vitrine-titulo">Sua turma em primeiro lugar</h2>
+            <p>Atividades, materiais e avisos inseridos pelos professores e pela direção.</p></div>
+        </header>
+        <div className="zelo-turma-vitrine-grade">
+          <div className="zelo-turma-vitrine-card">
+            <span className="zelo-kicker">TURMA ATUAL</span>
+            {turmas.length?<div className="portal-etiquetas">{turmas.map(t=><span key={t.id}>
+              {t.codigo} · {t.nome}</span>)}</div>:
+              <Vazio texto="Ainda sem turma vinculada. A direção precisa confirmar sua matrícula."/>}
+            <strong>{pendentes.length} {pendentes.length===1?'atividade aguardando':'atividades aguardando'}</strong>
+            <p>{materiais.length} materiais publicados por seus professores.</p>
+            <button type="button" className="botao-principal" onClick={()=>setAba('atividades')}>
+              <BookOpen size={17}/> Conferir atividades <ArrowRight size={17}/>
+            </button>
+            <button type="button" className="botao-secundario" onClick={()=>setAba('materiais')}>
+              <BookOpen size={17}/> Abrir materiais
+            </button>
+          </div>
+          <div className="zelo-turma-vitrine-card">
+            <span className="zelo-kicker">RECADOS DOS PROFESSORES</span>
+            <Mural avisos={[...avisos].sort((a,b)=>Number(b.importante)-Number(a.importante)).slice(0,2)}/>
+            <button type="button" className="botao-secundario" onClick={()=>setAba('avisos')}>
+              Ver todos os comunicados <ArrowRight size={17}/>
+            </button>
+          </div>
+        </div>
+      </section>
+      <Cartao titulo="Precisa de ajuda com uma atividade?">
+        <p>Seu assistente pode orientar o estudo. O conteúdo oficial sempre vem dos professores.</p>
         <button type="button" className="portal-link" onClick={()=>setAba('assistente')}>
           <Sparkles size={18}/> Perguntar ao assistente <ArrowRight size={18}/></button>
       </Cartao>
