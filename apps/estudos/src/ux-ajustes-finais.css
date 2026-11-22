@@ -1,0 +1,384 @@
+/* zELO+ | Correções de UX de 22/11 — camada final isolada em branch de revisão.
+   Não altera API, permissões, notas ou dados oficiais. */
+*,*::before,*::after{box-sizing:border-box}
+html,body,#root{max-width:100%;overflow-x:clip}
+:root{--zelo-ux-azul:#17496f;--zelo-ux-ouro:#f5c660;--zelo-ux-sombra:#0a263e23}
+
+/* LOGIN — arte e formulário convivem; o livro nunca desaparece no telefone. */
+.entrada-login{min-height:100svh;height:auto;overflow-x:clip;overflow-y:auto;padding:clamp(.65rem,2vh,1.2rem);place-content:center}
+.entrada-login>.portal-login.prime-login{
+  display:grid;grid-template-columns:minmax(0,.98fr) minmax(0,1.02fr);
+  width:min(100%,1120px);max-width:1120px;min-height:min(700px,calc(100svh - 2.5rem));
+  height:auto;overflow:hidden;margin-inline:auto;
+  border:1px solid #c9dbe8;border-radius:1.5rem;
+  box-shadow:0 24px 70px #1239572b;background:#fff;
+}
+.entrada-login .prime-login-cena{
+  display:grid;grid-template-rows:auto minmax(215px,1fr) auto auto;
+  align-items:center;justify-items:center;align-content:stretch;
+  min-height:0;height:auto;gap:.45rem;
+  padding:clamp(1.25rem,2.8vw,2.2rem);
+  background-color:#123655;
+  background-image:linear-gradient(145deg,#0e2f4de8 0%,#174b70b8 60%,#0c335ae0 100%),
+    url('https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1100&q=80');
+  background-position:center;background-size:cover;
+}
+.entrada-login .prime-login-cena:before{opacity:.36;pointer-events:none}
+.entrada-login .prime-login-cena>.zelo-login-cena-marca{
+  display:block;width:min(200px,52%);height:auto;max-height:68px;
+  justify-self:start;align-self:start;object-fit:contain;
+  filter:drop-shadow(0 3px 8px #06203799)}
+.entrada-login .prime-login-cena .prime-login-arte{
+  display:grid!important;place-items:center;position:relative;
+  width:min(100%,355px);height:clamp(210px,31vh,290px);
+  min-height:0;margin:0 auto;transform:none!important;
+  perspective:1300px;overflow:visible;pointer-events:none;
+}
+.entrada-login .prime-login-cena .prime-book-spread{--book-scale:1.05}
+.entrada-login .prime-login-cena>strong{
+  align-self:end;margin:.45rem 0 0;max-width:100%;
+  text-align:center;line-height:1.16;font-size:clamp(1.35rem,2.4vw,1.85rem);
+  color:#fff;text-shadow:0 3px 10px #0b2039ac}
+.entrada-login .prime-login-cena>p{
+  display:block;align-self:start;margin:0;max-width:31ch;
+  text-align:center;line-height:1.45;color:#edf5fc;font-size:clamp(.78rem,1.4vw,.92rem)}
+.entrada-login .prime-login-corpo{
+  display:grid;align-content:center;gap:clamp(.8rem,1.7vh,1.3rem);
+  min-width:0;min-height:0;padding:clamp(1.3rem,3.7vw,3rem);overflow:visible;
+}
+.entrada-login .prime-login .portal-login-cabecalho{display:grid;gap:.35rem}
+.entrada-login .prime-login .portal-login-cabecalho>.zelo-login-lockup{
+  display:block;width:min(100%,260px);height:auto;max-height:85px;object-fit:contain}
+.entrada-login .prime-login .portal-login-cabecalho>.sobretitulo{
+  display:block;color:#315d7f;font-size:.75rem;letter-spacing:.12em}
+.entrada-login .prime-login .portal-login-cabecalho h2{
+  font-size:clamp(1.65rem,3.1vw,2.45rem);line-height:1.12;
+  letter-spacing:-.045em;color:#102d47}
+.entrada-login .prime-login .portal-login-cabecalho>p{
+  display:block;font-size:.92rem;color:#536b7d;line-height:1.42}
+.entrada-login .prime-login .portal-perfis{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem;min-width:0}
+.entrada-login .prime-login .portal-perfis button{
+  min-width:0;min-height:4.25rem;gap:.32rem;
+  padding:.65rem .35rem;line-height:1.25;
+  border-radius:.85rem;white-space:normal}
+.entrada-login .prime-login .portal-perfis button strong{font-size:clamp(.78rem,1.7vw,.94rem)}
+.entrada-login .prime-login .portal-form{gap:.65rem}
+.entrada-login .prime-login .portal-form input{
+  width:100%;min-width:0;max-width:100%;min-height:3.25rem;
+  background:#f6f9fc;color:#15354f;border:1px solid #b8d0e1}
+.entrada-login .prime-login .portal-form input:focus-visible{
+  outline:3px solid #f2c76c;outline-offset:1px;border-color:#225985}
+.entrada-login .prime-login .portal-form .botao-principal{
+  min-height:3.35rem;background:#24527f;color:#fff;border-color:#24527f;
+  box-shadow:0 4px 0 #173a5b}
+.entrada-login .prime-login .portal-login-seguranca{
+  font-size:.78rem;line-height:1.4;max-width:55ch;color:#547188}
+
+/* Abre uma única vez, deixa as páginas no lugar e depois troca o texto da página direita. */
+.entrada-login .prime-book-page{
+  animation-fill-mode:both!important;
+  animation-iteration-count:1!important}
+.entrada-login .prime-book-page-one{
+  animation:primeBookHoldOne 7s cubic-bezier(.3,.1,.2,1) 1 both,
+    primeBookStableStackOne 7s steps(1,end) 1 both}
+.entrada-login .prime-book-page-two{
+  animation:primeBookHoldTwo 7s cubic-bezier(.3,.1,.2,1) 1 both,
+    primeBookStableStackTwo 7s steps(1,end) 1 both}
+.entrada-login .prime-book-page-three{
+  animation:primeBookHoldThree 7s cubic-bezier(.3,.1,.2,1) 1 both,
+    primeBookStableStackThree 7s steps(1,end) 1 both}
+.entrada-login .prime-book-page-four{
+  animation:primeBookHoldFour 7s cubic-bezier(.3,.1,.2,1) 1 both,
+    primeBookStableStackFour 7s steps(1,end) 1 both}
+@keyframes primeBookHoldOne{
+  0%,12%{transform:rotateY(-3deg)} 35%,100%{transform:rotateY(-169deg)}
+}
+@keyframes primeBookHoldTwo{
+  0%,25%{transform:rotateY(-3deg)} 50%,100%{transform:rotateY(-165deg)}
+}
+@keyframes primeBookHoldThree{
+  0%,39%{transform:rotateY(-3deg)} 63%,100%{transform:rotateY(-161deg)}
+}
+@keyframes primeBookHoldFour{
+  0%,55%{transform:rotateY(-3deg)} 78%,100%{transform:rotateY(-155deg)}
+}
+@keyframes primeBookStableStackOne{0%,22%{z-index:8}23%,100%{z-index:1}}
+@keyframes primeBookStableStackTwo{0%,38%{z-index:7}39%,100%{z-index:2}}
+@keyframes primeBookStableStackThree{0%,54%{z-index:6}55%,100%{z-index:3}}
+@keyframes primeBookStableStackFour{0%,71%{z-index:5}72%,100%{z-index:4}}
+.prime-book-renovacao{
+  display:grid;justify-items:center;gap:.22rem;max-width:92%;min-height:2.2rem;
+  animation:primeLivroTexto .55s ease both}
+.prime-book-renovacao strong{font-size:.78rem}
+.prime-book-renovacao small{font-size:.54rem}
+@keyframes primeLivroTexto{
+  from{opacity:0;transform:translateY(6px);filter:blur(2px)}
+  to{opacity:1;transform:translateY(0);filter:blur(0)}
+}
+.entrada-login .prime-login-cena .prime-book-spark{
+  text-shadow:0 0 16px #f8c955,0 0 29px #ffcc5677;
+  animation:primeBookSparkle 2.8s ease-in-out infinite}
+.entrada-login .prime-book-spread{
+  animation:primeBookFloat 6s ease-in-out infinite;filter:drop-shadow(4px 15px 18px #051d33c0)}
+
+/* Turma real primeiro, antes de progresso pessoal. */
+.prime-inicio>.prime-turma-real{
+  display:grid;gap:1rem;padding:clamp(1.15rem,2.5vw,1.8rem);
+  border-radius:1.35rem;min-width:0;
+  background:linear-gradient(135deg,#0c2945,#20577d);
+  box-shadow:0 16px 35px #13365424;color:#fff}
+.prime-turma-cabecalho{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;gap:.9rem;min-width:0}
+.prime-turma-emblema{
+  display:grid;place-items:center;width:3.4rem;height:3.4rem;
+  border:1px solid #e8ca7970;border-radius:1rem;
+  background:#ffffff17;color:#ffe1a1}
+.prime-turma-cabecalho h2{
+  margin:.2rem 0;font-size:clamp(1.55rem,3.1vw,2.2rem);
+  letter-spacing:-.04em;line-height:1.1;color:#fff}
+.prime-turma-cabecalho p{margin:0;max-width:56ch;color:#dcecf6;font-size:.85rem;line-height:1.5}
+.prime-turma-cabecalho .zelo-kicker{color:#fbd78f}
+.prime-turma-real button{cursor:pointer}
+.prime-turma-ir,.prime-turma-resumo button,.prime-turma-estado button{
+  display:inline-flex;align-items:center;justify-content:center;gap:.55rem;
+  padding:.75rem 1rem;min-height:2.9rem;border-radius:.8rem;
+  border:1px solid #f7d27c;background:#f6d47f;color:#143a55;font-size:.82rem;font-weight:900}
+.prime-turma-ir:hover,.prime-turma-resumo button:hover{background:#ffe39e}
+.prime-turma-conteudo{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+.prime-turma-resumo,.prime-turma-publicacao{
+  display:grid;align-content:start;justify-items:start;gap:.48rem;min-width:0;
+  border:1px solid #ffffff2a;background:#ffffff12;border-radius:1rem;
+  padding:clamp(.9rem,2vw,1.25rem)}
+.prime-turma-resumo>strong,.prime-turma-publicacao>strong{
+  color:#fff;font-size:clamp(1.05rem,2.2vw,1.35rem);
+  font-weight:950;line-height:1.2;overflow-wrap:anywhere}
+.prime-turma-resumo>p,.prime-turma-publicacao>p{
+  margin:0;color:#e7f2fa;font-size:.84rem;line-height:1.55;overflow-wrap:anywhere}
+.prime-turma-publicacao>small{color:#c5dae8;font-size:.72rem}
+.prime-turma-etiqueta{
+  display:inline-flex;align-items:center;gap:.45rem;
+  color:#f9d78f;font-size:.7rem;font-weight:900;line-height:1.3}
+.prime-turma-resumo button{margin-top:.3rem;background:#fff;color:#174568;border-color:#fff}
+.prime-turma-resumo button:disabled{background:#d8e4ed;color:#547286;border-color:#d8e4ed;cursor:not-allowed}
+.prime-turma-atalhos{
+  display:flex;flex-wrap:wrap;gap:.6rem;grid-column:1/-1}
+.prime-turma-atalhos span{
+  display:inline-flex;align-items:center;gap:.4rem;padding:.48rem .75rem;
+  color:#e9f3fb;font-size:.75rem;border:1px solid #ffffff27;border-radius:99px}
+.prime-turma-estado{margin:0;color:#e8f2fb;line-height:1.5}
+.prime-turma-estado p{margin:0 0 .7rem}
+
+/* Planejamento e progresso: densidade correta, números claros e leitura por etapas. */
+.plano-pagina,.zelo-progresso-pagina{min-width:0;max-width:1180px;gap:1rem}
+.plano-pagina .plano-cabecalho,.zelo-progresso-pagina>.cabecalho-secao{
+  padding:clamp(1.1rem,2.7vw,2rem);
+  border:1px solid #bfd5e5;border-radius:1.25rem;
+  background:linear-gradient(122deg,#e3f1f9,#fcfeff);color:#163c59}
+.plano-pagina .plano-cabecalho h1{
+  font-size:clamp(1.5rem,3.4vw,2.25rem);line-height:1.12}
+.plano-pagina .plano-contadores{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}
+.plano-pagina .plano-contadores>div{
+  min-width:0;background:#fff;border:1px solid #d5e4ed;border-radius:1rem;
+  padding:1rem;box-shadow:0 6px 18px #16374e0d}
+.plano-pagina .plano-contadores strong{font-size:clamp(1.7rem,4vw,2.5rem);color:#184b74}
+.plano-pagina .plano-painel{
+  min-width:0;border-radius:1.15rem;border:1px solid #d3e2eb;background:#fff;
+  box-shadow:0 7px 20px #1739530f}
+.zelo-progresso-pagina .progresso-destaque{
+  background:linear-gradient(120deg,#e1f3ff,#fafcff)}
+.zelo-progresso-pagina .progresso-numero strong{font-size:clamp(2.4rem,7vw,4.2rem)}
+.zelo-progresso-pagina .progresso-quiz,.zelo-progresso-pagina .materias-progresso{
+  background:#fff;border:1px solid #d4e3ec}
+
+/* Cabeçalho da área de estudo mais presente, sem criar uma segunda barra. */
+.cabecalho-app.prime-header{min-height:84px}
+.cabecalho-app .prime-brand .zelo-marca-compacta>img{width:3.3rem;height:3.3rem}
+.cabecalho-app .prime-brand .zelo-marca-compacta>span{font-size:clamp(1.75rem,3vw,2rem)}
+.cabecalho-app .prime-brand-legenda{font-size:.77rem;color:#52738a}
+
+/* Hub do livro: após virar, permanece aberto até o usuário fechar o menu. */
+.prime-menu-livro .zelo-livro-conteudo{
+  position:absolute;inset:auto 1px 4px;
+  display:grid;place-items:center;min-height:.7rem;
+  color:#224864;font-size:.42rem;line-height:1;
+  font-weight:950;letter-spacing:-.045em;text-align:center;
+  opacity:0;pointer-events:none}
+.prime-menu-livro.aberto .zelo-livro-conteudo{
+  opacity:1;animation:zelo-livro-ciclo 5s ease-in-out infinite}
+.prime-menu-livro.aberto .zelo-livro-direita .zelo-livro-conteudo{color:#fff}
+@keyframes zelo-livro-ciclo{
+  0%,100%{opacity:.55;filter:brightness(.9)}
+  35%,65%{opacity:1;filter:brightness(1.3)}
+}
+.prime-menu-livro.aberto .zelo-livro-pagina{
+  animation-iteration-count:1!important;animation-fill-mode:both!important}
+.prime-menu-livro.aberto .zelo-livro-direita{
+  transition:transform .68s cubic-bezier(.2,.8,.15,1);transform:rotateY(158deg)}
+.prime-menu-livro:not(.aberto) .zelo-livro-conteudo{opacity:0}
+
+/* Feed escolar: rolável pela página principal, sem containers Instagram/abas arrastáveis. */
+.zelo-portal .portal-mural{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;
+  width:100%;max-width:100%;min-width:0;
+  max-height:none;overflow-x:clip;overflow-y:visible;
+  scroll-snap-type:none}
+.zelo-portal .mural-card{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:.65rem;
+  min-width:0;max-width:100%;width:100%;padding:clamp(1rem,2.3vw,1.45rem);
+  background:#fff;border:1px solid #d3e2eb;border-radius:1.1rem;
+  box-shadow:0 6px 20px #153a590c;overflow-wrap:anywhere;
+  scroll-snap-align:none}
+.zelo-portal .mural-card.importante{
+  background:linear-gradient(145deg,#fff,#fff8e7);border-color:#e8c679}
+.zelo-feed-identidade{
+  display:flex;align-items:center;gap:.7rem;min-width:0;
+  padding-bottom:.7rem;border-bottom:1px solid #e4edf3}
+.zelo-feed-avatar{
+  flex:0 0 2.6rem;width:2.6rem;height:2.6rem;
+  display:grid;place-items:center;border-radius:50%;
+  color:#fff;background:linear-gradient(135deg,#16476a,#397fa7);
+  font-size:1rem;font-weight:900}
+.zelo-feed-autor{display:grid;min-width:0;gap:.12rem}
+.zelo-feed-autor>strong{color:#163e5d;font-size:.9rem;overflow-wrap:anywhere}
+.zelo-feed-identidade .mural-meta{
+  display:flex;flex-wrap:wrap;gap:.3rem;min-width:0;color:#526f84;
+  font-size:.7rem;letter-spacing:0;font-weight:750}
+.zelo-feed-data{margin-left:auto;white-space:nowrap;font-size:.7rem;color:#54758c}
+.zelo-feed-importante{
+  display:inline-flex;align-items:center;gap:.3rem;justify-self:start;
+  padding:.35rem .6rem;color:#785519;background:#fff0bf;border-radius:99px;
+  font-weight:900;font-size:.7rem}
+.zelo-portal .mural-card h3{color:#123e5e;font-size:clamp(1.04rem,2.3vw,1.22rem)}
+.zelo-portal .mural-card p{
+  color:#35556e;font-size:.88rem;line-height:1.65;
+  white-space:pre-wrap;overflow-wrap:anywhere}
+.zelo-portal .mural-card .portal-acoes-rapidas{
+  display:flex;flex-wrap:wrap;justify-content:flex-start;gap:.5rem}
+.zelo-portal .mural-card .portal-acoes-rapidas button{
+  min-height:2.6rem;padding:.55rem .85rem;font-size:.8rem}
+.zelo-portal .portal-mobile>.portal-abas{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));
+  overflow:visible;scroll-snap-type:none;gap:.4rem;max-width:100%}
+.zelo-portal .zelo-area-conteudo,.zelo-portal .portal-cartao{
+  min-width:0;overflow-wrap:anywhere}
+
+/* Área funcional, leitura sem espaço vazio artificial. */
+.entrada-funcionario{width:100%;max-width:1330px;min-height:100dvh}
+.zelo-portal.portal-pagina{min-height:100%;width:100%;gap:clamp(.8rem,2vw,1.3rem)}
+.zelo-portal .zelo-hero-lockup .zelo-marca-compacta>span{font-size:clamp(1.6rem,3.3vw,2.2rem)}
+.zelo-portal .zelo-hero-portal .portal-acesso button,
+.zelo-portal .zelo-hero-portal .portal-acesso span{
+  color:#fff;background:#173e5ece;border-color:#b2d1e568}
+.zelo-portal .zelo-hero-portal h1{font-size:clamp(1.75rem,3.7vw,3rem)}
+.zelo-portal .zelo-area-conteudo .portal-vazio{line-height:1.6;padding:1rem}
+
+/* Responsividade real: telas curtas podem rolar, mas nunca cortam o livro nem o formulário. */
+@media(max-width:759px){
+  .entrada-login{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+    height:auto;min-height:100svh;padding:.55rem;overflow-x:clip;overflow-y:auto}
+  .entrada-login>.portal-login.prime-login{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:minmax(260px,auto) auto;
+    width:min(100%,520px);max-width:100%;height:auto!important;min-height:0;
+    margin:0 auto;border-radius:1.1rem}
+  .entrada-login .prime-login-cena{
+    display:grid;grid-template-rows:auto minmax(120px,1fr) auto auto;
+    gap:.2rem;min-height:275px;height:auto;
+    padding:1rem 1rem .9rem;
+    background-image:linear-gradient(125deg,#102c4ce8,#2050729c 75%,#092744dc),
+      url('https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=900&q=80');
+    background-position:center;background-size:cover}
+  .entrada-login .prime-login-cena>.zelo-login-cena-marca{
+    display:block;width:min(165px,52vw);height:auto;max-height:48px;justify-self:start;margin:0}
+  .entrada-login .prime-login-cena .prime-login-arte{
+    display:grid!important;grid-column:1;grid-row:2;
+    width:min(100%,290px);height:160px;min-height:0;transform:none!important;
+    margin:.2rem auto 0;pointer-events:none}
+  .entrada-login .prime-login-cena .prime-book-spread{--book-scale:.72}
+  .entrada-login .prime-login-cena>strong{
+    font-size:clamp(1.05rem,4vw,1.28rem);text-align:center;
+    margin:.1rem 0 0;max-width:100%;line-height:1.2}
+  .entrada-login .prime-login-cena>p{
+    display:block;font-size:.76rem;line-height:1.32;
+    margin:0;max-width:37ch;text-align:center}
+  .entrada-login .prime-login-corpo{
+    height:auto!important;min-height:0;overflow:visible;gap:.65rem;
+    padding:clamp(.85rem,3vw,1.3rem)}
+  .entrada-login .prime-login .portal-login-cabecalho>.zelo-login-lockup{display:none}
+  .entrada-login .prime-login .portal-login-cabecalho>.sobretitulo{display:none}
+  .entrada-login .prime-login .portal-login-cabecalho>p{display:none}
+  .entrada-login .prime-login .portal-login-cabecalho h2{
+    font-size:clamp(1.35rem,5.5vw,1.85rem)}
+  .entrada-login .prime-login .portal-perfis button{min-height:3.5rem}
+  .entrada-login .prime-login .portal-form input{min-height:3rem}
+  .entrada-login .prime-login .portal-form .botao-principal{min-height:3.15rem}
+  .entrada-login .prime-login .portal-login-seguranca{font-size:.72rem}
+  .entrada-login>.entrada-rodape[role="status"]{max-width:520px;padding:.5rem .6rem;font-size:.71rem}
+  .prime-turma-cabecalho{grid-template-columns:auto minmax(0,1fr)}
+  .prime-turma-ir{grid-column:1/-1;justify-self:stretch}
+  .prime-turma-conteudo{grid-template-columns:minmax(0,1fr)}
+  .prime-turma-atalhos{grid-column:1}
+  .plano-pagina .plano-contadores{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .zelo-portal .zelo-hero-portal{min-height:0}
+  .zelo-portal .zelo-hero-conteudo{max-width:100%}
+  .zelo-portal .portal-mural{overflow-x:clip}
+}
+@media(max-width:479px){
+  .entrada-login .prime-login-cena{min-height:255px}
+  .entrada-login .prime-login-cena .prime-login-arte{height:145px}
+  .entrada-login .prime-login-cena .prime-book-spread{--book-scale:.63}
+  .entrada-login .prime-login-cena>strong{font-size:1.05rem}
+  .entrada-login .prime-login-cena>p{font-size:.71rem}
+  .entrada-login .prime-login-corpo{gap:.5rem;padding:.85rem .95rem}
+  .entrada-login .prime-login .portal-perfis button{min-height:3.1rem}
+  .entrada-login .prime-login .portal-form{gap:.4rem}
+  .entrada-login .prime-login .portal-form input{min-height:2.95rem}
+  .entrada-login .prime-login .portal-login-seguranca{line-height:1.35}
+  .cabecalho-app.prime-header{min-height:75px;padding:.55rem .8rem}
+  .cabecalho-app .prime-brand .zelo-marca-compacta>img{width:3rem;height:3rem}
+  .cabecalho-app .prime-brand .zelo-marca-compacta>span{font-size:1.72rem}
+  .prime-bottom-nav>button span:not(.zelo-livro-conteudo){white-space:normal;overflow-wrap:normal}
+  .plano-pagina .plano-contadores{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:759px) and (max-height:630px){
+  .entrada-login{height:auto!important;overflow-y:auto}
+  .entrada-login>.portal-login.prime-login{height:auto!important;grid-template-rows:auto auto}
+  .entrada-login .prime-login-cena{min-height:225px}
+  .entrada-login .prime-login-cena .prime-login-arte{height:120px}
+  .entrada-login .prime-login-cena .prime-book-spread{--book-scale:.57}
+  .entrada-login .prime-login-cena>p{display:block}
+  .entrada-login .prime-login-corpo{height:auto}
+}
+@media(min-width:760px) and (max-height:710px){
+  .entrada-login{height:auto!important;min-height:100svh;overflow-y:auto}
+  .entrada-login>.portal-login.prime-login{min-height:570px;max-height:none}
+  .entrada-login .prime-login-cena .prime-login-arte{height:200px}
+}
+/* Navegação da equipe, sem corte e sem scroll horizontal das abas. */
+@media(max-width:839px){
+  .zelo-layout.portal-paineis.portal-mobile>.zelo-nav-direta{
+    position:fixed!important;bottom:0!important;left:0!important;right:0!important;top:auto!important;
+    min-width:0;width:100%;max-width:100vw;z-index:101}
+  .zelo-portal .zelo-nav-todas{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .zelo-portal .zelo-nav-item,.zelo-portal .zelo-nav-mais{min-width:0}
+  .zelo-portal .zelo-nav-item span,.zelo-portal .zelo-nav-mais span{
+    overflow-wrap:normal;font-size:clamp(.6rem,2.2vw,.75rem)}
+  .zelo-portal.portal-pagina{padding-bottom:calc(5rem + env(safe-area-inset-bottom))}
+}
+@media(min-width:840px){
+  .zelo-portal.portal-pagina{padding-bottom:2.5rem}
+  .zelo-portal .zelo-nav-direta{align-self:start}
+}
+/* Acessibilidade: sem movimento para quem desativou animações. */
+@media(prefers-reduced-motion:reduce){
+  .entrada-login .prime-book-page{
+    animation:none!important;transform:rotateY(-161deg)!important}
+  .entrada-login .prime-book-spread{animation:none!important}
+  .entrada-login .prime-login-cena .prime-book-spark{animation:none!important;opacity:.8}
+  .prime-book-renovacao,.prime-menu-livro.aberto .zelo-livro-conteudo{
+    animation:none!important}
+}
