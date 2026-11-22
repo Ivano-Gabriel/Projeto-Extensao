@@ -627,7 +627,8 @@ function EstudosApp({usuario,onSair}:{usuario:UsuarioEscolar;onSair:()=>Promise<
               {tela === 'jogo' && <Jogo voltar={() => navegar('inicio')}/>}
               {tela === 'portal' && <Portal usuario={usuario} onSair={onSair} voltar={() => navegar('inicio')}/>}
               {tela === 'plano' && <Plano tarefas={plano} adicionar={incluirTarefa} alternar={concluirTarefa}
-                remover={excluirTarefa} reagendar={reagendar} abrirMaterial={abrirPorId} voltar={() => navegar('inicio')}/>}
+                remover={excluirTarefa} reagendar={reagendar} abrirMaterial={abrirPorId} voltar={() => navegar('inicio')}
+                irTurma={() => navegar('portal')}/>}
               {tela === 'progresso' && <Progresso estado={estado} pendentesPlano={resumoPlano(plano).pendentes}
                 irPlano={() => navegar('plano')} irMateriais={() => navegar('materiais')}
                 irRevisao={() => navegar('revisao')} irTurma={() => navegar('portal')}
