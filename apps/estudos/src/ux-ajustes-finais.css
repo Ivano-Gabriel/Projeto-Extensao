@@ -451,3 +451,120 @@ html,body,#root{max-width:100%;overflow-x:clip}
   .zelo-turma-vitrine-icone{flex-basis:2.8rem;width:2.8rem;height:2.8rem}
   .zelo-turma-vitrine-cabecalho h2{font-size:1.3rem}
 }
+
+
+/* Conteúdo do livro do hub muda enquanto as folhas ficam na posição final. */
+.prime-menu-livro .zelo-livro-overlay{
+  position:absolute;z-index:18;inset:.44rem .05rem .38rem;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.14rem;
+  place-items:center;opacity:0;pointer-events:none;
+  animation:zeloLivroMostrarTexto .55s .78s ease both;
+}
+.prime-menu-livro.aberto .zelo-livro-overlay .zelo-livro-conteudo{
+  display:grid;position:static;inset:auto;min-width:0;width:100%;min-height:1rem;
+  opacity:1;color:#144264;font-size:.47rem;font-weight:950;
+  line-height:1.1;letter-spacing:-.025em;text-align:center;
+  white-space:normal;overflow-wrap:break-word;
+  background:#fffbefb8;border-radius:.18rem;
+  padding:.08rem .02rem;animation:none;filter:none;
+}
+@keyframes zeloLivroMostrarTexto{
+  from{opacity:0;transform:translateY(4px) scale(.96)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* Indicadores escolares de verdade no progresso, com estudo local identificado depois. */
+.zelo-progresso-pagina>.zelo-progresso-escolar{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;gap:1rem;min-width:0;
+  padding:clamp(1.15rem,2.5vw,1.8rem);
+  border:1px solid #325c7e;border-radius:1.25rem;
+  background:linear-gradient(125deg,#133856,#255b80);
+  box-shadow:0 12px 30px #133d5b24;color:#fff;
+}
+.zelo-progresso-escolar>.botao-principal{
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+  min-height:3.1rem;color:#183e60;background:#f8d585;border:1px solid #f8d585;
+  border-radius:.75rem;white-space:normal;
+}
+.zelo-progresso-escolar .zelo-kicker{color:#f7d589}
+.zelo-progresso-escolar h2{
+  color:#fff;margin:.45rem 0;
+  font-size:clamp(1.3rem,2.6vw,1.8rem);line-height:1.15;
+}
+.zelo-progresso-escolar p{
+  color:#e4f1fa;margin:0;line-height:1.6;font-size:.86rem;
+}
+.zelo-escolar-numeros{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-column:1/-1;gap:.55rem;
+}
+.zelo-escolar-numeros>div{
+  display:grid;justify-items:start;gap:.1rem;min-width:0;
+  background:#ffffff16;border:1px solid #ffffff2e;
+  border-radius:.85rem;padding:.85rem 1rem;
+}
+.zelo-escolar-numeros strong{font-size:clamp(1.5rem,4vw,2.1rem);color:#fff}
+.zelo-escolar-numeros span{font-size:.75rem;color:#d2e7f5;font-weight:800}
+.zelo-progresso-distincao{
+  display:flex;align-items:flex-start;gap:.5rem;
+  color:#45667c;font-size:.82rem;line-height:1.5;
+  padding:.55rem .7rem;margin:0;
+}
+.zelo-progresso-distincao svg{flex:none;margin-top:.08rem}
+
+/* Plano: destaca primeiro o que foi publicado pela escola; o plano livre continua editável. */
+.zelo-plano-escolar{
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;min-width:0;
+  padding:1.15rem 1.35rem;border:1px solid #b8d4e6;
+  border-radius:1.1rem;background:linear-gradient(112deg,#e5f2fb,#fff);
+}
+.zelo-plano-escolar .sobretitulo{color:#315d7d}
+.zelo-plano-escolar h2{
+  margin:.25rem 0 .3rem;color:#164566;
+  font-size:clamp(1.25rem,2.5vw,1.55rem);
+}
+.zelo-plano-escolar p{
+  max-width:56ch;color:#4d6e86;font-size:.85rem;line-height:1.5;margin:0;
+}
+.zelo-plano-escolar-acao{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.5rem;min-width:175px;
+}
+.zelo-plano-escolar-acao>strong{
+  color:#17476b;font-size:1.55rem;line-height:1.1;
+}
+.zelo-plano-escolar-acao>strong span{font-size:.77rem}
+.zelo-plano-escolar-acao>span{color:#46667c;font-size:.78rem}
+.zelo-plano-escolar-acao>button{
+  display:flex;align-items:center;justify-content:center;gap:.35rem;
+  min-height:2.85rem;padding:.55rem .75rem;
+  border:1px solid #225780;border-radius:.75rem;
+  background:#225780;color:#fff;font-size:.82rem;font-weight:900;
+  text-align:center;
+}
+.zelo-plano-escolar-acao>button:focus-visible,
+.zelo-progresso-escolar>.botao-principal:focus-visible{
+  outline:3px solid #e7ba51;outline-offset:2px;
+}
+@media(max-width:759px){
+  .zelo-progresso-pagina>.zelo-progresso-escolar{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .zelo-progresso-escolar>.botao-principal{width:100%;justify-self:stretch}
+  .zelo-escolar-numeros{grid-column:1}
+  .zelo-plano-escolar{
+    flex-direction:column;align-items:stretch;gap:.85rem;padding:1rem;
+  }
+  .zelo-plano-escolar-acao{align-items:stretch;min-width:0}
+  .zelo-plano-escolar-acao>button{width:100%}
+}
+@media(max-width:380px){
+  .zelo-escolar-numeros>div{padding:.6rem .45rem;justify-items:center}
+  .zelo-escolar-numeros strong{font-size:1.35rem}
+  .zelo-escolar-numeros span{font-size:.62rem}
+}
+@media(prefers-reduced-motion:reduce){
+  .prime-menu-livro .zelo-livro-overlay{
+    animation:none!important;opacity:1!important;transform:none!important}
+}
