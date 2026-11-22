@@ -382,3 +382,72 @@ html,body,#root{max-width:100%;overflow-x:clip}
   .prime-book-renovacao,.prime-menu-livro.aberto .zelo-livro-conteudo{
     animation:none!important}
 }
+
+
+/* Minha turma no portal: quadro real com tarefas e últimas publicações docentes. */
+.zelo-portal .zelo-aluno .zelo-turma-vitrine{
+  display:grid;grid-column:1/-1;gap:1.1rem;min-width:0;
+  padding:clamp(1rem,2.7vw,1.65rem);
+  border:1px solid #c5d9e7;border-radius:1.3rem;
+  background:linear-gradient(145deg,#eaf5fc,#f8fcff);
+  box-shadow:0 10px 28px #15395217}
+.zelo-turma-vitrine-cabecalho{
+  display:flex;align-items:center;gap:.9rem;min-width:0}
+.zelo-turma-vitrine-cabecalho>div{min-width:0}
+.zelo-turma-vitrine-icone{
+  flex:0 0 3.5rem;display:grid;place-items:center;
+  width:3.5rem;height:3.5rem;border-radius:1rem;
+  background:#1c4c74;color:#fff;box-shadow:0 5px 14px #17456731}
+.zelo-turma-vitrine-cabecalho h2{
+  margin:.15rem 0;color:#163e5d;font-size:clamp(1.4rem,3vw,2rem);
+  line-height:1.15;letter-spacing:-.035em}
+.zelo-turma-vitrine-cabecalho p{
+  margin:0;color:#567389;font-size:.85rem;line-height:1.5}
+.zelo-turma-vitrine-grade{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem;
+  min-width:0}
+.zelo-turma-vitrine-card{
+  display:grid;align-content:start;justify-items:start;gap:.7rem;
+  padding:clamp(1rem,2vw,1.4rem);min-width:0;
+  background:#fff;border:1px solid #d1e3ed;border-radius:1.1rem}
+.zelo-turma-vitrine-card>.zelo-kicker{color:#396885}
+.zelo-turma-vitrine-card>strong{
+  color:#153f60;font-size:clamp(1.1rem,2.4vw,1.4rem);line-height:1.2}
+.zelo-turma-vitrine-card>p{
+  margin:0;color:#567186;font-size:.84rem;line-height:1.55}
+.zelo-turma-vitrine-card .portal-etiquetas{
+  display:flex;gap:.5rem;flex-wrap:wrap}
+.zelo-turma-vitrine-card .portal-etiquetas>span{
+  background:#e7f3fb;color:#24537b;border:1px solid #bfd8e9;
+  border-radius:.75rem;padding:.5rem .65rem}
+.zelo-turma-vitrine-card>button{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:100%;min-height:2.9rem;white-space:normal}
+.zelo-turma-vitrine-card>.portal-mural{width:100%;gap:.65rem}
+.zelo-turma-vitrine-card>.portal-mural>.mural-card{
+  box-shadow:none;border-radius:.95rem;background:#f9fcfe;padding:.85rem}
+.zelo-turma-vitrine-card>.portal-mural>.mural-card h3{font-size:.98rem}
+.zelo-portal .zelo-aluno-bemvindo{
+  grid-column:1/-1;background:linear-gradient(123deg,#143956,#246383);
+  color:#fff;border:1px solid #2b7492;border-radius:1.2rem;
+  box-shadow:0 10px 23px #193c5323}
+.zelo-portal .zelo-aluno-bemvindo .zelo-kicker{color:#f8d987}
+.zelo-portal .zelo-aluno-bemvindo h2{color:#fff}
+.zelo-portal .zelo-aluno-bemvindo p{color:#e4f2f9}
+.zelo-portal .zelo-aluno-bemvindo-acoes .botao-principal{
+  color:#173d5c;background:#fff;border-color:#fff}
+.zelo-portal .zelo-aluno-bemvindo-acoes .botao-secundario{
+  color:#fff;background:#ffffff16;border:1px solid #afcce1}
+.zelo-portal .zelo-aluno .portal-metricas{grid-column:1/-1;min-width:0}
+@media(max-width:839px){
+  .zelo-turma-vitrine-grade{grid-template-columns:minmax(0,1fr)}
+  .zelo-turma-vitrine-cabecalho{align-items:flex-start}
+  .zelo-turma-vitrine-cabecalho h2{font-size:1.5rem}
+  .zelo-portal .zelo-aluno .zelo-turma-vitrine{
+    padding:1rem;gap:.8rem}
+  .zelo-turma-vitrine-card{padding:1rem}
+}
+@media(max-width:380px){
+  .zelo-turma-vitrine-icone{flex-basis:2.8rem;width:2.8rem;height:2.8rem}
+  .zelo-turma-vitrine-cabecalho h2{font-size:1.3rem}
+}
