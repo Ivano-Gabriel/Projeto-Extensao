@@ -15,6 +15,7 @@ test('navegacao de aluno professor e direcao tem uma unica barra de cinco destin
   assert.match(css,/repeat\(5,minmax\(0,1fr\)\)/)
   assert.match(css,/\.zelo-nav-item\.zelo-nav-extra/)
   assert.match(css,/zelo-mais-v4/)
+  assert.match(css,/\.zelo-portal\.portal-pagina\{animation:none!important;transform:none!important\}/)
 })
 
 test('botao central do app de estudos tem icone simples e acessivel sem 3D defeituoso',()=>{

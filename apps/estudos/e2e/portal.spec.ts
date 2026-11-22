@@ -309,7 +309,8 @@ for (const perfilNav of ['ALUNO','PROFESSOR','DIRECAO'] as const){
       await page.setViewportSize({width,height:820})
       await page.goto('/')
       if(perfilNav==='ALUNO'){
-        if(width<900)await page.getByRole('button',{name:'Minha turma'}).click()
+        if(width<900)await page.getByRole('navigation',{name:'Navegação rápida'})
+          .getByRole('button',{name:'Minha turma'}).click()
         else await page.getByRole('navigation',{name:'Navegação da ferramenta de estudos'})
           .getByRole('button',{name:'Minha turma'}).click()
       }
