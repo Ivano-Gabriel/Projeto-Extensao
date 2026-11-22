@@ -246,3 +246,56 @@ for (const perfil of ['DIRECAO','PROFESSOR'] as const){
     expect(bounds!.y+bounds!.height).toBeLessThanOrEqual(844)
   })
 }
+
+
+test('login mobile preserva o livro animado com texto e não fecha automaticamente',async({page})=>{
+  await page.setViewportSize({width:390,height:844})
+  await page.route('**/api/me',route=>route.fulfill({
+    status:401,contentType:'application/json',body:'{"erro":"Faça login"}'
+  }))
+  await page.goto('/')
+  await expect(page.getByRole('heading',{name:'Bem-vindo ao zELO+'})).toBeVisible()
+  const arte=page.locator('.entrada-login .prime-login-arte')
+  await expect(arte).toBeVisible()
+  await expect(page.locator('.prime-book-page')).toHaveCount(4)
+  await expect(page.locator('.prime-book-renovacao')).toContainText('Novas ideias')
+  await expect.poll(()=>page.locator('.prime-book-page-one').evaluate(el=>
+    getComputedStyle(el).animationIterationCount)).toContain('1')
+  const dimensoes=await arte.boundingBox()
+  expect(dimensoes).not.toBeNull()
+  expect(dimensoes!.width).toBeGreaterThan(150)
+  await expect(page.getByRole('button',{name:'Entrar'})).toBeVisible()
+  await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth)).toBe(0)
+})
+
+test('Minha turma aparece primeiro e usa publicações do servidor, sem conteúdo inventado',async({page})=>{
+  await page.setViewportSize({width:390,height:844})
+  await portalSimulado(page,'ALUNO')
+  await page.route('**/api/portal/atividades',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify([{
+      id:321,turmaId:7,disciplina:'MATEMATICA',titulo:'Atividade real do professor',
+      pergunta:'Qual é o resultado?',opcoes:['1','2','3','4'],prazoEntrega:null
+    }])
+  }))
+  await page.route('**/api/portal/avisos',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify([{
+      id:25,turmaId:7,publico:'ALUNOS',titulo:'Aviso da professora',
+      texto:'Trazer o caderno na segunda.',importante:true,
+      criadoEm:'2026-11-21T12:00:00',autorId:44,autorNome:'Professora QA',autorPapel:'PROFESSOR'
+    }])
+  }))
+  await page.goto('/')
+  const destaque=page.locator('.prime-turma-real')
+  await expect(destaque).toBeVisible()
+  await expect(destaque).toContainText('QA27A')
+  await expect(destaque).toContainText('1 atividade pendente')
+  await expect(destaque).toContainText('Aviso da professora')
+  await page.getByRole('button',{name:'Abrir minha turma'}).click()
+  await expect(page.getByRole('heading',{name:'Sua turma em primeiro lugar'})).toBeVisible()
+  const vitrine=page.locator('.zelo-turma-vitrine')
+  await expect(vitrine).toContainText('Aviso da professora')
+  await expect(vitrine).toContainText('Professora QA')
+  await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth)).toBe(0)
+})
