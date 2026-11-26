@@ -7,9 +7,10 @@ import { Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } fr
 import { Mural } from './Avisos'
 import AssistenteEscolar from './AssistenteEscolar'
 import ProvaAluno from './ProvaAluno'
+import {orientarAluno,type ModoExperiencia} from './experiencia'
 
-export default function AlunoPainel(){
-  const [aba,setAba]=useState('inicio')
+export default function AlunoPainel({aba,mudar,modo}:{aba:string;mudar:(id:string)=>void;modo:ModoExperiencia}){
+  const setAba=mudar
   const [buscaMaterial,setBuscaMaterial]=useState('')
   const [filtroDisciplina,setFiltroDisciplina]=useState('Todas')
   const [turmas,setTurmas]=useState<TurmaEscolar[]>([])
@@ -24,6 +25,7 @@ export default function AlunoPainel(){
   const [escolhas,setEscolhas]=useState<Record<number,number>>({})
   const [enviando,setEnviando]=useState<number|null>(null)
   const [carregando,setCarregando]=useState(true)
+  const [dadosConfiaveis,setDadosConfiaveis]=useState(false)
   const [mensagem,setMensagem]=useState<Feedback>({})
   const recarregar=async()=>{
     const [t,a,v,r,d,f]=await Promise.all([
@@ -40,7 +42,8 @@ export default function AlunoPainel(){
     ]).then(([t,a,v,r,d,f])=>{
       if(!ativo)return
       setTurmas(t);setAtividades(a);setAvisos(v);setRespostas(r);setDesempenho(d);setFrequencia(f)
-    }).catch(e=>{if(ativo)setMensagem({erro:falha(e)})})
+      setDadosConfiaveis(true)
+    }).catch(e=>{if(ativo){setDadosConfiaveis(false);setMensagem({erro:falha(e)})}})
       .finally(()=>{if(ativo)setCarregando(false)})
     return()=>{ativo=false}
   },[])
@@ -72,12 +75,30 @@ export default function AlunoPainel(){
     (filtroDisciplina==='Todas'||m.disciplina===filtroDisciplina)&&
     (m.titulo+' '+m.disciplina+' '+m.conteudo).toLocaleLowerCase('pt-BR')
       .includes(buscaMaterial.trim().toLocaleLowerCase('pt-BR')))
+  const proximo=orientarAluno({turmas:turmas.length,pendentes:pendentes.length,materiais:materiais.length,avisos:avisos.length})
+  const comunicado=avisos.find(a=>a.importante)||avisos[0]
   return <div className="portal-paineis portal-mobile zelo-layout zelo-aluno">
     <NavegacaoDireta perfil="ALUNO" atual={aba} mudar={setAba}/>
     <main className="zelo-area-conteudo">
     <MensagemStatus estado={mensagem}/>
     {carregando&&<p className="portal-vazio">Carregando sua escola...</p>}
-    {!carregando&&aba==='inicio'&&<>
+    {!carregando&&aba==='inicio'&&modo==='essencial'&&dadosConfiaveis&&<>
+      <section className="zelo-essencial-aluno" aria-labelledby="zelo-essencial-aluno-titulo">
+        <span className="zelo-kicker">SEU PRÓXIMO PASSO</span>
+        <h2 id="zelo-essencial-aluno-titulo">{proximo.titulo}</h2>
+        <p>{proximo.descricao}</p>
+        {proximo.aba&&<button type="button" onClick={()=>{if(proximo.aba)setAba(proximo.aba)}}>
+          {proximo.acao} <ArrowRight size={18} aria-hidden="true"/>
+        </button>}
+        <small>{turmas[0]?'Sua turma: '+turmas[0].codigo+' · '+turmas[0].nome:'A escola precisa confirmar sua matrícula.'}</small>
+      </section>
+      {comunicado&&<section className="zelo-essencial-recado" aria-label="Comunicado da escola">
+        <span>RECADO DA ESCOLA · {comunicado.autorNome}</span>
+        <strong>{comunicado.titulo}</strong>
+        <p>{comunicado.texto.length>190?comunicado.texto.slice(0,190).trim()+'…':comunicado.texto}</p>
+      </section>}
+    </>}
+    {!carregando&&aba==='inicio'&&modo==='completo'&&<>
       <section className="zelo-aluno-bemvindo">
         <div><span className="zelo-kicker">SUA ESCOLA, SUA TURMA</span>
         <h2>{turmas[0]?'Tudo pronto para a '+turmas[0].codigo+'.':'Seu espaço de aprendizagem'}</h2>

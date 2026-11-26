@@ -1,6 +1,7 @@
 import NavegacaoDireta from './NavegacaoDireta'
 import GuiaPrimeirosPassos from './GuiaPrimeirosPassos'
 import {passosDirecao} from './implantacao'
+import type {ModoExperiencia} from './experiencia'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ArrowRight, Bell, CalendarDays, Link2, School, Trash2, UserPlus, Users } from 'lucide-react'
@@ -13,8 +14,8 @@ import AuditoriaEscola from './AuditoriaEscola'
 import { prepararTransferencia, type TransferenciaPendente } from './transferencia'
 
 const disciplinas=['MATEMATICA','PORTUGUES','FISICA','HISTORIA','BIOLOGIA','QUIMICA','GEOGRAFIA','INGLES','SOCIOLOGIA','FILOSOFIA']
-export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
-  const [aba,setAba]=useState('inicio')
+export default function DirecaoPainel({usuarioId,aba,mudar,modo}:{usuarioId:number;aba:string;mudar:(id:string)=>void;modo:ModoExperiencia}){
+  const setAba=mudar
   const [turmas,setTurmas]=useState<TurmaEscolar[]>([])
   const [matriculas,setMatriculas]=useState<MatriculaResumo[]>([])
   const [alunoMover,setAlunoMover]=useState(0)
@@ -151,6 +152,7 @@ export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
         <GuiaPrimeirosPassos perfil="DIRECAO" etapas={passos} navegar={setAba}/>}
       {dadosConfiaveis&&turma>0&&!vinculosConfiaveis&&
         <p role="status" className="portal-aviso-discreto">Não foi possível confirmar vínculos desta turma. Revise a conexão antes de interpretar o andamento.</p>}
+      {modo==='completo'&&<>
       <Cartao titulo="O que fazer agora" classe="zelo-destaque-tarefa">
         <div className="portal-acoes-rapidas">
           <button type="button" className="botao-principal" onClick={()=>setAba('turmas')}>
@@ -183,6 +185,7 @@ export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
         <p className="portal-aviso-discreto"><CalendarDays size={17}/> Horários e calendário oficial entrarão na próxima etapa.
           Por enquanto, a direção pode informar datas no mural.</p>
       </Cartao>
+      </>}
     </>}
     {!carregando&&aba==='turmas'&&<>
       <Cartao titulo="Turmas cadastradas">
