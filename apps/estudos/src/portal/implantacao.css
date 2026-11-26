@@ -1,0 +1,33 @@
+.zelo-guia-implantacao{display:grid;gap:1rem;min-width:0;padding:clamp(1rem,2.6vw,1.5rem);border:1px solid #c3dce9;border-radius:1.15rem;background:linear-gradient(125deg,#e8f4fb,#fff);color:#173f5c;box-shadow:0 8px 25px #173f5a13}
+.zelo-guia-cabecalho{display:flex;align-items:center;gap:.85rem}
+.zelo-guia-icone{flex:0 0 3rem;display:grid;place-items:center;width:3rem;height:3rem;border-radius:.95rem;background:#194b72;color:#fff}
+.zelo-guia-cabecalho>div{min-width:0}
+.zelo-guia-kicker,.zelo-guia-proxima small{font-size:.68rem;font-weight:900;letter-spacing:.08em;color:#315f82}
+.zelo-guia-cabecalho h2{margin:.15rem 0;color:#183f5c;font-size:clamp(1.2rem,2.8vw,1.65rem);line-height:1.2}
+.zelo-guia-cabecalho p,.zelo-guia-rodape{margin:0;color:#486b83;font-size:.79rem;line-height:1.5}
+.zelo-guia-andamento{display:grid;gap:.5rem}
+.zelo-guia-andamento>div{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.zelo-guia-andamento strong{font-size:.88rem;color:#184768}
+.zelo-guia-andamento span{font-size:.73rem;color:#4b6f85}
+.zelo-guia-andamento progress{display:block;width:100%;height:.65rem;border:0;border-radius:2rem;accent-color:#1a7772;overflow:hidden}
+.zelo-guia-andamento progress::-webkit-progress-bar{background:#d7e8f1;border-radius:2rem}
+.zelo-guia-andamento progress::-webkit-progress-value{background:#1a7772;border-radius:2rem}
+.zelo-guia-lista{display:grid;gap:.55rem;list-style:none;margin:0;padding:0}
+.zelo-guia-lista li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.7rem;align-items:center;min-width:0;padding:.75rem .85rem;background:#fff;border:1px solid #d1e2ec;border-radius:.9rem}
+.zelo-guia-numero{display:grid;place-items:center;width:2.1rem;height:2.1rem;border-radius:.6rem;background:#eaf4fa;color:#275578;font-size:.82rem;font-weight:900}
+.zelo-guia-lista li.concluida .zelo-guia-numero{background:#ddf0e6;color:#155d46}
+.zelo-guia-lista li>div{display:grid;gap:.16rem;min-width:0}
+.zelo-guia-lista li strong{font-size:.84rem;color:#1c4361}
+.zelo-guia-lista li>div span{font-size:.74rem;line-height:1.48;color:#526f80}
+.zelo-guia-estado{display:inline-flex;align-items:center;gap:.2rem;font-size:.7rem;font-weight:850;color:#646d77;white-space:nowrap}
+.zelo-guia-lista li.concluida .zelo-guia-estado{color:#146748}
+.zelo-guia-proxima{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.95rem 1rem;border-radius:.9rem;background:#173e5c;color:#fff}
+.zelo-guia-proxima>div{display:grid;gap:.15rem}
+.zelo-guia-proxima small{color:#f7d58a}
+.zelo-guia-proxima strong{font-size:.9rem;color:#fff}
+.zelo-guia-proxima button{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;flex:none;min-height:2.9rem;padding:.65rem .8rem;border:1px solid #f5d68a;border-radius:.75rem;background:#f5d68a;color:#1a4461;font-size:.82rem;font-weight:900;cursor:pointer}
+.zelo-guia-proxima button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.zelo-guia-final{display:flex;align-items:center;gap:.5rem;margin:0;padding:.9rem;background:#def2e8;border-radius:.8rem;color:#146147;font-size:.83rem;font-weight:800}
+.zelo-guia-rodape{font-size:.71rem}
+@media(max-width:680px){.zelo-guia-cabecalho{align-items:flex-start}.zelo-guia-lista li{grid-template-columns:auto minmax(0,1fr);gap:.5rem}.zelo-guia-estado{grid-column:2}.zelo-guia-proxima{align-items:stretch;flex-direction:column}.zelo-guia-proxima button{width:100%}}
+@media(prefers-reduced-motion:reduce){.zelo-guia-implantacao *{animation:none!important;transition:none!important}}
