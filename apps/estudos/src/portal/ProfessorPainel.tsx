@@ -1,4 +1,6 @@
 import NavegacaoDireta from './NavegacaoDireta'
+import GuiaPrimeirosPassos from './GuiaPrimeirosPassos'
+import {passosProfessor} from './implantacao'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ArrowRight, Bell, BookOpen, CalendarDays, CheckCircle2, ClipboardList, Download, Sparkles, Users } from 'lucide-react'
@@ -30,6 +32,8 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
   const [aulas,setAulas]=useState<AulaEscolar[]>([])
   const [mensagem,setMensagem]=useState<Feedback>({})
   const [carregando,setCarregando]=useState(true)
+  const [dadosConfiaveis,setDadosConfiaveis]=useState(false)
+  const [detalhesConfiaveis,setDetalhesConfiaveis]=useState(false)
   const [enviando,setEnviando]=useState(false)
   const [editandoAtividade,setEditandoAtividade]=useState<number|null>(null)
   const [titulo,setTitulo]=useState('')
@@ -53,17 +57,19 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
   const atualizar=async()=>{
     const [t,a,v]=await Promise.all([apiEscolar.turmas(),apiEscolar.atividades(),apiEscolar.avisos()])
     setTurmas(t);setAtividades(a);setAvisos(v);setTurma(atual=>atual||t[0]?.id||0)
+    setDadosConfiaveis(true)
   }
   useEffect(()=>{
     let vivo=true
     Promise.all([apiEscolar.turmas(),apiEscolar.atividades(),apiEscolar.avisos()])
-      .then(([t,a,v])=>{if(vivo){setTurmas(t);setAtividades(a);setAvisos(v);setTurma(t[0]?.id||0)}})
-      .catch(e=>{if(vivo)setMensagem({erro:falha(e)})})
+      .then(([t,a,v])=>{if(vivo){setTurmas(t);setAtividades(a);setAvisos(v);setTurma(t[0]?.id||0);setDadosConfiaveis(true)}})
+      .catch(e=>{if(vivo){setDadosConfiaveis(false);setMensagem({erro:falha(e)})}})
       .finally(()=>{if(vivo)setCarregando(false)})
     return()=>{vivo=false}
   },[])
   useEffect(()=>{
-    if(!turma){setDisciplinas([]);setDisciplina('');setAlunos([]);setDesempenho([]);setAulas([]);return}
+    setDetalhesConfiaveis(false)
+    if(!turma){setDisciplinas([]);setDisciplina('');setAlunos([]);setDesempenho([]);setAulas([]);setDetalhesConfiaveis(true);return}
     let vivo=true
     Promise.all([
       apiEscolar.disciplinas(turma),apiEscolar.alunos(turma),apiEscolar.desempenhoTurma(turma),apiEscolar.aulas(turma),
@@ -72,7 +78,8 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
       const opcoes=opcoesProfessor(d)
       setDisciplinas(opcoes);setDisciplina(opcoes[0]||'')
       setAlunos(a);setDesempenho(p);setAulas(l);setAulaSelecionada(l[0]?.id||0)
-    }).catch(e=>{if(vivo)setMensagem({erro:falha(e)})})
+      setDetalhesConfiaveis(true)
+    }).catch(e=>{if(vivo){setDetalhesConfiaveis(false);setMensagem({erro:falha(e)})}})
     return()=>{vivo=false}
   },[turma])
   useEffect(()=>{
@@ -181,6 +188,9 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
   const respondidasDaTurma=desempenho.reduce((total,a)=>total+a.respondidas,0)
   const recarregarFeed=async()=>setAvisos(await apiEscolar.avisos())
   const temas=materiais.filter(m=>assuntoDe(m.materia)===disciplina)
+  const passos=passosProfessor({turmas:turmas.length,disciplinaVinculada:!!disciplina,
+    atividadesNaTurma:atividadesDaTurma.length,
+    avisosDoProfessor:avisosDaTurma.filter(a=>a.autorId===usuarioId&&a.autorPapel==='PROFESSOR').length})
   return <div className="portal-paineis portal-mobile zelo-layout zelo-professor">
     <NavegacaoDireta perfil="PROFESSOR" atual={aba} mudar={setAba}/>
     <main className={`zelo-area-conteudo ${aba==='inicio'?'zelo-area-inicio':''}`}>
@@ -195,6 +205,10 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
     </div>}
     {carregando&&<Vazio texto="Carregando suas turmas..."/>}
     {!carregando&&aba==='inicio'&&<>
+      {dadosConfiaveis&&(!turma||detalhesConfiaveis)&&
+        <GuiaPrimeirosPassos perfil="PROFESSOR" etapas={passos} navegar={setAba}/>}
+      {dadosConfiaveis&&turma>0&&!detalhesConfiaveis&&
+        <p role="status" className="portal-aviso-discreto">Não foi possível confirmar a disciplina vinculada. Revise a conexão.</p>}
       <Cartao titulo="Sua próxima ação" classe="zelo-destaque-tarefa">
         <p>{selecionada?`Você está na turma ${selecionada.codigo}.`:'Você ainda não foi vinculado a uma turma.'}</p>
         <div className="portal-acoes-rapidas">
