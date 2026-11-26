@@ -114,6 +114,16 @@ class SegurancaIntegracaoTest {
     }
 
     @Test
+    void readinessPublicoConsultaBancoSemInformacaoSensivel() throws Exception {
+        mvc.perform(get("/readyz"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("ready"))
+            .andExpect(jsonPath("$.connection").doesNotExist())
+            .andExpect(jsonPath("$.password").doesNotExist())
+            .andExpect(header().string("Cache-Control", "no-store"));
+    }
+
+    @Test
     void cabecalhosDeSegurancaSaoEnviados() throws Exception {
         mvc.perform(get("/healthz"))
                 .andExpect(status().isOk())
