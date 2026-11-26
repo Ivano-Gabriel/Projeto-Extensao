@@ -69,7 +69,7 @@ public class SecurityConfig {
                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
             .securityContext(config -> config.securityContextRepository(contexto).requireExplicitSave(true))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.GET, "/healthz", "/api/csrf").permitAll()
+                .requestMatchers(HttpMethod.GET, "/healthz", "/readyz", "/api/csrf").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/gestao/**").hasRole("DIRECAO")

@@ -1,0 +1,35 @@
+name: Verificar prontidão do piloto zELO+
+on:
+  pull_request:
+    paths:
+      - 'scripts/pilot-smoke.mjs'
+      - 'scripts/pilot-smoke.test.mjs'
+      - '.github/workflows/piloto-verificacao.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tests:
+    name: Validar verificador de disponibilidade
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Testar resposta da API e proteção de sessão
+        run: node --test scripts/pilot-smoke.test.mjs
+  smoke:
+    name: Testar API, banco e autenticação no ar
+    if: github.event_name == 'workflow_dispatch'
+    needs: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar serviços publicados sem credenciais
+        run: node scripts/pilot-smoke.mjs
