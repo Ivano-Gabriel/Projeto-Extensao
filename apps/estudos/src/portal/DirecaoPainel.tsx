@@ -1,4 +1,6 @@
 import NavegacaoDireta from './NavegacaoDireta'
+import GuiaPrimeirosPassos from './GuiaPrimeirosPassos'
+import {passosDirecao} from './implantacao'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ArrowRight, Bell, CalendarDays, Link2, School, Trash2, UserPlus, Users } from 'lucide-react'
@@ -24,6 +26,8 @@ export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
   const [vinculos,setVinculos]=useState<Vinculo[]>([])
   const [mensagem,setMensagem]=useState<Feedback>({})
   const [carregando,setCarregando]=useState(true)
+  const [dadosConfiaveis,setDadosConfiaveis]=useState(false)
+  const [vinculosConfiaveis,setVinculosConfiaveis]=useState(false)
   const [enviando,setEnviando]=useState(false)
   const [codigo,setCodigo]=useState('')
   const [nomeTurma,setNomeTurma]=useState('')
@@ -38,20 +42,22 @@ export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
   const atualizar=async()=>{
     const [t,u,a,m]=await Promise.all([apiEscolar.turmas(),apiEscolar.usuarios(),apiEscolar.avisos(),apiEscolar.matriculasDaEscola()])
     setTurmas(t);setUsuarios(u);setAvisos(a);setMatriculas(m);setTurma(prev=>prev||t[0]?.id||0)
+    setDadosConfiaveis(true)
   }
   useEffect(()=>{
     let ativo=true
     Promise.all([apiEscolar.turmas(),apiEscolar.usuarios(),apiEscolar.avisos(),apiEscolar.matriculasDaEscola()])
-      .then(([t,u,a,m])=>{if(ativo){setTurmas(t);setUsuarios(u);setAvisos(a);setMatriculas(m);setTurma(t[0]?.id||0)}})
-      .catch(e=>{if(ativo)setMensagem({erro:falha(e)})})
+      .then(([t,u,a,m])=>{if(ativo){setTurmas(t);setUsuarios(u);setAvisos(a);setMatriculas(m);setTurma(t[0]?.id||0);setDadosConfiaveis(true)}})
+      .catch(e=>{if(ativo){setDadosConfiaveis(false);setMensagem({erro:falha(e)})}})
       .finally(()=>{if(ativo)setCarregando(false)})
     return()=>{ativo=false}
   },[])
   useEffect(()=>{
-    if(!turma){setVinculos([]);return}
+    setVinculos([]);setVinculosConfiaveis(false)
+    if(!turma){setVinculosConfiaveis(true);return}
     let ativo=true
-    apiEscolar.vinculos(turma).then(v=>{if(ativo)setVinculos(v)})
-      .catch(e=>{if(ativo)setMensagem({erro:falha(e)})})
+    apiEscolar.vinculos(turma).then(v=>{if(ativo){setVinculos(v);setVinculosConfiaveis(true)}})
+      .catch(e=>{if(ativo){setVinculosConfiaveis(false);setMensagem({erro:falha(e)})}})
     return()=>{ativo=false}
   },[turma])
   const executar=async(acao:()=>Promise<unknown>,texto:string):Promise<boolean>=>{
@@ -132,12 +138,19 @@ export default function DirecaoPainel({usuarioId}:{usuarioId:number}){
   const totalMatriculados=new Set(matriculas.map(m=>m.alunoId)).size
   const alunosSemTurma=Math.max(0,totalAlunos-totalMatriculados)
   const recarregarFeed=async()=>setAvisos(await apiEscolar.avisos())
+  const passos=passosDirecao({turmas:turmas.length,professores:totalProfessores,alunos:totalAlunos,
+    matriculasNaTurma:matriculas.filter(m=>m.turmaId===turma).length,vinculosNaTurma:vinculos.length,
+    avisosPublicados:avisos.filter(a=>a.autorId===usuarioId&&a.autorPapel==='DIRECAO').length})
   return <div className="portal-paineis portal-mobile zelo-layout zelo-direcao">
     <NavegacaoDireta perfil="DIRECAO" atual={aba} mudar={setAba}/>
     <main className={`zelo-area-conteudo ${aba==='inicio'?'zelo-area-inicio':''}`}>
     <MensagemStatus estado={mensagem}/>
     {carregando&&<Vazio texto="Carregando sua escola..."/>}
     {!carregando&&aba==='inicio'&&<>
+      {dadosConfiaveis&&(!turma||vinculosConfiaveis)&&
+        <GuiaPrimeirosPassos perfil="DIRECAO" etapas={passos} navegar={setAba}/>}
+      {dadosConfiaveis&&turma>0&&!vinculosConfiaveis&&
+        <p role="status" className="portal-aviso-discreto">Não foi possível confirmar vínculos desta turma. Revise a conexão antes de interpretar o andamento.</p>}
       <Cartao titulo="O que fazer agora" classe="zelo-destaque-tarefa">
         <div className="portal-acoes-rapidas">
           <button type="button" className="botao-principal" onClick={()=>setAba('turmas')}>

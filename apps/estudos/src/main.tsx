@@ -7,6 +7,7 @@ import './prime-v2.css'
 import './zelo-redesign-v2.css'
 import './ux-ajustes-finais.css'
 import './portal-nav-v4.css'
+import './portal/implantacao.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

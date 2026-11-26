@@ -348,3 +348,27 @@ for (const perfilNav of ['ALUNO','PROFESSOR','DIRECAO'] as const){
     }
   })
 }
+
+test('direção vê etapas reais e botão do próximo passo',async({page})=>{
+  await portalSimulado(page,'DIRECAO')
+  await page.setViewportSize({width:390,height:844})
+  await page.goto('/')
+  const guia=page.locator('.zelo-guia-implantacao')
+  await expect(guia).toBeVisible()
+  await expect(guia).toContainText('1 de 4 etapas')
+  await expect(guia).toContainText('Cadastre os participantes')
+  await guia.getByRole('button',{name:'Cadastrar pessoas'}).click()
+  await expect(page.getByRole('heading',{name:'Criar conta'})).toBeVisible()
+  await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBe(0)
+})
+
+test('professor sem vínculo de disciplina tem próxima ação orientada à direção',async({page})=>{
+  await portalSimulado(page,'PROFESSOR')
+  await page.setViewportSize({width:390,height:844})
+  await page.goto('/')
+  const guia=page.locator('.zelo-guia-implantacao')
+  await expect(guia).toBeVisible()
+  await expect(guia).toContainText('0 de 3 etapas')
+  await guia.getByRole('button',{name:'Ver minhas turmas'}).click()
+  await expect(page.getByRole('heading',{name:'Minhas turmas'})).toBeVisible()
+})
