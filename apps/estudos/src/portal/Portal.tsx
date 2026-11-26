@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowLeft, GraduationCap, KeyRound, LogOut, School, ShieldCheck } from 'lucide-react'
 import type { UsuarioEscolar } from './api'
 import { areaDoUsuario } from './perfis'
@@ -9,16 +9,30 @@ import ProfessorPainel from './ProfessorPainel'
 import DirecaoPainel from './DirecaoPainel'
 import AdminPainel from './AdminPainel'
 import { falha } from './ComponentesPortal'
+import BuscaAcoes from './BuscaAcoes'
+import {lerModo,salvarModo,type ModoExperiencia} from './experiencia'
 import './portal.css'
 import './portal-academico.css'
 import './portal-premium.css'
 import './gestao-responsive.css'
 
+const armazenamento=()=>{try{return typeof window==='undefined'?null:window.localStorage}catch{return null}}
 type Props={usuario:UsuarioEscolar;onSair:()=>Promise<void>;voltar?:()=>void}
 export default function Portal({usuario,onSair,voltar}:Props){
   const [erro,setErro]=useState('')
   const [saindo,setSaindo]=useState(false)
   const [seguranca,setSeguranca]=useState(false)
+  const [aba,setAba]=useState('inicio')
+  const [modo,setModo]=useState<ModoExperiencia>(()=>lerModo(usuario.id,armazenamento()))
+  useEffect(()=>{setAba('inicio');setModo(lerModo(usuario.id,armazenamento()))},[usuario.id])
+  const mudarAba=(id:string)=>{
+    setAba(id)
+    if(typeof window!=='undefined')window.scrollTo({top:0,behavior:'auto'})
+  }
+  const escolherModo=(proximo:ModoExperiencia)=>{
+    setModo(proximo)
+    salvarModo(usuario.id,proximo,armazenamento())
+  }
   const area=areaDoUsuario(usuario)
   const papel=area==='ADMIN'?'ADMINISTRADOR':area==='DIRECAO'?'DIREÇÃO':
     area==='PROFESSOR'?'PROFESSOR':'ALUNO'
@@ -47,6 +61,11 @@ export default function Portal({usuario,onSair,voltar}:Props){
           'Acompanhe sua comunidade e organize o dia com clareza.'}</p>
         <div className="portal-acesso">
         <span><ShieldCheck size={17}/>{papel}</span>
+        {area!=='ADMIN'&&<div className="zelo-modo-controle" role="group" aria-label="Experiência do portal">
+          <span>Como quer usar?</span>
+          <button type="button" aria-pressed={modo==='essencial'} onClick={()=>escolherModo('essencial')}>Essencial</button>
+          <button type="button" aria-pressed={modo==='completo'} onClick={()=>escolherModo('completo')}>Completa</button>
+        </div>}
         <button type="button" aria-expanded={seguranca} onClick={()=>setSeguranca(x=>!x)}>
           <KeyRound size={17}/>{seguranca?'Fechar segurança':'Minha segurança'}
         </button>
@@ -59,8 +78,10 @@ export default function Portal({usuario,onSair,voltar}:Props){
     </header>
     {erro&&<p role="alert" className="portal-feedback falha">{erro}</p>}
     {seguranca&&<SegurancaConta/>}
-    {area==='ADMIN'?<AdminPainel/>:area==='DIRECAO'?<DirecaoPainel usuarioId={usuario.id}/>:
-      area==='PROFESSOR'?<ProfessorPainel usuarioId={usuario.id}/>:<AlunoPainel/>}
+    {area!=='ADMIN'&&aba==='inicio'&&<BuscaAcoes perfil={area} navegar={mudarAba}/>}
+    {area==='ADMIN'?<AdminPainel/>:area==='DIRECAO'?<DirecaoPainel usuarioId={usuario.id} aba={aba} mudar={mudarAba} modo={modo}/>:
+      area==='PROFESSOR'?<ProfessorPainel usuarioId={usuario.id} aba={aba} mudar={mudarAba} modo={modo}/>:
+      <AlunoPainel aba={aba} mudar={mudarAba} modo={modo}/>}
     <footer className="portal-rodape"><GraduationCap size={16}/>
       Homologação · registros persistidos de teste, não dados oficiais da escola
     </footer>

@@ -9,6 +9,7 @@ import type { AlunoResumo, AtividadeEscolar, AulaEscolar, Aviso, DesempenhoAluno
 import { Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
 import { CriarAviso, Mural } from './Avisos'
 import { opcoesProfessor } from './navegacao'
+import type {ModoExperiencia} from './experiencia'
 import SalaDocente from './SalaDocente'
 import { baixarRelatorio } from './RelatorioCsv'
 import { materiais } from '../dados/materiais'
@@ -19,8 +20,8 @@ const assuntoDe=(materia:string)=>({
   'Física':'FISICA','História':'HISTORIA'
 } as Record<string,string>)[materia]
 
-export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
-  const [aba,setAba]=useState('inicio')
+export default function ProfessorPainel({usuarioId,aba,mudar,modo}:{usuarioId:number;aba:string;mudar:(id:string)=>void;modo:ModoExperiencia}){
+  const setAba=mudar
   const [turmas,setTurmas]=useState<TurmaEscolar[]>([])
   const [turma,setTurma]=useState(0)
   const [disciplinas,setDisciplinas]=useState<string[]>([])
@@ -209,6 +210,7 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
         <GuiaPrimeirosPassos perfil="PROFESSOR" etapas={passos} navegar={setAba}/>}
       {dadosConfiaveis&&turma>0&&!detalhesConfiaveis&&
         <p role="status" className="portal-aviso-discreto">Não foi possível confirmar a disciplina vinculada. Revise a conexão.</p>}
+      {modo==='completo'&&<>
       <Cartao titulo="Sua próxima ação" classe="zelo-destaque-tarefa">
         <p>{selecionada?`Você está na turma ${selecionada.codigo}.`:'Você ainda não foi vinculado a uma turma.'}</p>
         <div className="portal-acoes-rapidas">
@@ -243,6 +245,7 @@ export default function ProfessorPainel({usuarioId}:{usuarioId:number}){
           <button type="button" className="botao-secundario" onClick={()=>setAba('presenca')}>Registrar aula provisória</button>
         </div>
       </Cartao>
+      </>}
     </>}
     {!carregando&&aba==='turmas'&&<>
       <Cartao titulo="Minhas turmas">

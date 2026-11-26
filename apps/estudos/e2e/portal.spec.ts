@@ -214,6 +214,7 @@ for (const perfil of ['DIRECAO','PROFESSOR'] as const){
     await expect(painel.getByRole('tab',{name:perfil==='DIRECAO'?'Histórico':'Resultados'})).toBeVisible()
     const layout=await painel.evaluate(el=>getComputedStyle(el).gridTemplateColumns)
     expect(layout.trim().split(/\s+/).length).toBe(2)
+    await page.getByRole('group',{name:'Experiência do portal'}).getByRole('button',{name:'Completa'}).click()
     const botoes=painel.locator('.zelo-destaque-tarefa .botao-principal, .zelo-destaque-tarefa .botao-secundario')
     await expect(botoes.first()).toBeVisible()
     for(let i=0;i<await botoes.count();i++){
@@ -294,6 +295,8 @@ test('Minha turma aparece primeiro e usa publicações do servidor, sem conteúd
   await expect(destaque).toContainText('1 atividade pendente')
   await expect(destaque).toContainText('Aviso da professora')
   await page.getByRole('button',{name:'Abrir minha turma'}).click()
+  await expect(page.locator('.zelo-essencial-aluno')).toContainText('Sua próxima atividade está aqui')
+  await page.getByRole('group',{name:'Experiência do portal'}).getByRole('button',{name:'Completa'}).click()
   await expect(page.getByRole('heading',{name:'Sua turma em primeiro lugar'})).toBeVisible()
   const vitrine=page.locator('.zelo-turma-vitrine')
   await expect(vitrine).toContainText('Aviso da professora')
@@ -371,4 +374,67 @@ test('professor sem vínculo de disciplina tem próxima ação orientada à dire
   await expect(guia).toContainText('0 de 3 etapas')
   await guia.getByRole('button',{name:'Ver minhas turmas'}).click()
   await expect(page.getByRole('heading',{name:'Minhas turmas'})).toBeVisible()
+})
+
+
+for(const papel of ['ALUNO','PROFESSOR','DIRECAO'] as const){
+  test(papel+' inicia no Essencial e salva opção Completa por usuário',async({page})=>{
+    await portalSimulado(page,papel)
+    await page.setViewportSize({width:390,height:844})
+    await page.goto('/')
+    if(papel==='ALUNO')await page.getByRole('button',{name:'Minha turma',exact:true}).click()
+    const grupo=page.getByRole('group',{name:'Experiência do portal'})
+    await expect(grupo.getByRole('button',{name:'Essencial'})).toHaveAttribute('aria-pressed','true')
+    await expect(page.getByRole('heading',{name:'O que você quer fazer?'})).toBeVisible()
+    await grupo.getByRole('button',{name:'Completa'}).click()
+    await expect(grupo.getByRole('button',{name:'Completa'})).toHaveAttribute('aria-pressed','true')
+    await page.reload()
+    if(papel==='ALUNO')await page.getByRole('button',{name:'Minha turma',exact:true}).click()
+    await expect(grupo.getByRole('button',{name:'Completa'})).toHaveAttribute('aria-pressed','true')
+    await grupo.getByRole('button',{name:'Essencial'}).click()
+    await expect(grupo.getByRole('button',{name:'Essencial'})).toHaveAttribute('aria-pressed','true')
+    await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBe(0)
+  })
+}
+
+test('aluno busca lição, sem visualizar ações administrativas',async({page})=>{
+  await portalSimulado(page,'ALUNO')
+  await page.goto('/')
+  await page.getByRole('navigation',{name:'Navegação da ferramenta de estudos'})
+    .getByRole('button',{name:'Minha turma'}).click()
+  const busca=page.getByRole('searchbox',{name:'Buscar uma função'})
+  await busca.fill('vínculos')
+  await expect(page.getByText('Não encontramos essa função no seu perfil.')).toBeVisible()
+  await busca.fill('lição')
+  await page.locator('.zelo-busca-opcoes').getByRole('button',{name:'Atividades'}).click()
+  await expect(page.getByRole('heading',{name:'Atividades da turma'})).toBeVisible()
+})
+
+test('direção encontra cadastro pelo termo contas e acessa a aba correta',async({page})=>{
+  await portalSimulado(page,'DIRECAO')
+  await page.goto('/')
+  await page.getByRole('searchbox',{name:'Buscar uma função'}).fill('contas')
+  await page.locator('.zelo-busca-opcoes').getByRole('button',{name:'Pessoas'}).click()
+  await expect(page.getByRole('heading',{name:'Criar conta'})).toBeVisible()
+})
+
+test('professor encontra presença sem perder seu guia essencial',async({page})=>{
+  await portalSimulado(page,'PROFESSOR')
+  await page.goto('/')
+  await expect(page.getByRole('heading',{name:'Prepare sua primeira aula'})).toBeVisible()
+  await page.getByRole('searchbox',{name:'Buscar uma função'}).fill('presença')
+  await page.locator('.zelo-busca-opcoes').getByRole('button',{name:'Aulas'}).click()
+  await expect(page.getByRole('tab',{name:'Aulas'})).toHaveAttribute('aria-selected','true')
+})
+
+test('modo Essencial não inventa turma quando API falha',async({page})=>{
+  await portalSimulado(page,'ALUNO')
+  await page.route('**/api/portal/turmas',route=>route.fulfill({
+    status:503,contentType:'application/json',body:'{"erro":"Serviço indisponível"}'
+  }))
+  await page.goto('/')
+  await page.getByRole('navigation',{name:'Navegação da ferramenta de estudos'})
+    .getByRole('button',{name:'Minha turma'}).click()
+  await expect(page.getByRole('alert')).toBeVisible()
+  await expect(page.locator('.zelo-essencial-aluno')).toHaveCount(0)
 })

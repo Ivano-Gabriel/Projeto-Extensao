@@ -1,0 +1,38 @@
+.zelo-portal .zelo-modo-controle{display:flex;align-items:center;flex-wrap:wrap;gap:.35rem;padding:.25rem;border:1px solid #abcbe086;border-radius:.85rem;background:#09243caa}
+.zelo-portal .zelo-modo-controle>span{padding:0 .5rem;color:#f0f7ff;font-size:.72rem;font-weight:800}
+.zelo-portal .zelo-modo-controle button{min-height:2.6rem;border:1px solid transparent;padding:.46rem .78rem;border-radius:.65rem;background:transparent;color:#e4f1fb;font-size:.78rem;font-weight:850;cursor:pointer}
+.zelo-portal .zelo-modo-controle button[aria-pressed="true"]{background:#f5d382;color:#143950;border-color:#ffe5a4}
+.zelo-portal .zelo-modo-controle button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.zelo-busca-acoes{display:grid;gap:.8rem;min-width:0;padding:clamp(1rem,2.4vw,1.45rem);border:1px solid #c8dce9;border-radius:1.15rem;background:#fff;box-shadow:0 7px 22px #183e5410}
+.zelo-busca-titulo{display:flex;gap:.75rem;align-items:center}
+.zelo-busca-simbolo{flex:0 0 2.75rem;width:2.75rem;height:2.75rem;border:1px solid #d4e4ec;border-radius:.85rem;background:#eaf4fa;display:grid;place-items:center;color:#24577a}
+.zelo-busca-titulo>div{min-width:0}
+.zelo-busca-titulo h2{margin:.2rem 0;font-size:clamp(1.25rem,2.8vw,1.65rem);line-height:1.2;color:#193c59}
+.zelo-busca-titulo p{margin:0;font-size:.8rem;line-height:1.5;color:#4d6f86}
+.zelo-busca-campo{display:grid;gap:.4rem;min-width:0}
+.zelo-busca-campo label{font-size:.76rem;font-weight:900;color:#294e69}
+.zelo-busca-campo>div{display:flex;align-items:center;gap:.55rem;min-width:0;padding:.1rem .75rem;border:1px solid #afcada;border-radius:.8rem;background:#f5f9fc;color:#315c7c}
+.zelo-busca-campo>div:focus-within{outline:3px solid #edd28f;outline-offset:1px;border-color:#356b8d}
+.zelo-busca-campo input{flex:1;min-width:0;width:100%;min-height:2.9rem;border:0;outline:0;background:transparent;color:#183d5a;font:inherit;font-size:.86rem}
+.zelo-busca-campo button{display:grid;place-items:center;flex:0 0 2rem;border:0;background:transparent;color:#315d7a;min-height:2rem;cursor:pointer}
+.zelo-busca-resultado{color:#58788c;font-size:.72rem;font-weight:800}
+.zelo-busca-opcoes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+.zelo-busca-opcoes button{display:flex;align-items:center;justify-content:space-between;gap:.4rem;min-width:0;min-height:3.3rem;padding:.65rem .8rem;border:1px solid #d1e1eb;border-radius:.8rem;background:#edf5fa;color:#1f5273;text-align:left;cursor:pointer}
+.zelo-busca-opcoes button strong{font-size:.84rem;line-height:1.25;overflow-wrap:anywhere}
+.zelo-busca-opcoes button svg{flex:0 0 18px}
+.zelo-busca-opcoes button:hover{background:#dceef8}
+.zelo-busca-opcoes button:focus-visible{outline:3px solid #dbbc70;outline-offset:2px}
+.zelo-busca-vazio{margin:0;padding:.7rem .2rem;font-size:.83rem;color:#5c7081}
+.zelo-essencial-aluno{display:grid;justify-items:start;gap:.65rem;min-width:0;padding:clamp(1.1rem,3vw,1.7rem);border:1px solid #2c688b;border-radius:1.2rem;background:linear-gradient(130deg,#113753,#205f81);color:#fff}
+.zelo-essencial-aluno .zelo-kicker{color:#f5d787}
+.zelo-essencial-aluno h2{font-size:clamp(1.5rem,3.5vw,2rem);line-height:1.15;color:#fff;margin:0}
+.zelo-essencial-aluno>p{margin:0;font-size:.87rem;line-height:1.6;color:#e2eff7}
+.zelo-essencial-aluno>button{display:inline-flex;align-items:center;justify-content:center;gap:.55rem;margin-top:.3rem;min-height:3rem;padding:.65rem 1rem;border:1px solid #f8d58b;border-radius:.8rem;background:#f8d58b;color:#174160;font-size:.83rem;font-weight:900;cursor:pointer}
+.zelo-essencial-aluno>button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.zelo-essencial-aluno>small{font-size:.74rem;line-height:1.45;color:#cbdfea}
+.zelo-essencial-recado{display:grid;gap:.3rem;min-width:0;padding:.95rem 1.1rem;border:1px solid #d0e3ee;border-radius:1rem;background:#f8fcfe}
+.zelo-essencial-recado>span{font-size:.7rem;color:#466f8b;font-weight:850}
+.zelo-essencial-recado>strong{font-size:.94rem;line-height:1.3;color:#204965;overflow-wrap:anywhere}
+.zelo-essencial-recado>p{margin:0;font-size:.8rem;line-height:1.55;color:#405e72;overflow-wrap:anywhere}
+@media(max-width:719px){.zelo-busca-opcoes{grid-template-columns:minmax(0,1fr)}.zelo-busca-titulo{align-items:flex-start}.zelo-portal .zelo-modo-controle{width:100%;justify-content:space-between}.zelo-portal .zelo-modo-controle>span{flex:1}.zelo-portal .zelo-modo-controle button{min-height:2.8rem}}
+@media(prefers-reduced-motion:reduce){.zelo-busca-acoes *, .zelo-essencial-aluno *{animation:none!important;transition:none!important}}
