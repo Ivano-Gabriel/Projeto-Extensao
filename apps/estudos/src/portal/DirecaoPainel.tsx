@@ -12,6 +12,8 @@ import { CriarAviso, Mural } from './Avisos'
 import GestaoTurma from './GestaoTurma'
 import AuditoriaEscola from './AuditoriaEscola'
 import { prepararTransferencia, type TransferenciaPendente } from './transferencia'
+import {validarConta,validarTurma,type ErroFormulario} from './formularios-seguros'
+import {ResumoErros,ErroNoCampo} from './ErrosFormulario'
 
 const disciplinas=['MATEMATICA','PORTUGUES','FISICA','HISTORIA','BIOLOGIA','QUIMICA','GEOGRAFIA','INGLES','SOCIOLOGIA','FILOSOFIA']
 export default function DirecaoPainel({usuarioId,aba,mudar,modo}:{usuarioId:number;aba:string;mudar:(id:string)=>void;modo:ModoExperiencia}){
@@ -40,6 +42,9 @@ export default function DirecaoPainel({usuarioId,aba,mudar,modo}:{usuarioId:numb
   const [pessoa,setPessoa]=useState(0)
   const [disciplina,setDisciplina]=useState('MATEMATICA')
   const [confirmarRemocao,setConfirmarRemocao]=useState<string|null>(null)
+  const [errosTurma,setErrosTurma]=useState<ErroFormulario[]>([])
+  const [errosConta,setErrosConta]=useState<ErroFormulario[]>([])
+  const [revisaoConta,setRevisaoConta]=useState(false)
   const atualizar=async()=>{
     const [t,u,a,m]=await Promise.all([apiEscolar.turmas(),apiEscolar.usuarios(),apiEscolar.avisos(),apiEscolar.matriculasDaEscola()])
     setTurmas(t);setUsuarios(u);setAvisos(a);setMatriculas(m);setTurma(prev=>prev||t[0]?.id||0)
@@ -80,13 +85,30 @@ export default function DirecaoPainel({usuarioId,aba,mudar,modo}:{usuarioId:numb
   }
   const criarTurma=async(e:FormEvent)=>{
     e.preventDefault()
-    await executar(async()=>{await apiEscolar.criarTurma({codigo,nome:nomeTurma,anoLetivo:ano})
-      setCodigo('');setNomeTurma('')},'Turma criada.')
+    if(enviando)return
+    const resultado=validarTurma({codigo,nome:nomeTurma,anoLetivo:ano},turmas)
+    setErrosTurma(resultado.erros)
+    if(!resultado.pronto)return
+    const dados=resultado.pronto
+    const salva=await executar(async()=>{
+      await apiEscolar.criarTurma(dados)
+      setCodigo('');setNomeTurma('')
+    },'Turma criada.')
+    if(salva)setErrosTurma([])
   }
   const criarConta=async(e:FormEvent)=>{
     e.preventDefault()
-    await executar(async()=>{await apiEscolar.criarUsuario({nome,email,senha,papel})
-      setNome('');setEmail('');setSenha('')},'Conta criada. Agora vincule à turma.')
+    if(enviando)return
+    const resultado=validarConta({nome,email,senha,papel},usuarios)
+    setErrosConta(resultado.erros)
+    if(!resultado.pronto){setRevisaoConta(false);return}
+    if(!revisaoConta){setRevisaoConta(true);return}
+    const dados=resultado.pronto
+    const salva=await executar(async()=>{
+      await apiEscolar.criarUsuario(dados)
+      setNome('');setEmail('');setSenha('')
+    },'Conta criada. Agora vincule à turma.')
+    if(salva){setRevisaoConta(false);setErrosConta([])}
   }
   const vincular=async()=>{
     const selecionada=usuarios.find(u=>u.id===pessoa)
@@ -196,18 +218,25 @@ export default function DirecaoPainel({usuarioId,aba,mudar,modo}:{usuarioId:numb
         </div>)}</div>:<Vazio texto="Nenhuma turma cadastrada."/>}
       </Cartao>
       <Cartao titulo="Nova turma">
-        <form className="portal-form" onSubmit={e=>void criarTurma(e)}>
+        <form className="portal-form" noValidate onSubmit={e=>void criarTurma(e)}>
           <div className="portal-campos">
             <div><label htmlFor="dir-codigo">Código</label>
               <input id="dir-codigo" value={codigo} maxLength={32} required pattern="[a-zA-Z0-9-]{1,32}"
-                placeholder="3A" onChange={e=>setCodigo(e.target.value)}/></div>
+                placeholder="3A" aria-invalid={errosTurma.some(x=>x.campo==='codigo')}
+                onChange={e=>{setCodigo(e.target.value);setErrosTurma([])}}/>
+              <ErroNoCampo erros={errosTurma} campo="codigo"/></div>
             <div><label htmlFor="dir-ano">Ano</label>
               <input id="dir-ano" type="number" min={2020} max={2100} value={ano}
-                onChange={e=>setAno(Number(e.target.value))}/></div>
+                onChange={e=>{setAno(Number(e.target.value));setErrosTurma([])}}
+                aria-invalid={errosTurma.some(x=>x.campo==='anoLetivo')}/>
+              <ErroNoCampo erros={errosTurma} campo="anoLetivo"/></div>
           </div>
           <label htmlFor="dir-turma">Nome</label>
           <input id="dir-turma" required maxLength={100} value={nomeTurma}
-            placeholder="3º ano A" onChange={e=>setNomeTurma(e.target.value)}/>
+            placeholder="3º ano A" aria-invalid={errosTurma.some(x=>x.campo==='nome')}
+            onChange={e=>{setNomeTurma(e.target.value);setErrosTurma([])}}/>
+          <ErroNoCampo erros={errosTurma} campo="nome"/>
+          <ResumoErros erros={errosTurma}/>
           <button className="botao-principal" type="submit" disabled={enviando}>
             <Users size={18}/> Criar turma</button>
         </form>
@@ -216,20 +245,39 @@ export default function DirecaoPainel({usuarioId,aba,mudar,modo}:{usuarioId:numb
     </>}
     {!carregando&&aba==='pessoas'&&<>
       <Cartao titulo="Criar conta">
-        <form className="portal-form" onSubmit={e=>void criarConta(e)}>
+        <form className="portal-form" noValidate onSubmit={e=>void criarConta(e)}>
+          <fieldset className="zelo-campos-revisao" disabled={revisaoConta||enviando}>
           <label htmlFor="dir-nome">Nome</label><input id="dir-nome" required maxLength={150}
-            value={nome} onChange={e=>setNome(e.target.value)}/>
+            value={nome} aria-invalid={errosConta.some(x=>x.campo==='nome')}
+            onChange={e=>{setNome(e.target.value);setErrosConta([])}}/>
+          <ErroNoCampo erros={errosConta} campo="nome"/>
           <label htmlFor="dir-email">E-mail</label><input id="dir-email" required type="email" maxLength={254}
-            value={email} onChange={e=>setEmail(e.target.value)}/>
+            value={email} aria-invalid={errosConta.some(x=>x.campo==='email')}
+            onChange={e=>{setEmail(e.target.value);setErrosConta([])}}/>
+          <ErroNoCampo erros={errosConta} campo="email"/>
           <label htmlFor="dir-senha">Senha inicial</label><input id="dir-senha" required type="password"
             minLength={12} maxLength={200} autoComplete="new-password" value={senha}
-            onChange={e=>setSenha(e.target.value)}/>
+            aria-invalid={errosConta.some(x=>x.campo==='senha')}
+            onChange={e=>{setSenha(e.target.value);setErrosConta([])}}/>
+          <ErroNoCampo erros={errosConta} campo="senha"/>
           <label htmlFor="dir-papel">Perfil</label><select id="dir-papel" value={papel}
-            onChange={e=>setPapel(e.target.value as 'ALUNO'|'PROFESSOR')}>
+            onChange={e=>{setPapel(e.target.value as 'ALUNO'|'PROFESSOR');setErrosConta([])}}>
             <option value="ALUNO">Aluno</option><option value="PROFESSOR">Professor</option>
           </select>
+          </fieldset>
+          <ResumoErros erros={errosConta}/>
+          {revisaoConta&&<section className="zelo-revisao-formulario" role="group" aria-label="Revisão da nova conta">
+            <h3>Confira antes de criar a conta</h3>
+            <dl>
+              <dt>Nome</dt><dd>{nome.trim()}</dd>
+              <dt>E-mail</dt><dd>{email.trim().toLowerCase()}</dd>
+              <dt>Perfil</dt><dd>{papel==='ALUNO'?'Aluno':'Professor'}</dd>
+            </dl>
+            <p>A senha inicial não é exibida nesta revisão. Confirme o perfil antes de criar o acesso.</p>
+            <button type="button" disabled={enviando} onClick={()=>setRevisaoConta(false)}>Voltar e editar</button>
+          </section>}
           <button type="submit" className="botao-principal" disabled={enviando}>
-            <UserPlus size={18}/> Criar conta</button>
+            <UserPlus size={18}/>{revisaoConta?'Confirmar criação da conta':'Revisar conta'}</button>
         </form>
         <p className="portal-aviso-discreto">Somente contas fictícias neste ambiente. Falta implementar convites e recuperação de senha.</p>
       </Cartao>
