@@ -1,0 +1,24 @@
+.zelo-form-erros{display:grid;gap:.45rem;padding:.95rem 1.05rem;border:1px solid #dba5a5;border-radius:.85rem;background:#fff4f3;color:#823535}
+.zelo-form-erros strong{font-size:.86rem}
+.zelo-form-erros ul{margin:0;padding-left:1.1rem;font-size:.8rem;line-height:1.6}
+.zelo-form-erro-campo{display:block;color:#9b3d39;font-size:.75rem;line-height:1.45;margin-top:.25rem;font-weight:800}
+.portal-form :is(input,textarea,select)[aria-invalid="true"]{border-color:#c94f48!important;outline-color:#c94f48}
+.zelo-campos-revisao{display:grid;gap:.7rem;padding:0;margin:0;border:0;min-width:0}
+.zelo-campos-revisao[disabled]{opacity:.83}
+.zelo-campos-revisao .portal-campos{min-width:0}
+.zelo-revisao-formulario{display:grid;gap:.7rem;padding:1rem 1.15rem;border:1px solid #93bccb;border-radius:1rem;background:#eaf5fa;color:#1e4664;min-width:0}
+.zelo-revisao-formulario h3{margin:0;font-size:1.16rem;color:#173e5e}
+.zelo-revisao-formulario p{margin:0;font-size:.82rem;line-height:1.55;overflow-wrap:anywhere}
+.zelo-revisao-formulario dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:.35rem .75rem;font-size:.84rem;line-height:1.4}
+.zelo-revisao-formulario dt{color:#466983;font-weight:850}
+.zelo-revisao-formulario dd{margin:0;color:#184463;overflow-wrap:anywhere}
+.zelo-revisao-formulario ol{margin:0;display:grid;gap:.35rem;padding-left:1.35rem;font-size:.85rem;line-height:1.5;overflow-wrap:anywhere}
+.zelo-revisao-formulario .zelo-revisao-gabarito{padding:.65rem .75rem;border-radius:.75rem;background:#d5ece2;color:#165d42;font-weight:900}
+.zelo-revisao-formulario button[type="button"]{justify-self:start;min-height:2.85rem;padding:.55rem .85rem;border:1px solid #739cb2;border-radius:.7rem;background:#fff;color:#1b5173;font-weight:850;cursor:pointer}
+.zelo-revisao-formulario button:focus-visible{outline:3px solid #edc879;outline-offset:2px}
+.zelo-confirmar-exclusao{display:grid;gap:.45rem;padding:.9rem;border:1px solid #dfb5b1;border-radius:.9rem;background:#fff5f3}
+.zelo-confirmar-exclusao strong{font-size:.84rem;color:#893f38}
+.zelo-confirmar-exclusao p{margin:0;font-size:.78rem;line-height:1.45;color:#6d4c4b}
+.zelo-confirmar-exclusao .portal-acoes-rapidas{display:flex;flex-wrap:wrap;gap:.5rem}
+.zelo-confirmar-exclusao button{min-height:2.75rem}
+@media(max-width:580px){.zelo-revisao-formulario{padding:.85rem}.zelo-revisao-formulario dl{grid-template-columns:minmax(0,1fr)}.zelo-revisao-formulario dt{margin-top:.2rem}.zelo-revisao-formulario ol{padding-left:1.25rem}}

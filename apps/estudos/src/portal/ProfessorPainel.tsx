@@ -5,10 +5,12 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ArrowRight, Bell, BookOpen, CalendarDays, CheckCircle2, ClipboardList, Download, Sparkles, Users } from 'lucide-react'
 import { apiEscolar } from './api'
-import type { AlunoResumo, AtividadeEscolar, AulaEscolar, Aviso, DesempenhoAluno, QuizGeradoIa, TurmaEscolar } from './api'
+import type { AlunoResumo, AtividadeEscolar, AtividadeFormulario, AulaEscolar, Aviso, DesempenhoAluno, QuizGeradoIa, TurmaEscolar } from './api'
 import { Aviso as MensagemStatus, Cartao, Selo, Vazio, falha, type Feedback } from './ComponentesPortal'
 import { CriarAviso, Mural } from './Avisos'
 import { opcoesProfessor } from './navegacao'
+import {revisarAtividade,type ErroFormulario} from './formularios-seguros'
+import {ResumoErros,ErroNoCampo} from './ErrosFormulario'
 import type {ModoExperiencia} from './experiencia'
 import SalaDocente from './SalaDocente'
 import { baixarRelatorio } from './RelatorioCsv'
@@ -37,6 +39,9 @@ export default function ProfessorPainel({usuarioId,aba,mudar,modo}:{usuarioId:nu
   const [detalhesConfiaveis,setDetalhesConfiaveis]=useState(false)
   const [enviando,setEnviando]=useState(false)
   const [editandoAtividade,setEditandoAtividade]=useState<number|null>(null)
+  const [revisaoAtividade,setRevisaoAtividade]=useState<AtividadeFormulario|null>(null)
+  const [errosAtividade,setErrosAtividade]=useState<ErroFormulario[]>([])
+  const [atividadeParaExcluir,setAtividadeParaExcluir]=useState<number|null>(null)
   const [titulo,setTitulo]=useState('')
   const [pergunta,setPergunta]=useState('')
   const [opcoes,setOpcoes]=useState(['','','',''])
@@ -55,6 +60,7 @@ export default function ProfessorPainel({usuarioId,aba,mudar,modo}:{usuarioId:nu
   const [registrandoPresenca,setRegistrandoPresenca]=useState<number|null>(null)
   const [corrigindoPresenca,setCorrigindoPresenca]=useState<string|null>(null)
   const [recargaChamada,setRecargaChamada]=useState(0)
+  useEffect(()=>{setRevisaoAtividade(null);setErrosAtividade([])},[turma,disciplina])
   const atualizar=async()=>{
     const [t,a,v]=await Promise.all([apiEscolar.turmas(),apiEscolar.atividades(),apiEscolar.avisos()])
     setTurmas(t);setAtividades(a);setAvisos(v);setTurma(atual=>atual||t[0]?.id||0)
@@ -101,6 +107,7 @@ export default function ProfessorPainel({usuarioId,aba,mudar,modo}:{usuarioId:nu
     return()=>{ativo=false}
   },[aulaSelecionada,recargaChamada])
   const completarQuestao=()=>{
+    setRevisaoAtividade(null);setErrosAtividade([])
     const q=questoes.find(q=>q.materialId===temaCatalogo&&assuntoDe(q.materia)===disciplina)
     const m=materiais.find(m=>m.id===temaCatalogo)
     if(!q||!m)return
@@ -109,7 +116,7 @@ export default function ProfessorPainel({usuarioId,aba,mudar,modo}:{usuarioId:nu
     setMensagem({ok:'Questão do catálogo preenchida. Revise antes de publicar.'})
   }
   const prepararEdicao=async(id:number)=>{
-    setMensagem({})
+    setMensagem({});setRevisaoAtividade(null);setErrosAtividade([]);setAtividadeParaExcluir(null)
     try{
       const dados=await apiEscolar.dadosEdicaoAtividade(id)
       setTitulo(dados.titulo);setPergunta(dados.pergunta);setOpcoes(dados.opcoes)
@@ -119,23 +126,33 @@ export default function ProfessorPainel({usuarioId,aba,mudar,modo}:{usuarioId:nu
     }catch(e){setMensagem({erro:falha(e)})}
   }
   const apagarAtividade=async(id:number)=>{
-    if(!window.confirm('Excluir esta atividade? Não é permitido apagar questões já respondidas.'))return
-    setMensagem({})
+    if(atividadeParaExcluir!==id||enviando)return
+    setEnviando(true);setMensagem({})
     try{
       await apiEscolar.apagarAtividade(id)
       setAtividades(await apiEscolar.atividades())
       setMensagem({ok:'Atividade removida.'})
     }catch(e){setMensagem({erro:falha(e)})}
+    finally{setEnviando(false);setAtividadeParaExcluir(null)}
   }
   const publicar=async(e:FormEvent)=>{
     e.preventDefault()
-    if(!turma||!disciplina)return
+    if(enviando)return
+    const resultado=revisarAtividade({turmaId:turma,disciplina,titulo,pergunta,opcoes,correta,
+      explicacao,prazoEntrega:prazoEntrega||null},new Date().toLocaleDateString('sv-SE'))
+    setErrosAtividade(resultado.erros)
+    if(!resultado.pronto){setRevisaoAtividade(null);return}
+    if(!revisaoAtividade){setRevisaoAtividade(resultado.pronto);setMensagem({});return}
+    if(JSON.stringify(resultado.pronto)!==JSON.stringify(revisaoAtividade)){
+      setRevisaoAtividade(null)
+      setMensagem({erro:'Os dados da atividade mudaram. Confira novamente antes de salvar.'})
+      return
+    }
     setEnviando(true);setMensagem({})
     try{
-      const dados={turmaId:turma,disciplina,titulo,pergunta,opcoes,correta,explicacao,prazoEntrega:prazoEntrega||null}
-      if(editandoAtividade!==null)await apiEscolar.editarAtividade(editandoAtividade,dados)
-      else await apiEscolar.publicar(dados)
-      setEditandoAtividade(null)
+      if(editandoAtividade!==null)await apiEscolar.editarAtividade(editandoAtividade,resultado.pronto)
+      else await apiEscolar.publicar(resultado.pronto)
+      setEditandoAtividade(null);setRevisaoAtividade(null);setErrosAtividade([])
       setTitulo('');setPergunta('');setOpcoes(['','','','']);setExplicacao('');setPrazoEntrega('');setTemaCatalogo('')
       const a=await apiEscolar.atividades();setAtividades(a)
       setMensagem({ok:'Atividade salva. A edição só é permitida antes de receber respostas.'})
@@ -143,7 +160,7 @@ export default function ProfessorPainel({usuarioId,aba,mudar,modo}:{usuarioId:nu
     finally{setEnviando(false)}
   }
   const prepararQuizIa=(quiz:QuizGeradoIa)=>{
-    setEditandoAtividade(null)
+    setEditandoAtividade(null);setRevisaoAtividade(null);setErrosAtividade([])
     setTitulo(quiz.titulo);setPergunta(quiz.pergunta)
     setOpcoes([...quiz.opcoes]);setCorreta(quiz.correta)
     setExplicacao(quiz.explicacao);setPrazoEntrega('');setTemaCatalogo('')
@@ -279,7 +296,8 @@ export default function ProfessorPainel({usuarioId,aba,mudar,modo}:{usuarioId:nu
           </div>
           <small>Questões prontas do catálogo, não geradas por IA. Revise antes de publicar.</small>
         </div>
-        <form className="portal-form" onSubmit={e=>void publicar(e)}>
+        <form className="portal-form" noValidate onSubmit={e=>void publicar(e)}>
+          <fieldset className="zelo-campos-revisao" disabled={!!revisaoAtividade||enviando}>
           <label htmlFor="prof-disciplina-real">Disciplina vinculada</label>
           <select id="prof-disciplina-real" value={disciplina} onChange={e=>setDisciplina(e.target.value)}
             required disabled={disciplinas.length===0}>
@@ -288,30 +306,53 @@ export default function ProfessorPainel({usuarioId,aba,mudar,modo}:{usuarioId:nu
           </select>
           <label htmlFor="ativ-titulo">Título</label>
           <input id="ativ-titulo" value={titulo} required maxLength={150} placeholder="Ex.: Porcentagem"
-            onChange={e=>setTitulo(e.target.value)}/>
+            aria-invalid={errosAtividade.some(x=>x.campo==='titulo')}
+            onChange={e=>{setTitulo(e.target.value);setErrosAtividade([])}}/>
+          <ErroNoCampo erros={errosAtividade} campo="titulo"/>
           <label htmlFor="ativ-pergunta">Pergunta</label>
           <textarea id="ativ-pergunta" required rows={2} maxLength={500} value={pergunta}
-            onChange={e=>setPergunta(e.target.value)}/>
+            aria-invalid={errosAtividade.some(x=>x.campo==='pergunta')}
+            onChange={e=>{setPergunta(e.target.value);setErrosAtividade([])}}/>
+          <ErroNoCampo erros={errosAtividade} campo="pergunta"/>
           <div className="portal-campos">{opcoes.map((o,i)=><div key={i}>
             <label htmlFor={`ativ-opcao-${i}`}>Opção {String.fromCharCode(65+i)}</label>
             <input id={`ativ-opcao-${i}`} required maxLength={200} value={o}
               onChange={e=>setOpcoes(prev=>prev.map((v,j)=>j===i?e.target.value:v))}/>
           </div>)}</div>
+          <ErroNoCampo erros={errosAtividade} campo="opcoes"/>
           <label htmlFor="ativ-correta">Correta</label>
           <select id="ativ-correta" value={correta} onChange={e=>setCorreta(Number(e.target.value))}>
             {[0,1,2,3].map(i=><option key={i} value={i}>{String.fromCharCode(65+i)}</option>)}
           </select>
           <label htmlFor="ativ-prazo">Prazo de entrega (opcional)</label>
           <input id="ativ-prazo" type="date" value={prazoEntrega}
-            onChange={e=>setPrazoEntrega(e.target.value)}/>
+            aria-invalid={errosAtividade.some(x=>x.campo==='prazoEntrega')}
+            onChange={e=>{setPrazoEntrega(e.target.value);setErrosAtividade([])}}/>
+          <ErroNoCampo erros={errosAtividade} campo="prazoEntrega"/>
           <small>Após a data escolhida, novas respostas serão bloqueadas pelo servidor. Deixe vazio para não definir prazo.</small>
           <label htmlFor="ativ-explicacao">Explicação</label>
           <textarea id="ativ-explicacao" required maxLength={1000} rows={3} value={explicacao}
-            onChange={e=>setExplicacao(e.target.value)}/>
+            aria-invalid={errosAtividade.some(x=>x.campo==='explicacao')}
+            onChange={e=>{setExplicacao(e.target.value);setErrosAtividade([])}}/>
+          <ErroNoCampo erros={errosAtividade} campo="explicacao"/>
+          </fieldset>
+          <ResumoErros erros={errosAtividade}/>
+          {revisaoAtividade&&<section className="zelo-revisao-formulario" role="group" aria-label="Revisão da atividade">
+            <h3>Confira a atividade antes de enviar</h3>
+            <dl><dt>Turma</dt><dd>{selecionada?.codigo||'Turma selecionada'}</dd>
+              <dt>Disciplina</dt><dd>{revisaoAtividade.disciplina}</dd>
+              <dt>Título</dt><dd>{revisaoAtividade.titulo}</dd>
+              <dt>Pergunta</dt><dd>{revisaoAtividade.pergunta}</dd></dl>
+            <ol type="A">{revisaoAtividade.opcoes.map((o,i)=><li key={i}>{o}</li>)}</ol>
+            <p className="zelo-revisao-gabarito">Gabarito: {String.fromCharCode(65+revisaoAtividade.correta)} — {revisaoAtividade.opcoes[revisaoAtividade.correta]}</p>
+            <p>Explicação: {revisaoAtividade.explicacao}</p>
+            <p>Prazo: {revisaoAtividade.prazoEntrega||'Sem prazo de entrega'}</p>
+            <button type="button" onClick={()=>setRevisaoAtividade(null)}>Voltar e editar</button>
+          </section>}
           <button type="submit" className="botao-principal" disabled={!disciplina||enviando}>
-            <ClipboardList size={18}/>{enviando?'Salvando...':editandoAtividade===null?'Publicar atividade':'Salvar alterações'}</button>
+            <ClipboardList size={18}/>{enviando?'Salvando...':revisaoAtividade?(editandoAtividade===null?'Confirmar publicação':'Confirmar alterações'):'Revisar atividade'}</button>
           {editandoAtividade!==null&&<button className="botao-secundario" type="button"
-            onClick={()=>{setEditandoAtividade(null);setTitulo('');setPergunta('');setOpcoes(['','','','']);setExplicacao('');setPrazoEntrega('')}}>Cancelar edição</button>}
+            onClick={()=>{setEditandoAtividade(null);setRevisaoAtividade(null);setErrosAtividade([]);setTitulo('');setPergunta('');setOpcoes(['','','','']);setExplicacao('');setPrazoEntrega('')}}>Cancelar edição</button>}
         </form>
       </Cartao>
       <Cartao titulo="Atividades publicadas no banco">
@@ -319,7 +360,18 @@ export default function ProfessorPainel({usuarioId,aba,mudar,modo}:{usuarioId:nu
           <strong>{a.titulo}</strong><small>{a.disciplina} · {selecionada?.codigo}{a.prazoEntrega?' · Entrega até '+new Date(a.prazoEntrega+'T12:00:00').toLocaleDateString('pt-BR'):''}</small>
           <div className="ext-acoes">
             <button type="button" className="botao-secundario" onClick={()=>void prepararEdicao(a.id)}>Editar</button>
-            <button type="button" className="botao-secundario" onClick={()=>void apagarAtividade(a.id)}>Excluir</button>
+            <button type="button" className="botao-secundario" disabled={enviando}
+              onClick={()=>setAtividadeParaExcluir(a.id)}>Excluir</button>
+            {atividadeParaExcluir===a.id&&<div className="zelo-confirmar-exclusao" role="group" aria-label={`Confirmar exclusão de ${a.titulo}`}>
+              <strong>Excluir a atividade “{a.titulo}”?</strong>
+              <p>Essa operação será enviada ao servidor. Questões com respostas não podem ser apagadas.</p>
+              <div className="portal-acoes-rapidas">
+                <button type="button" className="botao-perigo" disabled={enviando}
+                  onClick={()=>void apagarAtividade(a.id)}>Sim, excluir atividade</button>
+                <button type="button" className="botao-secundario" disabled={enviando}
+                  onClick={()=>setAtividadeParaExcluir(null)}>Cancelar exclusão</button>
+              </div>
+            </div>}
           </div>
         </div>):<Vazio texto="Nenhuma atividade publicada."/>}
       </Cartao>

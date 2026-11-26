@@ -438,3 +438,92 @@ test('modo Essencial não inventa turma quando API falha',async({page})=>{
   await expect(page.getByRole('alert')).toBeVisible()
   await expect(page.locator('.zelo-essencial-aluno')).toHaveCount(0)
 })
+
+
+test('direção impede turma duplicada antes de chamar o backend',async({page})=>{
+  const requests=await portalSimulado(page,'DIRECAO')
+  await page.goto('/')
+  await page.getByRole('tab',{name:'Turmas'}).click()
+  await page.locator('#dir-codigo').fill('qa27a')
+  await page.locator('#dir-ano').fill('2027')
+  await page.locator('#dir-turma').fill('Turma já cadastrada')
+  await page.getByRole('button',{name:'Criar turma'}).click()
+  await expect(page.locator('.zelo-form-erros')).toContainText('Já existe uma turma')
+  expect(requests.requests.filter(s=>s==='POST /api/gestao/turmas')).toHaveLength(0)
+})
+
+test('direção revisa e confirma nova conta sem exibir senha',async({page})=>{
+  const requests=await portalSimulado(page,'DIRECAO')
+  await page.setViewportSize({width:390,height:844})
+  await page.goto('/')
+  await page.getByRole('tab',{name:'Pessoas'}).click()
+  await page.locator('#dir-nome').fill('Professora QA')
+  await page.locator('#dir-email').fill('professora@example.invalid')
+  await page.locator('#dir-senha').fill('senha-ficticia-2027')
+  await page.locator('#dir-papel').selectOption('PROFESSOR')
+  await page.getByRole('button',{name:'Revisar conta'}).click()
+  const revisao=page.getByRole('group',{name:'Revisão da nova conta'})
+  await expect(revisao).toBeVisible()
+  await expect(revisao).toContainText('Professora QA')
+  await expect(revisao).toContainText('Professor')
+  await expect(revisao).not.toContainText('senha-ficticia-2027')
+  expect(requests.requests.filter(s=>s==='POST /api/gestao/usuarios')).toHaveLength(0)
+  await page.getByRole('button',{name:'Confirmar criação da conta'}).click()
+  await expect(page.getByText('Conta criada. Agora vincule à turma.')).toBeVisible()
+  expect(requests.requests.filter(s=>s==='POST /api/gestao/usuarios')).toHaveLength(1)
+})
+
+test('professor corrige alternativas repetidas, revisa gabarito e só então publica',async({page})=>{
+  const requests=await portalSimulado(page,'PROFESSOR')
+  await page.route('**/api/professor/turmas/7/disciplinas',route=>route.fulfill({
+    status:200,contentType:'application/json',body:'["MATEMATICA"]'
+  }))
+  await page.goto('/')
+  await page.getByRole('tab',{name:'Atividades'}).click()
+  await expect(page.locator('#prof-disciplina-real')).toHaveValue('MATEMATICA')
+  await page.locator('#ativ-titulo').fill('Multiplicação')
+  await page.locator('#ativ-pergunta').fill('Quanto é dois vezes três?')
+  await page.locator('#ativ-opcao-0').fill('Casa')
+  await page.locator('#ativ-opcao-1').fill('casa ')
+  await page.locator('#ativ-opcao-2').fill('Seis')
+  await page.locator('#ativ-opcao-3').fill('Oito')
+  await page.locator('#ativ-correta').selectOption('2')
+  await page.locator('#ativ-explicacao').fill('Dois grupos de três resultam em seis.')
+  await page.getByRole('button',{name:'Revisar atividade'}).click()
+  await expect(page.locator('.zelo-form-erros')).toContainText('alternativas precisam ser diferentes')
+  expect(requests.requests.filter(s=>s==='POST /api/professor/atividades')).toHaveLength(0)
+  await page.locator('#ativ-opcao-1').fill('Quatro')
+  await page.getByRole('button',{name:'Revisar atividade'}).click()
+  const revisao=page.getByRole('group',{name:'Revisão da atividade'})
+  await expect(revisao).toBeVisible()
+  await expect(revisao).toContainText('Gabarito: C — Seis')
+  expect(requests.requests.filter(s=>s==='POST /api/professor/atividades')).toHaveLength(0)
+  await page.getByRole('button',{name:'Confirmar publicação'}).click()
+  await expect(page.getByText('Atividade salva. A edição só é permitida antes de receber respostas.')).toBeVisible()
+  expect(requests.requests.filter(s=>s==='POST /api/professor/atividades')).toHaveLength(1)
+})
+
+test('professor não exclui atividade antes de confirmar na própria tela',async({page})=>{
+  const requests=await portalSimulado(page,'PROFESSOR')
+  await page.route('**/api/professor/turmas/7/disciplinas',route=>route.fulfill({
+    status:200,contentType:'application/json',body:'["MATEMATICA"]'
+  }))
+  await page.route('**/api/portal/atividades',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify([{id:413,turmaId:7,disciplina:'MATEMATICA',
+      titulo:'Atividade de teste',pergunta:'Quanto é 1+1?',
+      opcoes:['1','2','3','4'],prazoEntrega:null}])
+  }))
+  await page.goto('/')
+  await page.getByRole('tab',{name:'Atividades'}).click()
+  await page.getByRole('button',{name:'Excluir',exact:true}).click()
+  const confirmar=page.getByRole('group',{name:'Confirmar exclusão de Atividade de teste'})
+  await expect(confirmar).toBeVisible()
+  expect(requests.requests.filter(s=>s==='DELETE /api/professor/atividades/413')).toHaveLength(0)
+  await confirmar.getByRole('button',{name:'Cancelar exclusão'}).click()
+  await expect(confirmar).toHaveCount(0)
+  expect(requests.requests.filter(s=>s==='DELETE /api/professor/atividades/413')).toHaveLength(0)
+  await page.getByRole('button',{name:'Excluir',exact:true}).click()
+  await confirmar.getByRole('button',{name:'Sim, excluir atividade'}).click()
+  expect(requests.requests.filter(s=>s==='DELETE /api/professor/atividades/413')).toHaveLength(1)
+})
